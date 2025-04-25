@@ -1,8 +1,10 @@
 package ui.main;
 
 
+
 import dao.EmployeeDAO;
 import dao.ManagerDAO;
+import lombok.SneakyThrows;
 import model.Employee;
 import model.Manager;
 import staticProcess.StaticProcess;
@@ -20,6 +22,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URI;
+import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -35,7 +38,7 @@ public class HomePage extends JFrame implements ActionListener{
     private final HomeSlide homeSlide = new HomeSlide();
     private final CreateOrder createOrder = new CreateOrder(this);
     //private final OrderHistory orderHistory = new OrderHistory(this);
-    private final RevenueStatistic revenueStatistic = new RevenueStatistic();
+//    private final RevenueStatistic revenueStatistic = new RevenueStatistic();
     //private CategorySearch category = new CategorySearch();
     private final AddProduct addProduct = new AddProduct();
     private final UpdateProduct updateProduct = new UpdateProduct();
@@ -48,11 +51,10 @@ public class HomePage extends JFrame implements ActionListener{
     private final AddEmployee addEmployee = new AddEmployee();
     private final PromotionSearch promotionSearch = new PromotionSearch();
     private final AddPromotion addPromotion = new AddPromotion();
-    private final TodayRevenueStatistic todayRevenueStatistic = new TodayRevenueStatistic();
     private final ProcessOrder processOrder = new ProcessOrder();
     private static String accLoginID;
 
-    public HomePage() {
+    public HomePage() throws RemoteException {
         initComponents();
         setFullScreen();
         updateDateLable();
@@ -62,7 +64,7 @@ public class HomePage extends JFrame implements ActionListener{
         GlassPanePopup.install(this);
         menu.setEvent(new MenuEvent() {
             @Override
-            public void selected(int index, int subIndex) {
+            public void selected(int index, int subIndex) throws Exception {
                 openFrame(index, subIndex);
             }
         });
@@ -124,7 +126,7 @@ public class HomePage extends JFrame implements ActionListener{
         accLoginID = s;
     }
 
-    private void openFrame(int index,int subIndex){
+    private void openFrame(int index,int subIndex) throws Exception {
         //Trang chủ
         if(index == 0 && subIndex == 0){
             replacePanel(homeSlide);
@@ -137,7 +139,7 @@ public class HomePage extends JFrame implements ActionListener{
         } else if(index == 1 && subIndex == 3){
             replacePanel(processOrder.getPnlProcessPanel());
         } else if(index == 1 && subIndex == 4){
-            replacePanel(revenueStatistic);
+//            replacePanel(revenueStatistic);
         } else if(index == 1 && subIndex == 5){
             replacePanel(new TodayRevenueStatistic());
         }
@@ -418,6 +420,7 @@ public class HomePage extends JFrame implements ActionListener{
 
         /* Create and display the form */
         EventQueue.invokeLater(new Runnable() {
+            @SneakyThrows
             public void run() {
                 StaticProcess.homePage = new HomePage();
                 homePage.setVisible(true);
