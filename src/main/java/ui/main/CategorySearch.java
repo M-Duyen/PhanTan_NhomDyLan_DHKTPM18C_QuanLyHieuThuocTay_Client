@@ -1,0 +1,586 @@
+package ui.main;
+
+import dao.AdministrationRouteDAO;
+import dao.CategoryDAO;
+import dao.ProductDAO;
+import dao.VendorDAO;
+import model.*;
+import ui.table.TableCustom;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+
+public class CategorySearch extends JPanel {
+    private final ArrayList<Product> proFetchList;
+    private HomePage homePage;
+    private ArrayList<Product> productsListTemp;
+
+    public CategorySearch(HomePage homePage) {
+        this.homePage = homePage;
+        initComponents();
+        JTableHeader theader = tableProduct.getTableHeader();
+        theader.setFont(new Font("Segoe UI", 0, 18));
+        TableCustom.apply(jScrollPane_tableProduct, TableCustom.TableType.MULTI_LINE);
+        tableProduct.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        setupTable();
+        showDataComboBoxVendor();
+        showDataComboBoxCategory();
+        showDataComboBoxAdmintrationRoute();
+        proFetchList = (ArrayList<Product>) productDAO.fetchProducts();
+    }
+
+
+    private void setupTable() {
+        JTableHeader theader = tableProduct.getTableHeader();
+        theader.setFont(new Font("Segoe UI", 0, 18));
+        tableProduct.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        if (tableProduct.getColumnModel().getColumnCount() > 0) {
+            tableProduct.getColumnModel().getColumn(0).setPreferredWidth(200);
+            tableProduct.getColumnModel().getColumn(1).setPreferredWidth(400);
+            tableProduct.getColumnModel().getColumn(2).setPreferredWidth(300);
+            tableProduct.getColumnModel().getColumn(3).setPreferredWidth(200);
+            tableProduct.getColumnModel().getColumn(4).setPreferredWidth(200);
+            tableProduct.getColumnModel().getColumn(5).setPreferredWidth(300);
+            tableProduct.getColumnModel().getColumn(6).setPreferredWidth(300);
+            tableProduct.getColumnModel().getColumn(7).setPreferredWidth(300);
+            tableProduct.getColumnModel().getColumn(8).setPreferredWidth(300);
+            tableProduct.getColumnModel().getColumn(9).setPreferredWidth(300);
+            tableProduct.getColumnModel().getColumn(10).setPreferredWidth(300);
+            tableProduct.getColumnModel().getColumn(11).setPreferredWidth(300);
+            tableProduct.getColumnModel().getColumn(12).setPreferredWidth(400);
+            tableProduct.getColumnModel().getColumn(13).setPreferredWidth(400);
+        }
+    }
+
+    private void initComponents() {
+        date = new ui.datechooser.DateChooser();
+        tableCustom = new TableCustom();
+        pCenter = new JPanel();
+        txtDate = new ui.textfield.TextField();
+        btnCalendar = new ui.button.Button();
+        btnAdd = new ui.button.Button();
+        cbbCategory = new ui.combobox.Combobox();
+        cbbVendor = new ui.combobox.Combobox();
+        cbbMethod = new ui.combobox.Combobox();
+        tableScrollButton_Product = new ui.table.TableScrollButton();
+        jScrollPane_tableProduct = new JScrollPane();
+        tableProduct = new JTable();
+        cbbAdministration = new ui.combobox.Combobox();
+        txtSearch = new ui.textfield.TextField();
+        btnSearch = new ui.button.Button();
+        lbDate = new JLabel();
+
+        date.setForeground(new Color(102, 204, 255));
+
+        date.setTextRefernce(txtDate);
+
+
+        setPreferredSize(new Dimension(1620, 1000));
+
+        pCenter.setBackground(new Color(242, 249, 255));
+        pCenter.setPreferredSize(new Dimension(1600, 1000));
+
+
+        txtDate.setFont(new Font("Segoe UI", 0, 18)); // NOI18N
+        txtDate.setMargin(new Insets(3, 6, 3, 6));
+        txtDate.setName(""); // NOI18N
+        txtDate.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent evt) {
+                txtDateActionPerformed(evt);
+            }
+        });
+
+        btnCalendar.setForeground(new Color(255, 255, 255));
+        btnCalendar.setIcon(new ImageIcon("src/main/java/ui/button/calendar.png")); // NOI18N
+        btnCalendar.setPreferredSize(new Dimension(64, 64));
+        btnCalendar.setRound(20);
+        btnCalendar.setShadowColor(new Color(255, 255, 255));
+        btnCalendar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                btnCalendarActionPerformed(evt);
+            }
+        });
+
+        btnAdd.setBackground(new Color(102, 204, 255));
+        btnAdd.setForeground(new Color(255, 255, 255));
+        btnAdd.setText("Thêm sản phẩm");
+        btnAdd.setFont(new Font("Segoe UI", 1, 18)); // NOI18N
+        btnAdd.setIconTextGap(2);
+        btnAdd.setPreferredSize(new Dimension(64, 64));
+        btnAdd.setRound(30);
+        btnAdd.setShadowColor(new Color(0, 0, 0));
+        btnAdd.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                btnAddActionPerformed(evt);
+            }
+        });
+
+        cbbCategory.setBackground(new Color(242, 249, 255));
+        cbbCategory.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        cbbCategory.setForeground(new Color(102, 102, 102));
+        cbbCategory.setModel(new DefaultComboBoxModel(new String[]{""}));
+        cbbCategory.setSelectedIndex(-1);
+        cbbCategory.setFont(new Font("Segoe UI", 0, 16)); // NOI18N
+        cbbCategory.setLabeText("Danh mục");
+        cbbCategory.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                if (txtSearch.getText().equals("Nhập tiêu chí tìm kiếm ...")) {
+                    cbbCategoryActionPerformed(evt);
+                }
+
+            }
+        });
+
+        cbbVendor.setBackground(new Color(242, 249, 255));
+        cbbVendor.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        cbbVendor.setForeground(new Color(102, 102, 102));
+        cbbVendor.setModel(new DefaultComboBoxModel(new String[]{""}));
+        cbbVendor.setSelectedIndex(-1);
+        cbbVendor.setFont(new Font("Segoe UI", 0, 16)); // NOI18N
+        cbbVendor.setLabeText("Nhà cung cấp");
+        cbbVendor.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                if (txtSearch.getText().equals("Nhập tiêu chí tìm kiếm ...")) {
+                    cbbVendorActionPerformed(evt);
+                }
+            }
+        });
+
+
+        cbbMethod.setBackground(new Color(242, 249, 255));
+        cbbMethod.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        cbbMethod.setForeground(new Color(102, 102, 102));
+        cbbMethod.setModel(new DefaultComboBoxModel(new String[]{"", "Sản phẩm sắp hết hạn", "Sản phẩm tồn kho thấp"}));
+        cbbMethod.setSelectedIndex(-1);
+        cbbMethod.setFont(new Font("Segoe UI", 0, 16)); // NOI18N
+        cbbMethod.setLabeText("Khác");
+        cbbMethod.setName(""); // NOI18N
+        cbbMethod.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                cbbMethodActionPerformed(evt);
+            }
+
+        });
+
+        tableScrollButton_Product.setMinimumSize(new Dimension(200, 15));
+        tableScrollButton_Product.setPreferredSize(new Dimension(1190, 400));
+
+        jScrollPane_tableProduct.setBackground(new Color(221, 221, 221));
+        jScrollPane_tableProduct.setBorder(null);
+        jScrollPane_tableProduct.setPreferredSize(new Dimension(950, 400));
+
+        tableProduct.setBackground(new Color(242, 249, 255));
+        tableProduct.setFont(new Font("Segoe UI", 0, 18)); // NOI18N
+        tableProduct.setModel(new DefaultTableModel(
+                new Object[][]{
+
+                },
+                new String[]{
+                        "Mã sản phẩm", "Tên sản phẩm", "Số đăng ký", "Ngày hết hạn", "Đơn vị", "Số lượng tồn", "Giá bán", "Hoạt chất", "Đường dùng", "Đơn vị nhập", "Dưỡng chất chính", "Loại vật tư y tế", "Danh mục", "Nhà cung cấp"
+                }
+        ) {
+            boolean[] canEdit = new boolean[]{
+                    false, false, false, false, false, false, false, false, false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit[columnIndex];
+            }
+        });
+        tableProduct.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+        tableProduct.setGridColor(new Color(218, 247, 249));
+        tableProduct.setRequestFocusEnabled(false);
+        tableProduct.setShowVerticalLines(true);
+        jScrollPane_tableProduct.setViewportView(tableProduct);
+
+        tableScrollButton_Product.add(jScrollPane_tableProduct, BorderLayout.CENTER);
+
+        cbbAdministration.setBackground(new Color(242, 249, 255));
+        cbbAdministration.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        cbbAdministration.setForeground(new Color(102, 102, 102));
+        cbbAdministration.setModel(new DefaultComboBoxModel(new String[]{""}));
+        cbbAdministration.setSelectedIndex(-1);
+        cbbAdministration.setFont(new Font("Segoe UI", 0, 16)); // NOI18N
+        cbbAdministration.setLabeText("Đường dùng");
+        cbbAdministration.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                if (txtSearch.getText().equals("Nhập tiêu chí tìm kiếm ...")) {
+                    cbbAdministrationActionPerformed(evt);
+                }
+            }
+        });
+
+        txtSearch.setForeground(new Color(153, 153, 153));
+        txtSearch.setText("Nhập tiêu chí tìm kiếm ...");
+        txtSearch.setFont(new Font("Segoe UI", 0, 18)); // NOI18N
+
+        txtSearch.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+//                if (!txtSearch.getText().equals("Nhập tiêu chí tìm kiếm ...")) {
+//                    ArrayList<Product> result = productDAO.searchProductWithCriteria(txtSearch.getText(), cbbCategory, cbbVendor, cbbAdministration);
+//                    if (result.isEmpty()) {
+//                        new Message(homePage, true, "Thông báo", "Hết hàng", "src/main/java/ui/dialog/warning.png").showAlert(); new Message(homePage, true, "Thông báo", "Không tìm thấy", "src/main/java/ui/dialog/warning.png").showAlert();
+//                    } else {
+//                        tableProduct.setVisible(true);
+//                        showTable(result);
+//                    }
+//                }
+//                pCenter.revalidate(); // Cập nhật lại giao diện
+//                pCenter.repaint();
+            }
+        });
+        txtSearch.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtSearchFocusGained(evt);
+            }
+
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                txtSearchFocusLost(evt);
+            }
+        });
+
+        btnSearch.setBackground(new Color(102, 204, 255));
+        btnSearch.setForeground(new Color(0, 0, 0));
+        btnSearch.setIcon(new ImageIcon("src/main/java/ui/button/magnifying-glass_32.png")); // NOI18N
+        btnSearch.setRound(20);
+        btnSearch.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!txtSearch.getText().equals("Nhập tiêu chí tìm kiếm ...")) {
+                    ArrayList<Product> result = null;
+//                    ArrayList<Product> result = productDAO.searchProductWithCriteria(txtSearch.getText(), cbbCategory, cbbVendor, cbbAdministration);
+                    DefaultTableModel model = (DefaultTableModel) tableProduct.getModel();
+                    if (result.isEmpty()) {
+//                        new Message(homePage, true, "Thông báo", "Không tìm thấy", "src/main/java/ui/dialog/warning.png").showAlert();
+                        model.addRow(new Object[]{"...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "..."});
+                    } else {
+                        tableProduct.setVisible(true);
+                        showTable(result);
+                    }
+                }
+                pCenter.revalidate(); // Cập nhật lại giao diện
+                pCenter.repaint();
+            }
+        });
+        btnSearch.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+
+                }
+            }
+        });
+
+
+        lbDate.setFont(new Font("Segoe UI", 0, 18)); // NOI18N
+        lbDate.setText("Lọc theo ngày");
+
+        GroupLayout pCenterLayout = new GroupLayout(pCenter);
+        pCenter.setLayout(pCenterLayout);
+        pCenterLayout.setHorizontalGroup(
+                pCenterLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(GroupLayout.Alignment.TRAILING, pCenterLayout.createSequentialGroup()
+                                .addGap(24, 24, 24)
+                                .addGroup(pCenterLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addGroup(pCenterLayout.createSequentialGroup()
+                                                .addComponent(txtSearch, GroupLayout.PREFERRED_SIZE, 500, GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(btnSearch, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(lbDate)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(txtDate, GroupLayout.PREFERRED_SIZE, 280, GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addComponent(btnCalendar, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                .addGap(221, 221, 221)
+                                                .addComponent(btnAdd, GroupLayout.PREFERRED_SIZE, 180, GroupLayout.PREFERRED_SIZE)
+                                                .addGap(123, 123, 123))
+                                        .addGroup(pCenterLayout.createSequentialGroup()
+                                                .addComponent(cbbCategory, GroupLayout.PREFERRED_SIZE, 384, GroupLayout.PREFERRED_SIZE)
+                                                .addGap(31, 31, 31)
+                                                .addComponent(cbbVendor, GroupLayout.PREFERRED_SIZE, 219, GroupLayout.PREFERRED_SIZE)
+                                                .addGap(30, 30, 30)
+                                                .addComponent(cbbAdministration, GroupLayout.PREFERRED_SIZE, 219, GroupLayout.PREFERRED_SIZE)
+                                                .addGap(31, 31, 31)
+                                                .addComponent(cbbMethod, GroupLayout.PREFERRED_SIZE, 272, GroupLayout.PREFERRED_SIZE)
+                                                .addGap(505, 505, 505))))
+                        .addGroup(pCenterLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                .addGroup(GroupLayout.Alignment.TRAILING, pCenterLayout.createSequentialGroup()
+                                        .addContainerGap(28, Short.MAX_VALUE)
+                                        .addComponent(tableScrollButton_Product, GroupLayout.PREFERRED_SIZE, 1572, GroupLayout.PREFERRED_SIZE)
+                                        .addGap(115, 115, 115)))
+        );
+        pCenterLayout.setVerticalGroup(
+                pCenterLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(pCenterLayout.createSequentialGroup()
+                                .addGap(71, 71, 71)
+                                .addGroup(pCenterLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addGroup(pCenterLayout.createSequentialGroup()
+                                                .addGroup(pCenterLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                                        .addComponent(btnSearch, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(txtSearch, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
+                                                        .addGroup(pCenterLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                                                                .addComponent(btnCalendar, GroupLayout.PREFERRED_SIZE, 52, GroupLayout.PREFERRED_SIZE)
+                                                                .addGroup(pCenterLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                                                        .addComponent(txtDate, GroupLayout.PREFERRED_SIZE, 53, GroupLayout.PREFERRED_SIZE)
+                                                                        .addComponent(lbDate, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE))))
+                                                .addGap(18, 18, 18)
+                                                .addGroup(pCenterLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(cbbVendor, GroupLayout.PREFERRED_SIZE, 55, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(cbbAdministration, GroupLayout.PREFERRED_SIZE, 55, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(cbbMethod, GroupLayout.PREFERRED_SIZE, 55, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(cbbCategory, GroupLayout.PREFERRED_SIZE, 55, GroupLayout.PREFERRED_SIZE)))
+                                        .addGroup(pCenterLayout.createSequentialGroup()
+                                                .addGap(1, 1, 1)
+                                                .addComponent(btnAdd, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
+                                .addContainerGap())
+                        .addGroup(pCenterLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                .addGroup(pCenterLayout.createSequentialGroup()
+                                        .addGap(226, 226, 226)
+                                        .addComponent(tableScrollButton_Product, GroupLayout.PREFERRED_SIZE, 690, GroupLayout.PREFERRED_SIZE)
+                                        .addContainerGap(84, Short.MAX_VALUE)))
+        );
+
+        GroupLayout layout = new GroupLayout(this);
+        this.setLayout(layout);
+        layout.setHorizontalGroup(
+                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addComponent(pCenter, GroupLayout.PREFERRED_SIZE, 1620, Short.MAX_VALUE)
+        );
+        layout.setVerticalGroup(
+                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addComponent(pCenter, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+        );
+    }// </editor-fold>
+
+    private void txtDateActionPerformed(ActionEvent evt) {
+        ArrayList<Product> proListByDate = (ArrayList<Product>) productDAO.searchByMultipleCriteria("Product",convertDateFormat(txtDate.getText()));
+        showTable(proListByDate);
+
+    }
+
+    private void btnCalendarActionPerformed(ActionEvent evt) {
+        date.showPopup();
+        ArrayList<Product> proListByDate = (ArrayList<Product>) productDAO.searchByMultipleCriteria("Product",convertDateFormat(txtDate.getText()));
+        showTable(proListByDate);
+    }
+
+    private void btnAddActionPerformed(ActionEvent evt) {
+        AddProduct addProduct = new AddProduct();
+        homePage.updateCurretPanel(addProduct);
+
+        pCenter.removeAll();
+
+        pCenter.setLayout(new BorderLayout());
+        pCenter.add(addProduct, BorderLayout.CENTER);
+
+        pCenter.revalidate();
+        pCenter.repaint();
+    }
+
+    private void cbbCategoryActionPerformed(ActionEvent evt) {
+        ArrayList<Product> proListByCategory = (ArrayList<Product>) productDAO.searchByMultipleCriteria("Product",(String) cbbCategory.getSelectedItem());
+        showTable(proListByCategory);
+    }
+
+    private void cbbVendorActionPerformed(ActionEvent evt) {
+        ArrayList<Product> proListByVendor = (ArrayList<Product>) productDAO.searchByMultipleCriteria("Product",(String) cbbVendor.getSelectedItem());
+        showTable(proListByVendor);
+    }
+
+    private void cbbMethodActionPerformed(ActionEvent evt) {
+        searchByOtherCriterious();
+    }
+
+    private void cbbAdministrationActionPerformed(ActionEvent evt) {
+        ArrayList<Product> proListByAdmin = (ArrayList<Product>) productDAO.searchByMultipleCriteria("Product",(String) cbbAdministration.getSelectedItem());
+        showTable(proListByAdmin);
+    }
+
+    private void txtSearchFocusGained(java.awt.event.FocusEvent evt) {
+        if (txtSearch.getText().equals("Nhập tiêu chí tìm kiếm ...")) {
+            txtSearch.setText("");
+        }
+    }
+
+    private void txtSearchFocusLost(java.awt.event.FocusEvent evt) {
+        if (txtSearch.getText().equals("")) {
+            txtSearch.setText("Nhập tiêu chí tìm kiếm ...");
+        }
+    }
+
+
+    // Variables declaration - do not modify
+    private ui.button.Button btnAdd;
+    private ui.button.Button btnCalendar;
+    private ui.button.Button btnSearch;
+    private ui.combobox.Combobox cbbAdministration;
+    private ui.combobox.Combobox cbbCategory;
+    private ui.combobox.Combobox cbbMethod;
+    private ui.combobox.Combobox cbbVendor;
+    private ui.datechooser.DateChooser date;
+    private JScrollPane jScrollPane_tableProduct;
+    private JLabel lbDate;
+    private JPanel pCenter;
+    private TableCustom tableCustom;
+    private JTable tableProduct;
+    private ui.table.TableScrollButton tableScrollButton_Product;
+    private ui.textfield.TextField txtDate;
+    private ui.textfield.TextField txtSearch;
+    ProductDAO productDAO = new ProductDAO(Product.class );
+
+
+    public void showTable(ArrayList<Product> arrayList) {
+        DefaultTableModel model = (DefaultTableModel) tableProduct.getModel();
+        model.setRowCount(0);
+
+        ArrayList<Medicine> medicineList = (ArrayList<Medicine>) arrayList.stream().filter(x -> x instanceof Medicine).map(product -> (Medicine) product).collect(Collectors.toList());
+        List<MedicalSupply> suppliesList = arrayList.stream().filter(x -> x instanceof MedicalSupply).map(product -> (MedicalSupply) product).collect(Collectors.toList());
+        List<FunctionalFood> funtionFoodList = arrayList.stream().filter(x -> x instanceof FunctionalFood).map(product -> (FunctionalFood) product).collect(Collectors.toList());
+        for (Medicine medicine : medicineList) {
+//            for (Map.Entry<PackagingUnit, Double> entry : medicine.getUnitPrice().entrySet()) {
+//                model.addRow(new Object[]{
+//                        medicine.getProductID(),
+//                        medicine.getProductName(),
+//                        medicine.getRegistrationNumber(),
+//                        medicine.getEndDate(),
+//                        entry.getKey().name(),
+//                        medicine.getInStockByUnit(entry.getKey()),
+//                        medicine.getSellPrice(entry.getKey()),
+//                        medicine.getActiveIngredient(),
+//                        medicine.getAdministrationRoute().getAdministrationRouteID(),
+//                        medicine.getConversionUnit(),
+//                        "", "",
+//                        medicine.getCategory().getCategoryName(),
+//                        medicine.getVendor().getVendorName()
+//                });
+//            }
+        }
+
+        for (MedicalSupply supplies : suppliesList) {
+//            for (Map.Entry<PackagingUnit, Double> entry : supplies.getUnitPrice().entrySet()) {
+//                model.addRow(new Object[]{
+//                        supplies.getProductID(),
+//                        supplies.getProductName(),
+//                        supplies.getRegistrationNumber(),
+//                        supplies.getEndDate(),
+//                        entry.getKey().name(), //supplies.getQuantityInStock()
+//                        supplies.getInStockByUnit(entry.getKey()),
+//                        supplies.getSellPrice(entry.getKey()),
+//                        "", "", "", "",
+//                        supplies.getMedicalSupplyType(),
+//                        supplies.getCategory().getCategoryName(),
+//                        supplies.getVendor().getVendorName()
+//                });
+//            }
+        }
+        for (FunctionalFood functionalFood : funtionFoodList) {
+//            for (Map.Entry<PackagingUnit, Double> entry : functionalFood.getUnitPrice().entrySet()) {
+//                model.addRow(new Object[]{
+//                        functionalFood.getProductID(),
+//                        functionalFood.getProductName(),
+//                        functionalFood.getRegistrationNumber(),
+//                        functionalFood.getEndDate(),
+//                        entry.getKey().name(), //functionalFood.getQuantityInStock()
+//                        functionalFood.getInStockByUnit(entry.getKey()),
+//                        functionalFood.getSellPrice(entry.getKey()),
+//                        "", "", "",
+//                        functionalFood.getMainNutrients(),
+//                        "",
+//                        functionalFood.getCategory().getCategoryName(),
+//                        functionalFood.getVendor().getVendorName()
+//                });
+//            }
+        }
+    }
+
+    public void showDataComboBoxVendor() {
+        VendorDAO vendor_dao = new VendorDAO(Vendor.class);
+        List<Vendor> list = vendor_dao.getAll();
+
+        Set<Vendor> uniqueValues = new LinkedHashSet<>(list);
+        List<Vendor> uniqueList = new ArrayList<>(uniqueValues);
+
+        for (Vendor vendor : uniqueList) {
+            cbbVendor.addItem(vendor.getVendorName());
+        }
+
+    }
+
+    public void showDataComboBoxCategory() {
+        CategoryDAO category_dao = new CategoryDAO(Category.class);
+        List<Category> list = category_dao.getAll();
+
+        Set<Category> uniqueValues = new LinkedHashSet<>(list);
+        List<Category> uniqueList = new ArrayList<>(uniqueValues);
+
+        for (Category category : uniqueList) {
+            cbbCategory.addItem(category.getCategoryName());
+        }
+    }
+
+    public void showDataComboBoxAdmintrationRoute() {
+        AdministrationRouteDAO administrationRoute_dao = new AdministrationRouteDAO(AdministrationRoute.class);
+        List<AdministrationRoute> list = administrationRoute_dao.getAll();
+
+        Set<AdministrationRoute> uniqueValues = new LinkedHashSet<>(list);
+        List<AdministrationRoute> uniqueList = new ArrayList<>(uniqueValues);
+
+        for (AdministrationRoute administrationRoute : uniqueList) {
+            cbbAdministration.addItem(administrationRoute.getAdministrationRouteID());
+        }
+    }
+
+    private static String convertDateFormat(String inputDate) {
+        SimpleDateFormat inputFormat = new SimpleDateFormat("dd-MM-yyyy");
+        SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date date;
+
+        try {
+            date = inputFormat.parse(inputDate);
+            return outputFormat.format(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public void searchByOtherCriterious() {
+        ProductDAO productDAO = new ProductDAO(Product.class);
+        String searchByOther = (String) cbbMethod.getSelectedItem();
+        if (searchByOther != null) {
+            if (searchByOther.equals("Sản phẩm sắp hết hạn")) {
+                ArrayList<Product> proNearExpire = (ArrayList<Product>) productDAO.getProductListNearExpire();
+                showTable(proNearExpire);
+
+            } else if (searchByOther.equals("Sản phẩm tồn kho thấp")) {
+                DefaultTableModel model = (DefaultTableModel) tableProduct.getModel();
+                ArrayList<Product> lowStockProductsList = (ArrayList<Product>) productDAO.getLowStockProducts(25);
+                if (lowStockProductsList.isEmpty()) {
+                    model.addRow(new Object[]{"...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "..."});
+                } else {
+                    showTable(lowStockProductsList);
+                }
+            } else if (searchByOther.equals("Tất cả")) {
+                ArrayList<Product> productArrayList = proFetchList;
+                showTable(productArrayList);
+            }
+        } else {
+            System.out.println("Bị null");
+        }
+    }
+}
+
