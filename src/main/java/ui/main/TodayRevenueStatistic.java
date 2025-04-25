@@ -5,6 +5,7 @@
 package ui.main;
 
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
 import dao.GenericDAO;
@@ -25,15 +26,17 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- *
  * @author nguye
  */
 public class TodayRevenueStatistic extends javax.swing.JPanel {
 
+    private final OrderService orderService = (OrderService) Naming.lookup("rmi://localhost:7281/orderService");
+    ;
+
     /**
      * Creates new form TodayRevenueStatistic
      */
-    public TodayRevenueStatistic() {
+    public TodayRevenueStatistic() throws Exception {
         initComponents();
         setupTable();
         TableCustom.apply(jScrollPane_tableRevenue, TableCustom.TableType.MULTI_LINE);
@@ -41,9 +44,11 @@ public class TodayRevenueStatistic extends javax.swing.JPanel {
         edtEmplID.setText(StaticProcess.userlogin);
         edtEmplName.setText(StaticProcess.empLogin.getEmployeeName());
 
-//        showDataCbbDate();
+        showDataCbbDate();
+
 
     }
+
     private void setupTable() {
         JTableHeader theader = tableRevenue.getTableHeader();
         theader.setFont(new java.awt.Font("Segoe UI", 0, 18));
@@ -57,7 +62,6 @@ public class TodayRevenueStatistic extends javax.swing.JPanel {
             tableRevenue.getColumnModel().getColumn(5).setPreferredWidth(300);
         }
     }
-
 
 
     /**
@@ -91,7 +95,8 @@ public class TodayRevenueStatistic extends javax.swing.JPanel {
         cbbDate.setBackground(new java.awt.Color(242, 249, 255));
         cbbDate.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
         cbbDate.setForeground(new java.awt.Color(102, 102, 102));
-        cbbDate.setFont(new java.awt.Font("Segoe UI", 0, 20)); // NOI18N
+        cbbDate.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
+        cbbDate.setSelectedIndex(-1);
         cbbDate.setLabeText("Ngày");
         cbbDate.addActionListener(new java.awt.event.ActionListener() {
             @SneakyThrows
@@ -110,7 +115,6 @@ public class TodayRevenueStatistic extends javax.swing.JPanel {
         edtEmplName.setFont(new java.awt.Font("Segoe UI", 0, 20)); // NOI18N
 
         edtSum.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
-        edtSum.setText("dsd");
 
         tableScrollButton_Product.setMinimumSize(new java.awt.Dimension(200, 15));
         tableScrollButton_Product.setPreferredSize(new java.awt.Dimension(1190, 400));
@@ -122,10 +126,10 @@ public class TodayRevenueStatistic extends javax.swing.JPanel {
         tableRevenue.setBackground(new java.awt.Color(242, 249, 255));
         tableRevenue.setFont(new java.awt.Font("Segoe UI", 0, 20)); // NOI18N
         tableRevenue.setModel(new javax.swing.table.DefaultTableModel(
-                new Object [][] {
+                new Object[][]{
 
                 },
-                new String [] {
+                new String[]{
                         "Mã hóa đơn", "Khách hàng", "Thời gian", "Hình thức", "Khuyến mãi", "Tổng tiền"
                 }
         ));
@@ -137,8 +141,9 @@ public class TodayRevenueStatistic extends javax.swing.JPanel {
 
         tableScrollButton_Product.add(jScrollPane_tableRevenue, java.awt.BorderLayout.CENTER);
 
-        lbSum.setFont(new java.awt.Font("Segoe UI", 0, 22)); // NOI18N
-        lbSum.setText("Tổng tiền:");
+        lbSum.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        lbSum.setForeground(new java.awt.Color(102, 204, 255));
+        lbSum.setText("TỔNG TIỀN: ");
 
         edtEmplID.setFont(new java.awt.Font("Segoe UI", 0, 20)); // NOI18N
 
@@ -150,8 +155,8 @@ public class TodayRevenueStatistic extends javax.swing.JPanel {
                                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(lbSum)
                                 .addGap(18, 18, 18)
-                                .addComponent(edtSum, javax.swing.GroupLayout.PREFERRED_SIZE, 234, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(23, 23, 23))
+                                .addComponent(edtSum, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(34, 34, 34))
                         .addGroup(pCenterLayout.createSequentialGroup()
                                 .addGroup(pCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                         .addGroup(pCenterLayout.createSequentialGroup()
@@ -219,6 +224,11 @@ public class TodayRevenueStatistic extends javax.swing.JPanel {
 
     private void cbbDateActionPerformed(java.awt.event.ActionEvent evt) throws RemoteException {
 
+        String choice = cbbDate.getSelectedItem().toString();
+        List<Order> list = orderService.filterOrderByEmpID(StaticProcess.userlogin, choice);
+        showDataTable(list);
+        edtSum.setText(String.valueOf(orderService.calculateTotalAllOrder(StaticProcess.userlogin, choice)));
+
 
     }
 
@@ -258,16 +268,39 @@ public class TodayRevenueStatistic extends javax.swing.JPanel {
         });
     }
 
-    public void showDataCbbDate() throws RemoteException, MalformedURLException, NotBoundException {
-//            OrderService orderService = (OrderService) Naming.lookup("rmi://localhost:7281/OrderService");
-//
-//            List<LocalDate> rs = orderService.getAllDateHaveEmpID(StaticProcess.userlogin);
-//
-//            cbbDate.removeAllItems();
-//            rs.forEach(date -> cbbDate.addItem(date));
-
+    public void showDataCbbDate() throws Exception {
+        assert orderService != null;
+        List<LocalDate> rs = orderService.getAllDateHaveEmpID(StaticProcess.userlogin);
+        if (rs != null && !rs.isEmpty()) {
+            cbbDate.removeAllItems();
+            rs.forEach(date -> cbbDate.addItem(date.toString()));
+        } else {
+            System.out.println("Khong co du lieu");
+        }
 
     }
+
+    private void showDataTable(List<Order> list) {
+        DefaultTableModel model = new DefaultTableModel(
+                new Object[][]{},
+                new String[]{"Mã hóa đơn", "Khách hàng", "Thời gian", "Hình thức", "Khuyến mãi", "Tổng tiền"}
+        );
+        tableRevenue.setModel(model); // Reset lại model
+
+        for (Order order : list) {
+            model.addRow(new Object[]{
+                    order.getOrderID(),
+                    order.getCustomer().getPhoneNumber(),
+                    order.getOrderDate(),
+                    order.getPaymentMethod(),
+                    order.getDiscount(),
+                    order.getTotalDue()
+            });
+        }
+
+        setupTable();
+    }
+
 
     // Variables declaration - do not modify
     private ui.combobox.Combobox cbbDate;
