@@ -791,10 +791,11 @@ public class RevenueStatistic extends JPanel implements ActionListener {
     }
 
     public void setOverView(LocalDate startD, LocalDate endD) throws MalformedURLException, NotBoundException, RemoteException {
-        ArrayList<Double> inf = ((OrderService)Naming.lookup("rmi://localhost:7281/orderService")).getOverviewStatistical(startD, endD);
-        lbCreatedNumber.setText(inf.get(0).intValue() + "");
-        lbSoldNumber.setText(inf.get(2).intValue() + "");
-        lbNumberRevenue.setText( formatCurrency(inf.get(1)));
+        //TODO
+//        ArrayList<Double> inf = ((OrderService)Naming.lookup("rmi://localhost:7281/orderService")).getOverviewStatistical(startD, endD);
+//        lbCreatedNumber.setText(inf.get(0).intValue() + "");
+//        lbSoldNumber.setText(inf.get(2).intValue() + "");
+//        lbNumberRevenue.setText( formatCurrency(inf.get(1)));
     }
 
     //Chuyển định dạng tiền
@@ -815,9 +816,10 @@ public class RevenueStatistic extends JPanel implements ActionListener {
     //Set biểu đồ tròn tỷ lệ
     public void setPgs() throws MalformedURLException, NotBoundException, RemoteException {
         OrderService orderDAO = (OrderService) Naming.lookup("rmi://localhost:7281/orderService");
-        pgsSanPhamBan.setValue((int) Math.round(orderDAO.getTotalProductsSold()));
-        pgsThuNhapBan.setValue((int) Math.round(orderDAO.getRevenueSoldPercentage()));
-        pgsLoiNhuan.setValue((int) Math.round(orderDAO.getProfit()));
+        //TODO
+//        pgsSanPhamBan.setValue((int) Math.round(orderDAO.getTotalProductsSold()));
+//        pgsThuNhapBan.setValue((int) Math.round(orderDAO.getRevenueSoldPercentage()));
+//        pgsLoiNhuan.setValue((int) Math.round(orderDAO.getProfit()));
 
         pgsSanPhamBan.start();
         pgsThuNhapBan.start();
