@@ -5,22 +5,25 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
-import dao.EmployeeDAO;
-import dao.OrderDAO;
 
 import model.Employee;
 import model.Manager;
 import model.Order;
+import service.EmployeeService;
 import staticProcess.StaticProcess;
 import ui.login.Login;
 import ui.table.TableCustom;
 
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 
 public class TodayRevenueStatistic extends javax.swing.JPanel {
 
-    public TodayRevenueStatistic() {
+    public TodayRevenueStatistic() throws MalformedURLException, NotBoundException, RemoteException {
         initComponents();
 
         setupTable();
@@ -48,7 +51,7 @@ public class TodayRevenueStatistic extends javax.swing.JPanel {
 //                repaint();
             }
 
-            Employee employ = new EmployeeDAO(Employee.class).findById(role);
+            Employee employ = ((EmployeeService)Naming.lookup("rmi://localhost:7281/employeeService")).findById(role);
             if(employ != null){
                 lblEmpID_show.setText(role);
                 lblEmpName_show.setText(employee.getEmployeeName());
