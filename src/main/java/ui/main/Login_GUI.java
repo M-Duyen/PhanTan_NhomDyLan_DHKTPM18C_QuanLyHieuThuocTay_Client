@@ -1,25 +1,29 @@
 package ui.main;
 
-import com.formdev.flatlaf.*;
+import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.fonts.roboto.FlatRobotoFont;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
-
 import staticProcess.StaticProcess;
 import ui.login.Home;
 import ui.login.Login;
-import ui.scroll.win11.ScrollBarWin11UI;
-
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.net.MalformedURLException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 
 public class Login_GUI extends JFrame implements ActionListener {
+
     public static Home home;
 
     public static Login loginPanel = new Login();
 
-    public Login_GUI() {
+    public Login_GUI() throws MalformedURLException, NotBoundException, RemoteException {
         init();
         getRootPane().setDefaultButton(loginPanel.btnLogin);
     }

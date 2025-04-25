@@ -5,10 +5,11 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
 
-import dao.EmployeeDAO;
-import dao.OrderDAO;
+
 import model.Employee;
 import model.Order;
+import service.EmployeeService;
+import service.OrderService;
 import staticProcess.StaticProcess;
 import ui.dialog.Message;
 import ui.forms.TempOrderForm;
@@ -18,6 +19,10 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -25,13 +30,14 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 
 public class OrderHistory extends javax.swing.JPanel {
+    EmployeeService employeeService = (EmployeeService) Naming.lookup("rmi://localhost:7281/employeeService");
+    OrderService orderService = (OrderService) Naming.lookup("rmi://localhost:7281/orderService");
     private HomePage homePage;
-    OrderDAO orderDAO = new OrderDAO(Order.class);
 
-    ArrayList<Order> listT = (ArrayList<Order>) orderDAO.getAll();
+    ArrayList<Order> listT = (ArrayList<Order>) orderService.getAll();
     String flag1 = "", flag2 = "", flag3 = "";
 
-    public OrderHistory(HomePage homePage) {
+    public OrderHistory(HomePage homePage) throws MalformedURLException, NotBoundException, RemoteException {
         this.homePage = homePage;
         initComponents();
 
@@ -118,7 +124,11 @@ public class OrderHistory extends javax.swing.JPanel {
         btnLoad.setShadowColor(new Color(0, 0, 0));
         btnLoad.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                listT = (ArrayList<Order>) orderDAO.getAll();
+                try {
+                    listT = (ArrayList<Order>) orderService.getAll();
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
                 showTable(filterOrder(listT, flag1, flag2, flag3));
             }
         });
@@ -200,7 +210,12 @@ public class OrderHistory extends javax.swing.JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 DefaultTableModel model = (DefaultTableModel) tableOrder.getModel();
-                ArrayList<Order> list = (ArrayList<Order>) new OrderDAO(Order.class).searchByMultipleCriteria("Order",txtSearch.getText().trim());
+                ArrayList<Order> list = null;
+                try {
+                    list = (ArrayList<Order>) orderService.searchByMultipleCriteria("Order",txtSearch.getText().trim());
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
                 model.setRowCount(0);
                 if (!list.isEmpty()) {
                     for (Order o : list) {
@@ -238,7 +253,12 @@ public class OrderHistory extends javax.swing.JPanel {
                 tempOrderForm = new TempOrderForm();
                 int row = tableOrder.getSelectedRow();
                 if (row >= 0) {
-                    ArrayList<Order> list = (ArrayList<Order>) orderDAO.searchByMultipleCriteria("Order",tableOrder.getValueAt(row, 0).toString());
+                    ArrayList<Order> list = null;
+                    try {
+                        list = (ArrayList<Order>) orderService.searchByMultipleCriteria("Order",tableOrder.getValueAt(row, 0).toString());
+                    } catch (RemoteException e) {
+                        throw new RuntimeException(e);
+                    }
                     System.out.println(list.get(0).toString());
                     try {
                         tempOrderForm.invoiceOrder(list.get(0));
@@ -332,7 +352,7 @@ public class OrderHistory extends javax.swing.JPanel {
         try {
             LocalDate localDate = LocalDate.parse(dateString, formatter);
             LocalDateTime startOfDay = localDate.atStartOfDay();
-            ArrayList<Order> orderListByDate_txt = orderDAO.getOrdersByDateRange(startOfDay, startOfDay.plusDays(1).minusNanos(1));
+            ArrayList<Order> orderListByDate_txt = orderService.getOrdersByDateRange(startOfDay, startOfDay.plusDays(1).minusNanos(1));
             showTable(orderListByDate_txt);
         } catch (Exception e) {
             e.printStackTrace();
@@ -348,7 +368,7 @@ public class OrderHistory extends javax.swing.JPanel {
         try {
             LocalDate localDate = LocalDate.parse(dateString, formatter);
             LocalDateTime startOfDay = localDate.atStartOfDay();
-            ArrayList<Order> orderListByDate_txt = orderDAO.getOrdersByDateRange(startOfDay, startOfDay.plusDays(1).minusNanos(1));
+            ArrayList<Order> orderListByDate_txt = orderService.getOrdersByDateRange(startOfDay, startOfDay.plusDays(1).minusNanos(1));
             showTable(orderListByDate_txt);
         } catch (Exception e) {
             e.printStackTrace();
@@ -403,9 +423,8 @@ public class OrderHistory extends javax.swing.JPanel {
         }
     }
 
-    public void showcbbSaler() {
-        EmployeeDAO employee_dao = new EmployeeDAO(Employee.class);
-        ArrayList<Employee> employeeList = (ArrayList<Employee>) employee_dao.getAll();
+    public void showcbbSaler() throws RemoteException {
+        ArrayList<Employee> employeeList = (ArrayList<Employee>) employeeService.getAll();
 
         for (Employee employee : employeeList) {
             cbbSaler.addItem(employee.getEmployeeName());
@@ -497,7 +516,6 @@ public class OrderHistory extends javax.swing.JPanel {
     private ui.table.TableScrollButton tableScrollButton_Order;
     private ui.textfield.TextField txtDate;
     private ui.textfield.TextField txtSearch;
-    private EmployeeDAO employee_dao = new EmployeeDAO(Employee.class);
     private TempOrderForm tempOrderForm;
     // End of variables declaration//GEN-END:variables
 }
