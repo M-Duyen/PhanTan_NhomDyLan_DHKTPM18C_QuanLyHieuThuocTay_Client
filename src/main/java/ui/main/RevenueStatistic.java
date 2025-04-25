@@ -1,7 +1,8 @@
 package ui.main;
 
-import dao.OrderDAO;
+
 import model.Order;
+import service.OrderService;
 import ui.model.ModelDataRS;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -14,6 +15,10 @@ import java.awt.event.ActionListener;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -486,119 +491,119 @@ public class RevenueStatistic extends JPanel implements ActionListener {
         if (path != null) {
             try (FileInputStream fis = new FileInputStream("src/main/java/ui/custom/Report_RevenueStatistic.xlsx");
                  Workbook workbook = new XSSFWorkbook(fis)) {
-                    Sheet sheet = null;
-                    OrderDAO orderDAO = new OrderDAO(Order.class);
-                    ArrayList<Double> inf = new ArrayList<>();
-                    ArrayList<ModelDataRS> listMD = new ArrayList<>();
-                    switch ((String) cboThongKeTheo.getSelectedItem()) {
-                        case "Năm":
-                            sheet = workbook.getSheetAt(0);
-                            Row row1 = sheet.getRow(0);
-                            if (row1 == null) row1 = sheet.createRow(0);
-                            Cell cellB1 = row1.getCell(1);
-                            if (cellB1 == null) cellB1 = row1.createCell(1);
-                            cellB1.setCellValue("THỐNG KÊ DOANH THU NĂM " + (Integer) panelBarStatistical1.ycNam.getValue());
+                Sheet sheet = null;
+                OrderService orderDAO = ((OrderService) Naming.lookup("rmi://localhost:7281/orderService"));
+                ArrayList<Double> inf = new ArrayList<>();
+                ArrayList<ModelDataRS> listMD = new ArrayList<>();
+                switch ((String) cboThongKeTheo.getSelectedItem()) {
+                    case "Năm":
+                        sheet = workbook.getSheetAt(0);
+                        Row row1 = sheet.getRow(0);
+                        if (row1 == null) row1 = sheet.createRow(0);
+                        Cell cellB1 = row1.getCell(1);
+                        if (cellB1 == null) cellB1 = row1.createCell(1);
+                        cellB1.setCellValue("THỐNG KÊ DOANH THU NĂM " + (Integer) panelBarStatistical1.ycNam.getValue());
 
-                            inf = orderDAO.getOverviewStatistical(
-                                    LocalDate.of((Integer) (Integer) panelBarStatistical1.ycNam.getValue(), 1, 1),
-                                    LocalDate.of((Integer) (Integer) panelBarStatistical1.ycNam.getValue(), 12, 31)
-                            );
-                            listMD = orderDAO.getModelDataRSByYear((Integer) (Integer) panelBarStatistical1.ycNam.getValue());
-                            break;
-                        case "Tháng":
-                            sheet = workbook.getSheetAt(0);
-                            Row rowa = sheet.getRow(0);
-                            if (rowa == null) row1 = sheet.createRow(0);
-                            Cell cellBa = rowa.getCell(1);
-                            if (cellBa == null) cellBa = rowa.createCell(1);
+                        inf = orderDAO.getOverviewStatistical(
+                                LocalDate.of((Integer) (Integer) panelBarStatistical1.ycNam.getValue(), 1, 1),
+                                LocalDate.of((Integer) (Integer) panelBarStatistical1.ycNam.getValue(), 12, 31)
+                        );
+                        listMD = orderDAO.getModelDataRSByYear((Integer) (Integer) panelBarStatistical1.ycNam.getValue());
+                        break;
+                    case "Tháng":
+                        sheet = workbook.getSheetAt(0);
+                        Row rowa = sheet.getRow(0);
+                        if (rowa == null) row1 = sheet.createRow(0);
+                        Cell cellBa = rowa.getCell(1);
+                        if (cellBa == null) cellBa = rowa.createCell(1);
 
-                            String[] parts = ((String) panelBarStatistical1.cboT.getSelectedItem()).split(" ");
-                            int month = 1;
-                            if (parts.length > 1) {
-                                month = Integer.parseInt(parts[1]);
-                            }
-                            cellBa.setCellValue("THỐNG KÊ DOANH THU THÁNG " + month + " NĂM " + (Integer) panelBarStatistical1.ycNam.getValue());
-                            LocalDate firstDayOfMonth = LocalDate.of((Integer) (Integer) panelBarStatistical1.ycT.getValue(), month, 1);
-                            inf = orderDAO.getOverviewStatistical(
-                                    firstDayOfMonth,
-                                    firstDayOfMonth.withDayOfMonth(firstDayOfMonth.lengthOfMonth())
-                            );
-                            listMD = orderDAO.getModelDataRSByYearByMonth(month, (Integer) (Integer) panelBarStatistical1.ycT.getValue());
-                            break;
-                        case "Tùy chỉnh":
-                            sheet = workbook.getSheetAt(0);
-                            Row rowtc = sheet.getRow(0);
-                            if (rowtc == null) row1 = sheet.createRow(0);
-                            Cell cellBtc = rowtc.getCell(1);
-                            if (cellBtc == null) cellBtc = rowtc.createCell(1);
-                            cellBtc.setCellValue("THỐNG KÊ DOANH THU TỪ  " + panelBarStatistical1.txtStart.getText() + " ĐẾN " + panelBarStatistical1.txtStart.getText());
+                        String[] parts = ((String) panelBarStatistical1.cboT.getSelectedItem()).split(" ");
+                        int month = 1;
+                        if (parts.length > 1) {
+                            month = Integer.parseInt(parts[1]);
+                        }
+                        cellBa.setCellValue("THỐNG KÊ DOANH THU THÁNG " + month + " NĂM " + (Integer) panelBarStatistical1.ycNam.getValue());
+                        LocalDate firstDayOfMonth = LocalDate.of((Integer) (Integer) panelBarStatistical1.ycT.getValue(), month, 1);
+                        inf = orderDAO.getOverviewStatistical(
+                                firstDayOfMonth,
+                                firstDayOfMonth.withDayOfMonth(firstDayOfMonth.lengthOfMonth())
+                        );
+                        listMD = orderDAO.getModelDataRSByYearByMonth(month, (Integer) (Integer) panelBarStatistical1.ycT.getValue());
+                        break;
+                    case "Tùy chỉnh":
+                        sheet = workbook.getSheetAt(0);
+                        Row rowtc = sheet.getRow(0);
+                        if (rowtc == null) row1 = sheet.createRow(0);
+                        Cell cellBtc = rowtc.getCell(1);
+                        if (cellBtc == null) cellBtc = rowtc.createCell(1);
+                        cellBtc.setCellValue("THỐNG KÊ DOANH THU TỪ  " + panelBarStatistical1.txtStart.getText() + " ĐẾN " + panelBarStatistical1.txtStart.getText());
 
-                            inf =orderDAO.getOverviewStatistical(
-                                    convertStringToLocalDate(panelBarStatistical1.txtStart.getText()),
-                                    convertStringToLocalDate(panelBarStatistical1.txtEnd.getText())
-                            );
+                        inf =orderDAO.getOverviewStatistical(
+                                convertStringToLocalDate(panelBarStatistical1.txtStart.getText()),
+                                convertStringToLocalDate(panelBarStatistical1.txtEnd.getText())
+                        );
 //                            listMD = orderDAO.getModelDataRSByYearByTime(convertDateFormat(panelBarStatistical1.txtStart.getText()), convertDateFormat(panelBarStatistical1.txtEnd.getText()));
-                            break;
+                        break;
+                }
+
+                Row row2 = sheet.getRow(2);
+                if (row2 == null) row2 = sheet.createRow(2);
+                Cell cellB2 = row2.getCell(3);
+                if (cellB2 == null) cellB2 = row2.createCell(3);
+                cellB2.setCellValue(inf.get(0).intValue());
+
+                Row row3 = sheet.getRow(3);
+                if (row3 == null) row3 = sheet.createRow(3);
+                Cell cellB3 = row3.getCell(3); // Cột D
+                if (cellB3 == null) cellB3 = row3.createCell(3);
+                cellB3.setCellValue(inf.get(2).intValue());
+
+                Row row4 = sheet.getRow(4);
+                if (row4 == null) row4 = sheet.createRow(4);
+                Cell cellB4 = row4.getCell(3); // Cột C
+                if (cellB4 == null) cellB4 = row4.createCell(3);
+                cellB4.setCellValue(inf.get(1));
+
+                int startRow = 7;
+
+                for (int i = listMD.size() - 1; i >= 0; i--) {
+                    ModelDataRS d = listMD.get(i);
+                    Row row = sheet.getRow(startRow);
+                    if (row == null) {
+                        row = sheet.createRow(startRow);
                     }
-                    
-                    Row row2 = sheet.getRow(2);
-                    if (row2 == null) row2 = sheet.createRow(2);
-                    Cell cellB2 = row2.getCell(3);
-                    if (cellB2 == null) cellB2 = row2.createCell(3);
-                    cellB2.setCellValue(inf.get(0).intValue());
 
-                    Row row3 = sheet.getRow(3);
-                    if (row3 == null) row3 = sheet.createRow(3);
-                    Cell cellB3 = row3.getCell(3); // Cột D
-                    if (cellB3 == null) cellB3 = row3.createCell(3);
-                    cellB3.setCellValue(inf.get(2).intValue());
+                    Cell cellA = row.getCell(1);
+                    if (cellA == null) {
+                        cellA = row.createCell(1);
+                    }
+                    cellA.setCellValue(d.getMonth());
 
-                    Row row4 = sheet.getRow(4);
-                    if (row4 == null) row4 = sheet.createRow(4);
-                    Cell cellB4 = row4.getCell(3); // Cột C
-                    if (cellB4 == null) cellB4 = row4.createCell(3);
-                    cellB4.setCellValue(inf.get(1));
+                    Cell cellB = row.getCell(2);
+                    if (cellB == null) {
+                        cellB = row.createCell(2);
+                    }
+                    cellB.setCellValue(d.getAll());
 
-                    int startRow = 7;
+                    Cell cellC = row.getCell(3);
+                    if (cellC == null) {
+                        cellC = row.createCell(3);
+                    }
+                    cellC.setCellValue(d.getRevenueMedicine());
 
-                    for (int i = listMD.size() - 1; i >= 0; i--) {
-                        ModelDataRS d = listMD.get(i);
-                        Row row = sheet.getRow(startRow);
-                        if (row == null) {
-                            row = sheet.createRow(startRow);
-                        }
+                    Cell cellD = row.getCell(4);
+                    if (cellD == null) {
+                        cellD = row.createCell(4);
+                    }
+                    cellD.setCellValue(d.getRevenueMedicalS());
 
-                        Cell cellA = row.getCell(1);
-                        if (cellA == null) {
-                            cellA = row.createCell(1);
-                        }
-                        cellA.setCellValue(d.getMonth());
+                    Cell cellE = row.getCell(5);
+                    if (cellE == null) {
+                        cellE = row.createCell(5);
+                    }
+                    cellE.setCellValue(d.getRevenueFunctionalFood());
 
-                        Cell cellB = row.getCell(2);
-                        if (cellB == null) {
-                            cellB = row.createCell(2);
-                        }
-                        cellB.setCellValue(d.getAll());
-
-                        Cell cellC = row.getCell(3);
-                        if (cellC == null) {
-                            cellC = row.createCell(3);
-                        }
-                        cellC.setCellValue(d.getRevenueMedicine());
-
-                        Cell cellD = row.getCell(4);
-                        if (cellD == null) {
-                            cellD = row.createCell(4);
-                        }
-                        cellD.setCellValue(d.getRevenueMedicalS());
-
-                        Cell cellE = row.getCell(5);
-                        if (cellE == null) {
-                            cellE = row.createCell(5);
-                        }
-                        cellE.setCellValue(d.getRevenueFunctionalFood());
-
-                        startRow++;
+                    startRow++;
                 }
 
                 try (FileOutputStream fileOut = new FileOutputStream(path)) {
@@ -611,6 +616,8 @@ public class RevenueStatistic extends JPanel implements ActionListener {
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(null, "Lỗi khi mở file mẫu.", "Lỗi", JOptionPane.ERROR_MESSAGE);
                 e.printStackTrace();
+            } catch (NotBoundException e) {
+                throw new RuntimeException(e);
             }
         } else {
             JOptionPane.showMessageDialog(null, "Thao tác xuất báo cáo đã bị hủy");
@@ -651,21 +658,50 @@ public class RevenueStatistic extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         Object source = e.getSource();
-        OrderDAO orderDAO = new OrderDAO(Order.class);
+        OrderService orderDAO = null;
+        try {
+            orderDAO = (OrderService) Naming.lookup("rmi://localhost:7281/orderService");
+        } catch (NotBoundException ex) {
+            throw new RuntimeException(ex);
+        } catch (MalformedURLException ex) {
+            throw new RuntimeException(ex);
+        } catch (RemoteException ex) {
+            throw new RuntimeException(ex);
+        }
         if (source.equals(panelBarStatistical1.btnSelectStart)) {
             dcStart.showPopup();
         } else if (source.equals(panelBarStatistical1.btnSelectEnd)) {
             dcEnd.showPopup();
         }
         if (source.equals(btnLamMoi)) {
-            setPgs();
+            try {
+                setPgs();
+            } catch (MalformedURLException ex) {
+                throw new RuntimeException(ex);
+            } catch (NotBoundException ex) {
+                throw new RuntimeException(ex);
+            } catch (RemoteException ex) {
+                throw new RuntimeException(ex);
+            }
             String loaiThongKe = (String) cboThongKeTheo.getSelectedItem();
             switch (loaiThongKe) {
                 case "Năm":
                     setNameLineChart("BIỂU ĐỒ ĐƯỜNG THỂ HIỆN DOANH THU NĂM " + (Integer) panelBarStatistical1.ycNam.getValue());
-                    setOverView(LocalDate.of((Integer) panelBarStatistical1.ycNam.getValue(), 1, 1), LocalDate.of((Integer) panelBarStatistical1.ycNam.getValue(), 12, 31));
+                    try {
+                        setOverView(LocalDate.of((Integer) panelBarStatistical1.ycNam.getValue(), 1, 1), LocalDate.of((Integer) panelBarStatistical1.ycNam.getValue(), 12, 31));
+                    } catch (MalformedURLException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (NotBoundException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (RemoteException ex) {
+                        throw new RuntimeException(ex);
+                    }
                     curveLineChart1.clear();
-                    setDataLineChart(orderDAO.getModelDataRSByYear((Integer) panelBarStatistical1.ycNam.getValue()));
+                    try {
+                        setDataLineChart(orderDAO.getModelDataRSByYear((Integer) panelBarStatistical1.ycNam.getValue()));
+                    } catch (RemoteException ex) {
+                        throw new RuntimeException(ex);
+                    }
                     break;
                 case "Tháng":
                     curveLineChart1.clear();
@@ -675,16 +711,36 @@ public class RevenueStatistic extends JPanel implements ActionListener {
                         month = Integer.parseInt(parts[1]);
                     }
                     LocalDate firstDayOfMonth = LocalDate.of((Integer) panelBarStatistical1.ycT.getValue(), month, 1);
-                    setOverView(firstDayOfMonth , firstDayOfMonth.withDayOfMonth(firstDayOfMonth.lengthOfMonth()));
+                    try {
+                        setOverView(firstDayOfMonth , firstDayOfMonth.withDayOfMonth(firstDayOfMonth.lengthOfMonth()));
+                    } catch (MalformedURLException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (NotBoundException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (RemoteException ex) {
+                        throw new RuntimeException(ex);
+                    }
                     setNameLineChart("BIỂU ĐỒ ĐƯỜNG THỂ HIỆN DOANH THU THÁNG " + month + " NĂM " + (Integer) panelBarStatistical1.ycT.getValue());
-                    setDataLineChart(orderDAO.getModelDataRSByYearByMonth(month, (Integer) panelBarStatistical1.ycT.getValue()));
+                    try {
+                        setDataLineChart(orderDAO.getModelDataRSByYearByMonth(month, (Integer) panelBarStatistical1.ycT.getValue()));
+                    } catch (RemoteException ex) {
+                        throw new RuntimeException(ex);
+                    }
                     break;
                 case "Tùy chỉnh":
                     String start = panelBarStatistical1.txtStart.getText();
                     String end = panelBarStatistical1.txtEnd.getText();
                     curveLineChart1.clear();
                     if(checkSelect(start, end)){
-                        setOverView(convertStringToLocalDate(start), convertStringToLocalDate(end));
+                        try {
+                            setOverView(convertStringToLocalDate(start), convertStringToLocalDate(end));
+                        } catch (MalformedURLException ex) {
+                            throw new RuntimeException(ex);
+                        } catch (NotBoundException ex) {
+                            throw new RuntimeException(ex);
+                        } catch (RemoteException ex) {
+                            throw new RuntimeException(ex);
+                        }
                         curveLineChart1.clear();
                         setNameLineChart("BIỂU ĐỒ ĐƯỜNG THỂ HIỆN DOANH THU TỪ " + convertDateFormat(start) + " ĐẾN " + convertDateFormat(end));
 //                        setDataLineChart(orderDAO.getModelDataRSByYearByTime(convertDateFormat(start), convertDateFormat(end)));
@@ -734,12 +790,11 @@ public class RevenueStatistic extends JPanel implements ActionListener {
         }
     }
 
-    public void setOverView(LocalDate startD, LocalDate endD){
-        //TODO: Bên entity là kiểu LocalDateTime
-//        ArrayList<Double> inf = new OrderDAO(Order.class).getOverviewStatistical(startD, endD);
-//        lbCreatedNumber.setText(inf.get(0).intValue() + "");
-//        lbSoldNumber.setText(inf.get(2).intValue() + "");
-//        lbNumberRevenue.setText( formatCurrency(inf.get(1)));
+    public void setOverView(LocalDate startD, LocalDate endD) throws MalformedURLException, NotBoundException, RemoteException {
+        ArrayList<Double> inf = ((OrderService)Naming.lookup("rmi://localhost:7281/orderService")).getOverviewStatistical(startD, endD);
+        lbCreatedNumber.setText(inf.get(0).intValue() + "");
+        lbSoldNumber.setText(inf.get(2).intValue() + "");
+        lbNumberRevenue.setText( formatCurrency(inf.get(1)));
     }
 
     //Chuyển định dạng tiền
@@ -758,10 +813,10 @@ public class RevenueStatistic extends JPanel implements ActionListener {
     }
 
     //Set biểu đồ tròn tỷ lệ
-    public void setPgs(){
-        OrderDAO orderDAO = new OrderDAO(Order.class);
+    public void setPgs() throws MalformedURLException, NotBoundException, RemoteException {
+        OrderService orderDAO = (OrderService) Naming.lookup("rmi://localhost:7281/orderService");
         pgsSanPhamBan.setValue((int) Math.round(orderDAO.getTotalProductsSold()));
-//        pgsThuNhapBan.setValue((int) Math.round(orderDAO.getRevenueSoldPercentage()));
+        pgsThuNhapBan.setValue((int) Math.round(orderDAO.getRevenueSoldPercentage()));
         pgsLoiNhuan.setValue((int) Math.round(orderDAO.getProfit()));
 
         pgsSanPhamBan.start();
