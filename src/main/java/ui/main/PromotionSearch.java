@@ -4,11 +4,11 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
-import dao.PromotionDAO;
-import dao.PromotionTypeDAO;
 
 import model.Promotion;
 import model.PromotionType;
+import service.PromotionService;
+import service.PromotionTypeService;
 import ui.button.Button;
 import ui.combobox.Combobox;
 import ui.panel.PanelRound;
@@ -20,14 +20,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 public class PromotionSearch extends JPanel{
+    PromotionService promotionService = (PromotionService) Naming.lookup("rmi://localhost:7281/promotionService");
+    PromotionTypeService promotionTypeService = (PromotionTypeService) Naming.lookup("rmi://localhost:7281/promotionTypeService");
     
-    public PromotionSearch() {
+    public PromotionSearch() throws MalformedURLException, NotBoundException, RemoteException {
         initComponents();
-        promotionType_dao = new PromotionTypeDAO(PromotionType.class);
-        promotion_dao = new PromotionDAO(Promotion.class);
         setupTable();
         TableCustom.apply(scrollPane, TableCustom.TableType.MULTI_LINE);
         loadCbb();
@@ -35,13 +39,21 @@ public class PromotionSearch extends JPanel{
         cbbPromoType.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                searchPromotion();
+                try {
+                    searchPromotion();
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         });
         cbbStatus.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                searchPromotion();
+                try {
+                    searchPromotion();
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         });
         txtSearch.addKeyListener(new KeyListener() {
@@ -56,7 +68,11 @@ public class PromotionSearch extends JPanel{
 
             @Override
             public void keyReleased(KeyEvent e) {
-                searchPromotion();
+                try {
+                    searchPromotion();
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         });
     }
@@ -67,9 +83,9 @@ public class PromotionSearch extends JPanel{
         tableKhuyenMai.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
     }
 
-    private void loadCbb(){
+    private void loadCbb() throws RemoteException {
         ArrayList<PromotionType> listPromotionType = new ArrayList<>();
-        listPromotionType = (ArrayList<PromotionType>) promotionType_dao.getAll();
+        listPromotionType = (ArrayList<PromotionType>) promotionTypeService.getAll();
         for( PromotionType promotionType : listPromotionType){
             cbbPromoType.addItem(promotionType.getPromotionTypeName());
         }
@@ -90,7 +106,7 @@ public class PromotionSearch extends JPanel{
         }
     }
 
-    private void searchPromotion() {
+    private void searchPromotion() throws RemoteException {
         // Xóa bảng hiện tại và thêm dữ liệu tìm kiếm
         DefaultTableModel model = (DefaultTableModel) tableKhuyenMai.getModel();
         model.setRowCount(0); // Xóa các dòng hiện tại
@@ -102,7 +118,7 @@ public class PromotionSearch extends JPanel{
 
         // Nếu tất cả đều rỗng
         if ((type == null || type.isEmpty()) && (stt == null || stt.isEmpty()) && search.isEmpty()) {
-            listPromotions = (ArrayList<Promotion>) promotion_dao.getAll(); // Lấy tất cả khuyến mãi
+            listPromotions = (ArrayList<Promotion>) promotionService.getAll(); // Lấy tất cả khuyến mãi
         }
         //  Nếu chỉ có `type` không rỗng
         else if (type != null && !type.isEmpty() && (stt == null || stt.isEmpty()) && search.isEmpty()) {
@@ -110,7 +126,7 @@ public class PromotionSearch extends JPanel{
         }
         // Nếu chỉ có `stt` không rỗng
         else if ((type == null || type.isEmpty()) && stt != null && !stt.isEmpty() && search.isEmpty()) {
-            listPromotions = (ArrayList<Promotion>) promotion_dao.getAll(); // Lấy tất cả khuyến mãi, sau đó lọc theo trạng thái
+            listPromotions = (ArrayList<Promotion>) promotionService.getAll(); // Lấy tất cả khuyến mãi, sau đó lọc theo trạng thái
             boolean status = stt.equals("Đang áp dụng");
             ArrayList<Promotion> listPromotionsByStatus = new ArrayList<>();
             for (Promotion promotion : listPromotions) {
@@ -122,7 +138,7 @@ public class PromotionSearch extends JPanel{
         }
         // Nếu chỉ có `search` không rỗng
         else if ((type == null || type.isEmpty()) && (stt == null || stt.isEmpty()) && !search.isEmpty()) {
-            listPromotions = (ArrayList<Promotion>) promotion_dao.getAll(); // Lấy tất cả khuyến mãi, sau đó lọc theo từ khóa
+            listPromotions = (ArrayList<Promotion>) promotionService.getAll(); // Lấy tất cả khuyến mãi, sau đó lọc theo từ khóa
             ArrayList<Promotion> listPromotionsBySearch = new ArrayList<>();
             for (Promotion promotion : listPromotions) {
                 if (promotion.getPromotionId().toLowerCase().contains(search.toLowerCase()) ||
@@ -158,7 +174,7 @@ public class PromotionSearch extends JPanel{
         }
         // Nếu `stt` và `search` không rỗng, `type` rỗng
         else if ((type == null || type.isEmpty()) && stt != null && !stt.isEmpty() && !search.isEmpty()) {
-            listPromotions = (ArrayList<Promotion>) promotion_dao.getAll(); // Lấy tất cả khuyến mãi
+            listPromotions = (ArrayList<Promotion>) promotionService.getAll(); // Lấy tất cả khuyến mãi
             boolean status = stt.equals("Đang áp dụng");
             ArrayList<Promotion> listPromotionsByStatus = new ArrayList<>();
             for (Promotion promotion : listPromotions) {
@@ -356,7 +372,5 @@ public class PromotionSearch extends JPanel{
     private JScrollPane scrollPane;
     private JTable tableKhuyenMai;
     private TextField txtSearch;
-    private PromotionTypeDAO promotionType_dao;
-    private PromotionDAO promotion_dao;
     // End of variables declaration//GEN-END:variables
 }

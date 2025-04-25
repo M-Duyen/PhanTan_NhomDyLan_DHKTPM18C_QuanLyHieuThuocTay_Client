@@ -1,10 +1,11 @@
 package ui.main;
 
-import dao.PromotionTypeDAO;
-import dao.PromotionDAO;
+
 
 import model.Promotion;
 import model.PromotionType;
+import service.PromotionService;
+import service.PromotionTypeService;
 import staticProcess.StaticProcess;
 import ui.button.Button;
 import ui.combo_suggestion.ComboBoxSuggestion;
@@ -21,13 +22,19 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class AddPromotion extends JPanel {
 
-    public AddPromotion() {
+    PromotionService promotionService = (PromotionService) Naming.lookup("rmi://localhost:7281/promotionService");
+    PromotionTypeService promotionTypeService = (PromotionTypeService) Naming.lookup("rmi://localhost:7281/promotionTypeService");
+    public AddPromotion() throws MalformedURLException, NotBoundException, RemoteException {
         initComponents();
 
         TableCustom.apply(scrollPane, TableCustom.TableType.MULTI_LINE);
@@ -264,7 +271,11 @@ public class AddPromotion extends JPanel {
         cboLoaiKhuyenMai.setSelectedIndex(-1);
         cboLoaiKhuyenMai.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                cboLoaiKhuyenMaiActionPerformed(evt);
+                try {
+                    cboLoaiKhuyenMaiActionPerformed(evt);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -277,11 +288,19 @@ public class AddPromotion extends JPanel {
         cboTinhTrang.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                promotion_dao.updatePromotionStatus();
+                try {
+                    promotionService.updatePromotionStatus();
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
                 Object selectedType = cboLoaiKhuyenMai.getSelectedItem();
                 Object selectedStatus = cboTinhTrang.getSelectedItem();
 
-                searchPromotion(selectedType, selectedStatus);
+                try {
+                    searchPromotion(selectedType, selectedStatus);
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         });
 
@@ -329,12 +348,12 @@ public class AddPromotion extends JPanel {
             String endDate = txtNgayKetThuc.getText();
             double per = Double.parseDouble(txtPer.getText());
 
-            ArrayList<PromotionType> promotionTypeList = (ArrayList<PromotionType>) promotionType_dao.searchByMultipleCriteria("PromotionType",cboProType_Left.getSelectedItem().toString());
+            ArrayList<PromotionType> promotionTypeList = (ArrayList<PromotionType>) promotionTypeService.searchByMultipleCriteria("PromotionType",cboProType_Left.getSelectedItem().toString());
 
             PromotionType promotionType = promotionTypeList.getFirst();
 
             Promotion promotion = new Promotion();
-            promotion.setPromotionId(promotion_dao.createPromotionID(convertDateFormat_createID(startDate), convertDateFormat_createID(endDate)));
+            promotion.setPromotionId(promotionService.createPromotionID(convertDateFormat_createID(startDate), convertDateFormat_createID(endDate)));
             promotion.setPromotionName(name);
             promotion.setStartDate(convertDateFormat(startDate));
             promotion.setEndDate(convertDateFormat(endDate));
@@ -342,7 +361,7 @@ public class AddPromotion extends JPanel {
             promotion.setStats(true);
             promotion.setPromotionType(promotionType);
 
-            if (promotion_dao.create(promotion)) {
+            if (promotionService.create(promotion)) {
                 new Message(StaticProcess.homePage, true, "Thông báo", "Thêm khuyến mãi thành công", "src/main/java/ui/dialog/checked.png").showAlert();
 
             } else {
@@ -351,6 +370,8 @@ public class AddPromotion extends JPanel {
             }
         } catch (NumberFormatException e) {
             new Message(StaticProcess.homePage, true, "Thông báo", "Vui lòng nhập phần trăm giảm giá hợp lệ.", "src/main/java/ui/dialog/warning.png").showAlert();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -359,7 +380,7 @@ public class AddPromotion extends JPanel {
         startDate.showPopup();
     }
 
-    private void cboLoaiKhuyenMaiActionPerformed(ActionEvent evt) {
+    private void cboLoaiKhuyenMaiActionPerformed(ActionEvent evt) throws RemoteException {
         Object selectedType = cboLoaiKhuyenMai.getSelectedItem();
         Object selectedStatus = cboTinhTrang.getSelectedItem();
 
@@ -394,51 +415,51 @@ public class AddPromotion extends JPanel {
         return date;
     }
 
-    private void loadCbb() {
-        ArrayList<PromotionType> listPromotionType = (ArrayList<PromotionType>) promotionType_dao.getAll();
+    private void loadCbb() throws RemoteException {
+        ArrayList<PromotionType> listPromotionType = (ArrayList<PromotionType>) promotionTypeService.getAll();
         for (PromotionType promotionType : listPromotionType) {
             cboLoaiKhuyenMai.addItem(promotionType.getPromotionTypeName());
         }
     }
 
-    private void loadCbbType_Right() {
-        ArrayList<PromotionType> listPromotionType = (ArrayList<PromotionType>) promotionType_dao.getAll();
+    private void loadCbbType_Right() throws RemoteException {
+        ArrayList<PromotionType> listPromotionType = (ArrayList<PromotionType>) promotionTypeService.getAll();
         for (PromotionType promotionType : listPromotionType) {
             cboProType_Left.addItem(promotionType.getPromotionTypeName());
         }
     }
 
-    private void searchPromotion(Object cri_type, Object crt_sta) {
+    private void searchPromotion(Object cri_type, Object crt_sta) throws RemoteException {
 
         ArrayList<Promotion> promotionList = new ArrayList<>();
 
         if (cri_type == null && crt_sta != null) {
             if (crt_sta.equals("Đang áp dụng")) {
-                promotionList = promotion_dao.getPromotionListByStatus(true);
+                promotionList = promotionService.getPromotionListByStatus(true);
 
             } else if (crt_sta.equals("Ngừng áp dụng")) {
-                promotionList = promotion_dao.getPromotionListByStatus(false);
+                promotionList = promotionService.getPromotionListByStatus(false);
 
             } else if (crt_sta.equals("")) {
-                promotionList = (ArrayList<Promotion>) promotion_dao.searchByMultipleCriteria("Promotion","");
+                promotionList = (ArrayList<Promotion>) promotionService.searchByMultipleCriteria("Promotion","");
 
             }
 
 
         } else if (cri_type != null && crt_sta == null) {
-            promotionList = (ArrayList<Promotion>) promotion_dao.searchByMultipleCriteria("Promotion",cri_type.toString());
+            promotionList = (ArrayList<Promotion>) promotionService.searchByMultipleCriteria("Promotion",cri_type.toString());
 
         } else if (cri_type != null && crt_sta != null) {
-            ArrayList<Promotion> proList_1 = (ArrayList<Promotion>) promotion_dao.searchByMultipleCriteria("Promotion",cri_type.toString());
+            ArrayList<Promotion> proList_1 = (ArrayList<Promotion>) promotionService.searchByMultipleCriteria("Promotion",cri_type.toString());
             if (crt_sta.equals("Đang áp dụng")) {
-                promotionList = promotion_dao.getPromotionListByCriterous(true, proList_1);
+                promotionList = promotionService.getPromotionListByCriterous(true, proList_1);
 
 
             } else if (crt_sta.equals("Ngừng áp dụng")) {
-                promotionList = promotion_dao.getPromotionListByCriterous(false, proList_1);
+                promotionList = promotionService.getPromotionListByCriterous(false, proList_1);
 
             } else if (crt_sta.equals("")) {
-                promotionList = (ArrayList<Promotion>) promotion_dao.searchByMultipleCriteria("Promotion",cri_type.toString());
+                promotionList = (ArrayList<Promotion>) promotionService.searchByMultipleCriteria("Promotion",cri_type.toString());
 
             }
 
@@ -483,7 +504,5 @@ public class AddPromotion extends JPanel {
     private TextField txtNgayBatDau;
     private TextField txtNgayKetThuc;
     private TextField txtPer;
-    private PromotionTypeDAO promotionType_dao = new PromotionTypeDAO(PromotionType.class);
-    private PromotionDAO promotion_dao = new PromotionDAO(Promotion.class);
     // End of variables declaration
 }

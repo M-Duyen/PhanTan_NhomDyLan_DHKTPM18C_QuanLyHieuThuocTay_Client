@@ -3,9 +3,11 @@ package ui.main;
 import model.BarcodeGenerator;
 import model.Order;
 
-import dao.*;
 import model.OrderDetail;
 import model.Product;
+import service.OrderDetailService;
+import service.OrderService;
+import service.ProductService;
 import staticProcess.StaticProcess;
 import ui.dialog.Confirm;
 import ui.dialog.Message;
@@ -24,6 +26,10 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
@@ -33,6 +39,10 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 public class ProcessOrder extends JFrame implements ActionListener {
+
+    OrderService orderService = (OrderService) Naming.lookup("rmi://localhost:7281/orderService");
+    OrderDetailService orderDetailService = (OrderDetailService) Naming.lookup("rmi://localhost:7281/orderDetailService");
+    ProductService productService = (ProductService) Naming.lookup("rmi://localhost:7281/productService");
     private Order orderTemp = new Order();
     private ArrayList<OrderDetail> orderDetailsTemp = new ArrayList<>();
     private ArrayList<OrderDetail> listOrderConfirm = new ArrayList<>();
@@ -42,7 +52,7 @@ public class ProcessOrder extends JFrame implements ActionListener {
     /**
      * Creates new form frmProcessOrder
      */
-    public ProcessOrder() {
+    public ProcessOrder() throws MalformedURLException, NotBoundException, RemoteException {
         initComponents();
         panelProcess1.pnlHoanTien.setVisible(false);
         panelProcess1.pnlDoiSanPham.setVisible(false);
@@ -656,7 +666,15 @@ public class ProcessOrder extends JFrame implements ActionListener {
         /* Create and display the form */
         EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new ProcessOrder().setVisible(true);
+                try {
+                    new ProcessOrder().setVisible(true);
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException(e);
+                } catch (NotBoundException e) {
+                    throw new RuntimeException(e);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
     }
@@ -704,15 +722,16 @@ public class ProcessOrder extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        OrderDAO orderDAO = new OrderDAO(Order.class);
-        OrderDetailDAO orderDetailDAO = new OrderDetailDAO(OrderDetail.class);
-        ProductDAO productDAO = new ProductDAO(Product.class);
         Object o = e.getSource();
         if(o.equals(btnSearch)){
             if(txtSearch.getText().trim().equals("")){
                 new Message(StaticProcess.homePage, true, "Thông báo", "Vui lòng nhập mã hóa đơn đổi trả", "src/main/java/ui/dialog/warning.png").showAlert();
             }else{
-                orderTemp = orderDAO.findById(txtSearch.getText());
+                try {
+                    orderTemp = orderService.findById(txtSearch.getText());
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
                 if(orderTemp.getCustomer().getCustomerID() == null){
                     new Message(StaticProcess.homePage, true, "Thông báo", "Hóa đơn khách vãng lai, không được đổi trả theo quy định!", "src/main/java/ui/dialog/warning.png").showAlert();
                 }
@@ -725,12 +744,16 @@ public class ProcessOrder extends JFrame implements ActionListener {
                         throw new RuntimeException(ex);
                     }
 
-                    if(orderDAO.orderIsExists(convertOrderID(orderTemp.getOrderID()))){
-                        new Message(StaticProcess.homePage, true, "Thông báo", "Hóa đơn này đã được đổi trả, vui lòng kiểm tra lại", "src/main/java/ui/dialog/warning.png").showAlert();
-                    }else{
-//                        orderDetailsTemp =orderDetailDAO.getOrderDetailList(orderTemp.getOrderID());
-//                        fillInfo(orderTemp);
-//                        loadTableCTHD(tblCTHD, orderDetailsTemp);
+                    try {
+                        if(orderService.orderIsExists(convertOrderID(orderTemp.getOrderID()))){
+                            new Message(StaticProcess.homePage, true, "Thông báo", "Hóa đơn này đã được đổi trả, vui lòng kiểm tra lại", "src/main/java/ui/dialog/warning.png").showAlert();
+                        }else{
+    //                        orderDetailsTemp =orderDetailDAO.getOrderDetailList(orderTemp.getOrderID());
+    //                        fillInfo(orderTemp);
+    //                        loadTableCTHD(tblCTHD, orderDetailsTemp);
+                        }
+                    } catch (RemoteException ex) {
+                        throw new RuntimeException(ex);
                     }
                 }
             }
@@ -765,7 +788,12 @@ public class ProcessOrder extends JFrame implements ActionListener {
         //XỬ lý đổi trả sản phẩm
         if(o.equals(panelProcess1.btnDThem)){
             if(checkData()){
-                Product prod = productDAO.findById(convertBarcodeToProductID(panelProcess1.txtDThem.getText()));
+                Product prod = null;
+                try {
+                    prod = productService.findById(convertBarcodeToProductID(panelProcess1.txtDThem.getText()));
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
                 if(prod != null){
                     ProductConfirm pCf = new ProductConfirm(StaticProcess.homePage, prod, true);
                     pCf.showAlert();

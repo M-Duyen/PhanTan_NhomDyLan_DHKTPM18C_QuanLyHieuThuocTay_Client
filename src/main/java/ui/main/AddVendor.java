@@ -1,8 +1,8 @@
 package ui.main;
 
-import dao.VendorDAO;
-import staticProcess.StaticProcess;
 import model.Vendor;
+import service.VendorService;
+import staticProcess.StaticProcess;
 import ui.dialog.Message;
 import ui.table.TableCustom;
 
@@ -11,15 +11,17 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.SQLException;
-import java.util.ArrayList;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.List;
 
 public class AddVendor extends JPanel implements ActionListener {
-
-    public AddVendor() {
+    VendorService vendorService = (VendorService)  Naming.lookup("rmi://localhost:7281/vendorService");
+    public AddVendor() throws MalformedURLException, NotBoundException, RemoteException {
         initComponents();
-        vendor_dao = new VendorDAO(model.Vendor.class);
+
         JTableHeader theader = tableVendor.getTableHeader();
         theader.setFont(new java.awt.Font("Segoe UI", 0, 18));
 
@@ -27,7 +29,7 @@ public class AddVendor extends JPanel implements ActionListener {
         TableCustom.apply(scrollPane_tableVendor, TableCustom.TableType.MULTI_LINE);
         btnAdd.addActionListener(this);
 
-        List<Vendor> list = vendor_dao.getAll();
+        List<Vendor> list = vendorService.getAll();
         loadTable(list);
     }
 
@@ -196,7 +198,6 @@ public class AddVendor extends JPanel implements ActionListener {
     private JScrollPane scrollPane_tableVendor;
     private JTable tableVendor;
     private ui.textfield.TextField txtVendorName;
-    private VendorDAO vendor_dao;
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -208,7 +209,7 @@ public class AddVendor extends JPanel implements ActionListener {
                 String country = (String) cbCountry.getSelectedItem();
                 String vendorid = null;
                 try {
-                    vendorid = vendor_dao.createVendorID(country);
+                    vendorid = vendorService.createVendorID(country);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -216,19 +217,19 @@ public class AddVendor extends JPanel implements ActionListener {
                 vd.setVendorID(vendorid);
                 vd.setVendorName(vendorName);
                 vd.setCountry(country);
-                if (vendor_dao.create(vd)) {
-                    Object[] row = {
-                            vendorid,
-                            vendorName,
-                            country};
-                    model.addRow(row);
+                try {
+                    if (vendorService.create(vd)) {
+                        Object[] row = {
+                                vendorid,
+                                vendorName,
+                                country};
+                        model.addRow(row);
 
+                    }
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
                 }
-
-
             }
-
-
         }
     }
 

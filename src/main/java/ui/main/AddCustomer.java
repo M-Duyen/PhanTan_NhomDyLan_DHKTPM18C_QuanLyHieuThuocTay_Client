@@ -1,8 +1,9 @@
 package ui.main;
 
-import dao.CustomerDAO;
+
 import model.Customer;
 
+import service.CustomerService;
 import staticProcess.StaticProcess;
 import ui.dialog.Message;
 import ui.table.TableCustom;
@@ -14,16 +15,19 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class AddCustomer extends JPanel implements ActionListener, MouseListener {
-
-    public AddCustomer() {
+    CustomerService customerService = (CustomerService) Naming.lookup("rmi://localhost:7281/customerService");
+    public AddCustomer() throws MalformedURLException, NotBoundException, RemoteException {
         initComponents();
-        customer_dao = new CustomerDAO(Customer.class);
         customer =new Customer();
         setupTable();
 //        testData(tableCustomer);
@@ -332,7 +336,6 @@ public class AddCustomer extends JPanel implements ActionListener, MouseListener
     private ui.textfield.TextField txtBirthDate;
     private ui.textfield.TextField txtCustName;
     private ui.textfield.TextField txtPhoneNumber;
-    private final CustomerDAO customer_dao;
     private final Customer customer;
     private DefaultTableModel model;
 
@@ -385,8 +388,8 @@ public class AddCustomer extends JPanel implements ActionListener, MouseListener
         return true;
     }
 
-    private void loadTable(){
-        ArrayList<Customer> customerList = (ArrayList<Customer>) customer_dao.getAll();
+    private void loadTable() throws RemoteException {
+        ArrayList<Customer> customerList = (ArrayList<Customer>) customerService.getAll();
         DefaultTableModel model = (DefaultTableModel) tableCustomer.getModel();
         for (Customer customer : customerList) {
             model.addRow(new Object[]{
@@ -421,11 +424,15 @@ public class AddCustomer extends JPanel implements ActionListener, MouseListener
                 // Kiểm tra số điện thoại
                 if (!txtPhoneNumber.getText().isEmpty()) {
                     String sdt = txtPhoneNumber.getText().trim();
-                    if (customer_dao.checkPhoneNumber(sdt)) {
-                        new Message(StaticProcess.homePage, true, "Thông báo", "Số điện thoại đã được sử dụng!!!", "src/main/java/ui/dialog/warning.png").showAlert();
+                    try {
+                        if (customerService.checkPhoneNumber(sdt)) {
+                            new Message(StaticProcess.homePage, true, "Thông báo", "Số điện thoại đã được sử dụng!!!", "src/main/java/ui/dialog/warning.png").showAlert();
 
-                        txtPhoneNumber.requestFocus();
-                        return;
+                            txtPhoneNumber.requestFocus();
+                            return;
+                        }
+                    } catch (RemoteException ex) {
+                        throw new RuntimeException(ex);
                     }
                 }
                 String name = txtCustName.getText().trim();
@@ -435,7 +442,12 @@ public class AddCustomer extends JPanel implements ActionListener, MouseListener
                 LocalDate date = LocalDate.parse(txtBirthDate.getText().trim(),formatter);
                 String mail = txtEmail.getText().trim();
                 String add = txtAddress.getText().trim();
-                String id = customer_dao.createCustomerID();
+                String id = null;
+                try {
+                    id = customerService.createCustomerID();
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
                 Customer c = new Customer();
                 c.setCustomerID(id);
                 c.setPhoneNumber(phone);
@@ -444,9 +456,13 @@ public class AddCustomer extends JPanel implements ActionListener, MouseListener
                 c.setGender(sex);
                 c.setAddr(add);
                 c.setBrithDate(date);
-                if(customer_dao.create(c)){
-                        Object[] row = {id, name, phone, sex?"Nam":"Nữ", date, mail,customer.getPoint(), add};
-                    model.addRow(row);
+                try {
+                    if(customerService.create(c)){
+                            Object[] row = {id, name, phone, sex?"Nam":"Nữ", date, mail,customer.getPoint(), add};
+                        model.addRow(row);
+                    }
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
                 }
             }
         } else if (obj.equals(btnRefresh)) {
@@ -473,16 +489,20 @@ public class AddCustomer extends JPanel implements ActionListener, MouseListener
                     c.setGender(false? true: false);
                     c.setAddr(add);
                     c.setBrithDate(date);
-                    if (customer_dao.update(c)) {
-                        new Message(StaticProcess.homePage, true, "Thông báo", "Cập nhật khách hàng thành công !!!", "src/main/java/ui/dialog/checked.png").showAlert();
+                    try {
+                        if (customerService.update(c)) {
+                            new Message(StaticProcess.homePage, true, "Thông báo", "Cập nhật khách hàng thành công !!!", "src/main/java/ui/dialog/checked.png").showAlert();
 
-                        model.setValueAt(c.getCustomerName(),row, 1);
-                        model.setValueAt(c.getPhoneNumber(),row, 2);
-                        model.setValueAt(c.isGender()?"Nữ":"Nam",row, 3);
-                        model.setValueAt(c.getBrithDate(),row, 4 );
-                        model.setValueAt(c.getEmail(),row, 5);
-                        model.setValueAt(c.getAddr(),row, 7);
-                        clearData();
+                            model.setValueAt(c.getCustomerName(),row, 1);
+                            model.setValueAt(c.getPhoneNumber(),row, 2);
+                            model.setValueAt(c.isGender()?"Nữ":"Nam",row, 3);
+                            model.setValueAt(c.getBrithDate(),row, 4 );
+                            model.setValueAt(c.getEmail(),row, 5);
+                            model.setValueAt(c.getAddr(),row, 7);
+                            clearData();
+                        }
+                    } catch (RemoteException ex) {
+                        throw new RuntimeException(ex);
                     }
                 }
             } else {

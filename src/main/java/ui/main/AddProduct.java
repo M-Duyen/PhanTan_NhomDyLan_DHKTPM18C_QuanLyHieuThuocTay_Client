@@ -1,14 +1,16 @@
 package ui.main;
 
 
-import dao.CategoryDAO;
-import dao.ProductDAO;
-import dao.VendorDAO;
+
 import model.*;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import service.CategoryService;
+import service.ProductService;
+import service.VendorService;
 import ui.dialog.Message;
 import ui.table.TableCustom;
 import staticProcess.StaticProcess;
@@ -21,6 +23,10 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -31,14 +37,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AddProduct extends JPanel {
-
+    ProductService productService = (ProductService) Naming.lookup("rmi://localhost:7281/productService");
+    VendorService vendorService = (VendorService) Naming.lookup("rmi://localhost:7281/vendorService");
+    CategoryService categoryService = (CategoryService) Naming.lookup("rmi://localhost:7281/categoryService");
     //    private final ArrayList<Product> listPd;
     private boolean flag = false;
     ArrayList<Product> temp = new ArrayList<>();
-    private ProductDAO product_dao = new ProductDAO(Product.class);
 
 
-    public AddProduct() {
+
+    public AddProduct() throws MalformedURLException, NotBoundException, RemoteException {
 //        listPd = new Product_DAO().getProductList();
 
         initComponents();
@@ -496,9 +504,9 @@ public class AddProduct extends JPanel {
         }
     }
 
-    public void showDataComboBoxVendor() {
-        VendorDAO vendor_dao = new VendorDAO(Vendor.class);
-        List<Vendor> list = vendor_dao.getAll();
+    public void showDataComboBoxVendor() throws RemoteException {
+
+        List<Vendor> list = vendorService.getAll();
 
         Set<Vendor> uniqueValues = new LinkedHashSet<>(list);
         List<Vendor> uniqueList = new ArrayList<>(uniqueValues);
@@ -509,9 +517,8 @@ public class AddProduct extends JPanel {
 
     }
 
-    public void showDataComboBoxCategory() {
-        CategoryDAO category_dao = new CategoryDAO(Category.class);
-        List<Category> list = category_dao.getAll();
+    public void showDataComboBoxCategory() throws RemoteException {
+        List<Category> list = categoryService.getAll();
 
         Set<Category> uniqueValues = new LinkedHashSet<>(list);
         List<Category> uniqueList = new ArrayList<>(uniqueValues);

@@ -4,21 +4,25 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
-import dao.CustomerDAO;
+
 
 import model.Customer;
+import service.CustomerService;
+import service.ProductService;
 import ui.table.TableCustom;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 public class CustomerSearch extends javax.swing.JPanel {
-
-    public CustomerSearch() {
+    CustomerService customerService = (CustomerService) Naming.lookup("rmi://localhost:7281/customerService");
+    public CustomerSearch() throws MalformedURLException, NotBoundException, RemoteException {
         initComponents();
-
-        customer_dao = new CustomerDAO(model.Customer.class);
         setupTable();
 //        testData(tableCustomer);
         TableCustom.apply(scrollPane_tableCustomer, TableCustom.TableType.MULTI_LINE);
@@ -35,7 +39,11 @@ public class CustomerSearch extends javax.swing.JPanel {
 
             @Override
             public void keyReleased(KeyEvent e) {
-                searchCustomer();
+                try {
+                    searchCustomer();
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         });
     }
@@ -194,13 +202,13 @@ public class CustomerSearch extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_btnSearchActionPerformed
 
-    private void searchCustomer() {
+    private void searchCustomer() throws RemoteException {
         // Xóa bảng hiện tại và thêm dữ liệu tìm kiếm
         DefaultTableModel model = (DefaultTableModel) tableCustomer.getModel();
         model.setRowCount(0); // Xóa các dòng hiện tại
         String criteria = txtearch.getText().trim();
 
-        ArrayList<Customer> searchResults = (ArrayList<Customer>) customer_dao.searchByMultipleCriteria("Customer", "criteria");
+        ArrayList<Customer> searchResults = (ArrayList<Customer>) customerService.searchByMultipleCriteria("Customer", "criteria");
         if(searchResults.isEmpty()){
             model.addRow(new Object[] {"...","...","...","...","...","...","...","..."});
             // Tùy chọn: Căn chỉnh cột đầu tiên cho thông báo
@@ -231,6 +239,5 @@ public class CustomerSearch extends javax.swing.JPanel {
     private javax.swing.JScrollPane scrollPane_tableCustomer;
     private JTable tableCustomer;
     private ui.textfield.TextField txtearch;
-    private CustomerDAO customer_dao;
     // End of variables declaration//GEN-END:variables
 }
