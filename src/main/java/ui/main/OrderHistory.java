@@ -262,7 +262,7 @@ public class OrderHistory extends javax.swing.JPanel {
                     System.out.println(list.get(0).toString());
                     try {
                         tempOrderForm.invoiceOrder(list.get(0));
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
                 } else {

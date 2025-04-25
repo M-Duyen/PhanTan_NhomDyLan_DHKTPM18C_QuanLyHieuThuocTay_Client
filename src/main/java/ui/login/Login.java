@@ -3,13 +3,12 @@ package ui.login;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.util.UIScale;
 
-import dao.AccountDAO;
-import dao.EmployeeDAO;
-import dao.ManagerDAO;
 import model.Account;
 import model.Employee;
 import model.Manager;
 import service.AccountService;
+import service.EmployeeService;
+import service.ManagerService;
 import service.impl.AccountServiceImpl;
 import staticProcess.StaticProcess;
 import staticProcess.StaticProcess;
@@ -137,7 +136,7 @@ public class Login extends JPanel implements ActionListener, KeyListener {
     /**
      * xử lý checkbox forgot password
      */
-    private void handleForgotPasswordCheckbox() {
+    private void handleForgotPasswordCheckbox() throws MalformedURLException, NotBoundException, RemoteException {
         if (checkBoxForgotPW.isSelected()) {
             // Tạo và hiển thị dialog cho quên mật khẩu
             panelForgot = new ForgotPassword();
@@ -237,7 +236,11 @@ public class Login extends JPanel implements ActionListener, KeyListener {
                         lblErrorUser.setText("");
                         lblErrorPass.setText("");
                         StaticProcess.userlogin = txtUsername.getText();
-                        StaticProcess.empLogin = new EmployeeDAO(Employee.class).findById(txtUsername.getText());
+                        try {
+                            StaticProcess.empLogin = ((EmployeeService)Naming.lookup("rmi://localhost:7281/employeeService")).findById(txtUsername.getText());
+                        } catch (Exception ex) {
+                            throw new RuntimeException(ex);
+                        }
                         StaticProcess.loginSuccess = true;
                         closeLoginWindow();
 
@@ -255,7 +258,11 @@ public class Login extends JPanel implements ActionListener, KeyListener {
             }
         } else if (o.equals(checkBoxForgotPW)) {
             if (checkBoxForgotPW.isSelected()) {
-                handleForgotPasswordCheckbox();
+                try {
+                    handleForgotPasswordCheckbox();
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
 
             }
 
@@ -291,16 +298,16 @@ public class Login extends JPanel implements ActionListener, KeyListener {
         }
     }
 
-    public static Employee getEmployeeLogin(){
-        return new EmployeeDAO(Employee.class).findById(currentAccount);
+    public static Employee getEmployeeLogin() throws MalformedURLException, NotBoundException, RemoteException {
+        return ((EmployeeService)Naming.lookup("rmi://localhost:7281/employeeService")).findById(currentAccount);
     }
 
-    public static Manager getManagerLogin(){
-        return new ManagerDAO(Manager.class).findById(currentAccount);
+    public static Manager getManagerLogin() throws MalformedURLException, NotBoundException, RemoteException {
+        return ((ManagerService)Naming.lookup("rmi://localhost:7281/managerService")).findById(currentAccount);
     }
 
-    public static boolean checkRole(){
-        if (new EmployeeDAO(Employee.class).findById(currentAccount) != null){
+    public static boolean checkRole() throws MalformedURLException, NotBoundException, RemoteException {
+        if (((EmployeeService)Naming.lookup("rmi://localhost:7281/employeeService")).findById(currentAccount) != null){
             return true;
         }
         return false;

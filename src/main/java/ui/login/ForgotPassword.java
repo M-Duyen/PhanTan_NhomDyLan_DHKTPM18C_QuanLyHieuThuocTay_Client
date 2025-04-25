@@ -2,14 +2,17 @@ package ui.login;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.util.UIScale;
-import dao.AccountDAO;
-import model.Account;
 import net.miginfocom.swing.MigLayout;
+import service.AccountService;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.RoundRectangle2D;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 
 public class ForgotPassword extends JPanel implements ActionListener, KeyListener {
     Font f = new Font("Times New Romam", Font.PLAIN, 20);
@@ -20,10 +23,10 @@ public class ForgotPassword extends JPanel implements ActionListener, KeyListene
     private JLabel lblErrorUser;
     private JLabel lblUsername;
     private JLabel lblPassword;
-    private AccountDAO account_dao = new AccountDAO(Account.class);
+    private AccountService accountDAO = (AccountService) Naming.lookup("rmi://localhost:7281/accountService");
 
 
-    public ForgotPassword() {
+    public ForgotPassword() throws MalformedURLException, NotBoundException, RemoteException {
         init();
 
         txtUsername.addKeyListener(this);
@@ -114,16 +117,25 @@ public class ForgotPassword extends JPanel implements ActionListener, KeyListene
                 txtUsername.requestFocus();
                 lblErrorUser.setText("Vui lòng nhập tên người dùng");
             } else {
-                String email = account_dao.getEmailByAccountID(username);
+                String email = null;
+                try {
+                    email = accountDAO.getEmailByAccountID(username);
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
                 if (!email.isEmpty()) {
                     lblErrorUser.setForeground(Color.white);
                     lblErrorUser.setText("Mật khẩu mới được gửi tới địa chỉ " + email);
 
-                    if (account_dao.updatePasswordByAccountID(username, username)) {
-//                        Email_DAO email_dao = new Email_DAO();
-//                        email_dao.sendEmail(email, "Khôi phục mật khẩu", "Mật khẩu mới của bạn là " + username);
-                    } else {
-                        System.out.println("Cập nhật mật khẩu thất bại");
+                    try {
+                        if (accountDAO.updatePasswordByAccountID(username, username)) {
+    //                        Email_DAO email_dao = new Email_DAO();
+    //                        email_dao.sendEmail(email, "Khôi phục mật khẩu", "Mật khẩu mới của bạn là " + username);
+                        } else {
+                            System.out.println("Cập nhật mật khẩu thất bại");
+                        }
+                    } catch (RemoteException ex) {
+                        throw new RuntimeException(ex);
                     }
                 } else {
                     lblErrorUser.setText("Tên người dùng không tồn tại");

@@ -2,6 +2,7 @@ package ui.cell;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.rmi.RemoteException;
 
 public class PanelAction extends javax.swing.JPanel {
 
@@ -13,7 +14,11 @@ public class PanelAction extends javax.swing.JPanel {
         cmdEdit.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
-                event.onEdit(row);
+                try {
+                    event.onEdit(row);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
         cmdDelete.addActionListener(new ActionListener() {

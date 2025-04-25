@@ -101,7 +101,15 @@ public class CreateOrder extends JPanel {
         btnAddTab.setRound(50);
         btnAddTab.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                btnAddTabActionPerformed(evt);
+                try {
+                    btnAddTabActionPerformed(evt);
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException(e);
+                } catch (NotBoundException e) {
+                    throw new RuntimeException(e);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -228,7 +236,7 @@ public class CreateOrder extends JPanel {
     private List<String> availableCounts = new ArrayList<>(List.of("1", "2", "3", "4", "5"));
     private List<String> usedCounts = new ArrayList<>();
 
-    private void btnAddTabActionPerformed(ActionEvent evt) {//GEN-FIRST:event_btnAddTabActionPerformed
+    private void btnAddTabActionPerformed(ActionEvent evt) throws MalformedURLException, NotBoundException, RemoteException {//GEN-FIRST:event_btnAddTabActionPerformed
         if (!availableCounts.isEmpty()) {
             String countString = availableCounts.remove(0);
             usedCounts.add(countString);
@@ -258,7 +266,7 @@ public class CreateOrder extends JPanel {
     /**
      * Khởi tạo tab khi mở trang CreatOrder
      */
-    public void initFirstTab() {
+    public void initFirstTab() throws MalformedURLException, NotBoundException, RemoteException {
         String countString = availableCounts.remove(0);
         usedCounts.add(countString);
 
@@ -323,7 +331,15 @@ public class CreateOrder extends JPanel {
                 if (index != -1 && tabbedPane.getTabCount() > 1) {
                     removeTabAt(index);
                 } else if (tabbedPane.getTabCount() == 1) {
-                    replaceLastTabWithInvoiceOne();
+                    try {
+                        replaceLastTabWithInvoiceOne();
+                    } catch (MalformedURLException e) {
+                        throw new RuntimeException(e);
+                    } catch (NotBoundException e) {
+                        throw new RuntimeException(e);
+                    } catch (RemoteException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             });
         }, 30, TimeUnit.MINUTES);
@@ -367,7 +383,7 @@ public class CreateOrder extends JPanel {
     /**
      * Nếu xóa tất cả tab sẽ reset về 1
      */
-    private void replaceLastTabWithInvoiceOne() {
+    private void replaceLastTabWithInvoiceOne() throws MalformedURLException, NotBoundException, RemoteException {
         if (tabbedPane.getTabCount() == 1) {
             removeTabAt(0);
             String newTabTitle = "Hóa đơn 1";

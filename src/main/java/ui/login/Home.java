@@ -8,6 +8,9 @@ import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 
 import javax.swing.*;
 import java.awt.*;
+import java.net.MalformedURLException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,7 +70,7 @@ public class Home extends JPanel {
 
     }
 
-    public void initOverlay(JFrame frame) {
+    public void initOverlay(JFrame frame) throws MalformedURLException, NotBoundException, RemoteException {
         homeOverlay = new HomeOverlay(frame, locations);
         homeOverlay.getOverlay().setEventHomeOverlay(index1 -> {
             play(index1);
