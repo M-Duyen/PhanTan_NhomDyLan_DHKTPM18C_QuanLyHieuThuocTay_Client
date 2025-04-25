@@ -16,6 +16,7 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class VendorSearch extends javax.swing.JPanel {
 
@@ -247,13 +248,13 @@ public class VendorSearch extends javax.swing.JPanel {
                 loadTable(searchResults);
             }
             if (!nameCriteria_txt.isEmpty()) {
-                ArrayList<Vendor> searchByCountryAndCri = (ArrayList<Vendor>) vendorDAO.searchByMultipleCriteria("Vendor", "nameCriteria_txt");
-                model.setRowCount(0);
-                if(!searchByCountryAndCri.isEmpty()){
-                    loadTable(searchByCountryAndCri);
-                }else{
-                    model.addRow(new Object[]{"...","...","..."});
-                }
+//                List<Vendor> searchByCountryAndCri = vendorDAO.getVendorListByCriteriasByCountry(nameCriteria_txt, searchResults);
+//                model.setRowCount(0);
+//                if(!searchByCountryAndCri.isEmpty()){
+//                    loadTable(searchByCountryAndCri);
+//                }else{
+//                    model.addRow(new Object[]{"...","...","..."});
+//                }
             }
         }else{
             ArrayList<Vendor> searchResults = (ArrayList<Vendor>) vendorDAO.searchByMultipleCriteria("Vendor","nameCriteria_txt");

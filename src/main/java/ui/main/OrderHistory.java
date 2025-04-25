@@ -250,7 +250,15 @@ public class OrderHistory extends javax.swing.JPanel {
         btnPrintOut.setRound(30);
         btnPrintOut.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                tempOrderForm = new TempOrderForm();
+                try {
+                    tempOrderForm = new TempOrderForm();
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException(e);
+                } catch (NotBoundException e) {
+                    throw new RuntimeException(e);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
                 int row = tableOrder.getSelectedRow();
                 if (row >= 0) {
                     ArrayList<Order> list = null;
@@ -262,7 +270,7 @@ public class OrderHistory extends javax.swing.JPanel {
                     System.out.println(list.get(0).toString());
                     try {
                         tempOrderForm.invoiceOrder(list.get(0));
-                    } catch (Exception e) {
+                    } catch (IOException | NotBoundException e) {
                         throw new RuntimeException(e);
                     }
                 } else {

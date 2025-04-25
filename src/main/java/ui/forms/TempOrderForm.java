@@ -27,10 +27,7 @@ import com.itextpdf.layout.property.TextAlignment;
 import model.*;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.printing.PDFPageable;
-import service.CustomerService;
-import service.OrderDetailService;
-import service.OrderService;
-import service.ProductService;
+import service.*;
 import staticProcess.StaticProcess;
 import ui.button.Button;
 import ui.cell.TableActionCellEditor;
@@ -72,20 +69,22 @@ import java.util.Locale;
 import java.util.Map;
 
 public class TempOrderForm extends TabbedForm {
+    OrderService orderService  = (OrderService) Naming.lookup("rmi://localhost:7281/orderService");
+    OrderDetailService orderDetailService  = (OrderDetailService) Naming.lookup("rmi://localhost:7281/orderDetailService");
+    ProductService productService  = (ProductService) Naming.lookup("rmi://localhost:7281/productService");
+    CustomerService customerService = (CustomerService) Naming.lookup("rmi://localhost:7281/customerService");
+
     private HomePage homePage;
     private DefaultTableModel model;
-    public TempOrderForm(){};
+    public TempOrderForm() throws MalformedURLException, NotBoundException, RemoteException {};
     public TempOrderForm(HomePage homePage) throws MalformedURLException, NotBoundException, RemoteException {
         this.homePage = homePage;
         initComponents();
-        OrderDetailService orderDetailsDAO = (OrderDetailService) Naming.lookup("rmi://localhost:7281/orderDetailService");
-        OrderService orderDAO = (OrderService) Naming.lookup("rmi://localhost:7281/orderService");
-        ProductService productDAO = (ProductService) Naming.lookup("rmi://localhost:7281/productService");
         TableActionEvent event = new TableActionEvent() {
             @Override
             public void onEdit(int row) throws RemoteException {
                 String productID = model.getValueAt(row, 0).toString();
-                Product product = productDAO.findById(productID);
+                Product product = productService.findById(productID);
 
                 ProductConfirm productConfirm = new ProductConfirm(homePage, product, true);
                 productConfirm.setSelectedComboboxUnit(model.getValueAt(row, 2).toString(), (Integer) model.getValueAt(row, 3));
@@ -171,7 +170,7 @@ public class TempOrderForm extends TabbedForm {
     }
 
     // <editor-fold defaultstate="collapsed" desc="Generated Code">
-    private void initComponents() throws MalformedURLException, NotBoundException, RemoteException {
+    private void initComponents() throws RemoteException {
 
         btnGroup_PaymentMethod = new ButtonGroup();
         panelRound2 = new PanelRound();
@@ -305,10 +304,6 @@ public class TempOrderForm extends TabbedForm {
             public void actionPerformed(ActionEvent evt) {
                 try {
                     txtCustPhoneActionPerformed(evt);
-                } catch (MalformedURLException e) {
-                    throw new RuntimeException(e);
-                } catch (NotBoundException e) {
-                    throw new RuntimeException(e);
                 } catch (RemoteException e) {
                     throw new RuntimeException(e);
                 }
@@ -503,11 +498,7 @@ public class TempOrderForm extends TabbedForm {
             public void actionPerformed(ActionEvent evt) {
                 try {
                     btnCheckOutActionPerformed(evt);
-                } catch (MalformedURLException e) {
-                    throw new RuntimeException(e);
-                } catch (NotBoundException e) {
-                    throw new RuntimeException(e);
-                } catch (RemoteException e) {
+                } catch (RemoteException | MalformedURLException | NotBoundException e) {
                     throw new RuntimeException(e);
                 }
             }
@@ -814,10 +805,10 @@ public class TempOrderForm extends TabbedForm {
         }
     }
 
-    private void txtCustPhoneActionPerformed(ActionEvent evt) throws MalformedURLException, NotBoundException, RemoteException {//GEN-FIRST:event_txtCustPhoneActionPerformed
+    private void txtCustPhoneActionPerformed(ActionEvent evt) throws RemoteException {//GEN-FIRST:event_txtCustPhoneActionPerformed
         String phone = txtCustPhone.getText().trim();
         if (!phone.isEmpty()) {
-            Customer customer = ((CustomerService)Naming.lookup("rmi://localhost:7281/customerService")).getCustomerByPhone(phone);
+            Customer customer = customerService.getCustomerByPhone(phone);
             if (customer != null) {
                 txtCustName.setText(customer.getCustomerName());
                 txtPoint.setText(String.valueOf(df_point.format(customer.getPoint())));
@@ -851,6 +842,7 @@ public class TempOrderForm extends TabbedForm {
         return list;
     }
 
+    private void btnCheckOutActionPerformed(ActionEvent evt) throws RemoteException, MalformedURLException, NotBoundException {//GEN-FIRST:event_btnCheckOutActionPerformed
     private void btnCheckOutActionPerformed(ActionEvent evt) throws MalformedURLException, NotBoundException, RemoteException {//GEN-FIRST:event_btnCheckOutActionPerformed
         ArrayList<String> productIDList = getProductIDList();
         ArrayList<Integer> quantityList = getQuantityList();
@@ -866,7 +858,7 @@ public class TempOrderForm extends TabbedForm {
             return;
         }
 
-        String orderID = ((OrderService)Naming.lookup("rmi://localhost:7281/orderService")).createOrderID(Login.getEmployeeLogin().getEmployeeID());
+        String orderID = orderService.createOrderID(Login.getEmployeeLogin().getEmployeeID());
         LocalDateTime orderDate = LocalDateTime.now();
         String shipToAddress = null;
 
@@ -892,7 +884,7 @@ public class TempOrderForm extends TabbedForm {
 
         Customer customer = null;
         if (!txtCustPhone.getText().trim().isEmpty()) {
-            customer = ((CustomerService)Naming.lookup("rmi://localhost:7281/customerService")).getCustomerByPhone(txtCustPhone.getText().trim());
+            customer = customerService.getCustomerByPhone(txtCustPhone.getText().trim());
         }
 
         Employee employee = new Login().getEmployeeLogin();
@@ -931,7 +923,7 @@ public class TempOrderForm extends TabbedForm {
                 }
 
                 if (customer != null) {
-                    if (!((CustomerService)Naming.lookup("rmi://localhost:7281/customerService")).updateCustPoint_Decrease(customer.getPhoneNumber(), point)) {
+                    if (!customerService.updateCustPoint_Decrease(customer.getPhoneNumber(), point)) {
                         con.rollback();
                         new Message(homePage, true, "Thông báo", "Cập nhật giảm điểm tích lũy của khách hàng thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
                         return;
@@ -946,7 +938,7 @@ public class TempOrderForm extends TabbedForm {
             }
 
             //Add Orders
-            if (((OrderService)Naming.lookup("rmi://localhost:7281/orderService")).create(order)) {
+            if (!orderService.create(order)) {
                 con.rollback();
                 new Message(homePage, true, "Thông báo", "Thêm đơn hàng thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
                 return;
@@ -954,7 +946,7 @@ public class TempOrderForm extends TabbedForm {
 
             //Add OrderDetails
             for (int i = 0; i < productIDList.size(); i++) {
-                Product product = ((ProductService)Naming.lookup("rmi://localhost:7281/productService")).findById(productIDList.get(i));
+                Product product = productService.findById(productIDList.get(i));
 
                 int quantity = quantityList.get(i);
                 String unitName = unitNameList.get(i);
@@ -965,7 +957,7 @@ public class TempOrderForm extends TabbedForm {
                 od.setOrder(order);
                 od.setProduct(product);
 //                od.setUnit(unit);
-                if (!((OrderDetailService) Naming.lookup("rmi://localhost:7281/orderDetailService")).create(od)) {
+                if (!orderDetailService.create(od)) {
                     con.rollback();
                     new Message(homePage, true, "Thông báo", "Thêm chi tiết đơn hàng thất bại " + i + " !", "src/main/java/ui/dialog/warning.png").showAlert();
                     return;
@@ -978,7 +970,7 @@ public class TempOrderForm extends TabbedForm {
             }
 
             if (customer != null) {
-                if (!((CustomerService)Naming.lookup("rmi://localhost:7281/customerService")).updateCustPoint_Increase(customer.getPhoneNumber(), point)) {
+                if (!customerService.updateCustPoint_Increase(customer.getPhoneNumber(), point)) {
                     new Message(homePage, true, "Thông báo", "Cập nhật tăng điểm tích lũy của khách hàng thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
                     con.rollback();
                     return;
@@ -989,7 +981,7 @@ public class TempOrderForm extends TabbedForm {
             new Message(homePage, true, "Xác nhận", "Thêm đơn hàng thành công!", "src/main/java/ui/dialog/checked.png").showAlert();
             try {
                 invoiceOrder(order);
-            } catch (IOException e) {
+            } catch (IOException | NotBoundException e) {
                 throw new RuntimeException(e);
             }
             clearAll();
@@ -1114,8 +1106,9 @@ public class TempOrderForm extends TabbedForm {
     }
 
     public static void invoiceOrder(Order order) throws IOException, NotBoundException {
-        OrderDetailService orderDetailsDAO = (OrderDetailService) Naming.lookup("rmi://localhost:7281/orderDetailService");;
-        OrderService orderDAO = ((OrderService)Naming.lookup("rmi://localhost:7281/orderService"));
+        OrderService orderService  = (OrderService) Naming.lookup("rmi://localhost:7281/orderService");
+        OrderDetailService orderDetailService  = (OrderDetailService) Naming.lookup("rmi://localhost:7281/orderDetailService");
+
         String path = "invoice.pdf";
         PdfWriter pdfWriter = new PdfWriter(path);
         PdfDocument pdfDocument = new PdfDocument(pdfWriter);
@@ -1141,7 +1134,7 @@ public class TempOrderForm extends TabbedForm {
         Table divider = new Table(fullWidth);
         divider.setBorder(gb);
 
-        ArrayList<Order> list = (ArrayList<Order>) orderDAO.searchByMultipleCriteria("Order",order.getOrderID());
+        ArrayList<Order> list = (ArrayList<Order>) orderService.searchByMultipleCriteria("Order",order.getOrderID());
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         // Chuyển đổi LocalDateTime thành String
@@ -1185,8 +1178,8 @@ public class TempOrderForm extends TabbedForm {
         tableHeader.addCell(getCell10Right("Giá bán", true).setFont(font).setBorderBottom(new SolidBorder(0)).setBorderTop(new SolidBorder(0)));
         tableHeader.addCell(getCell10Right("Thành tiền", true).setFont(font).setBorderBottom(new SolidBorder(0)).setBorderTop(new SolidBorder(0)));
 
-        ArrayList<OrderDetail> listOD = (ArrayList<OrderDetail>) orderDetailsDAO.searchByMultipleCriteria("Order",order.getOrderID());
-        Map<String, Double> productPrices = ((OrderDetailService) Naming.lookup("rmi://localhost:7281/orderDetailService")).getUnitPricesByOrderID(order.getOrderID());
+        ArrayList<OrderDetail> listOD = (ArrayList<OrderDetail>) orderDetailService.searchByMultipleCriteria("Order",order.getOrderID());
+        Map<String, Double> productPrices = orderDetailService.getUnitPricesByOrderID(order.getOrderID());
         List<String> keys = new ArrayList<>(productPrices.keySet());
 
         for (int i = 0; i <= listOD.size() - 1; i++) {
@@ -1199,7 +1192,7 @@ public class TempOrderForm extends TabbedForm {
 //            Double unitPrice = productPrices.get(unit);
             String unit = keys.get(i);
             Double unitPrice = productPrices.get(unit);
-//            tableHeader.addCell(getCell10Center(orderDetailsDAO.createUnit(unit).getDescription(), false).setFont(font));
+//            tableHeader.addCell(getCell10Center(orderDetails_dao.createUnit(unit).getDescription(), false).setFont(font));
 
             tableHeader.addCell(getCell10Center(String.valueOf(detail.getOrderQuantity()), false).setFont(font));
             tableHeader.addCell(getCell10Right(String.valueOf(unitPrice), false).setFont(font));
@@ -1395,7 +1388,7 @@ public class TempOrderForm extends TabbedForm {
     // End of variables declaration//GEN-END:variables
 //    public static void main(String[] args) throws IOException {
 //        ConnectDB.getInstance().connect();
-//        orderDAO orderDAO = new orderDAO();
-//        invoiceOrder(orderDAO.getOrderByCriterious("OR1112240302001").getFirst());
+//        OrderDAO order_dao = new OrderDAO();
+//        invoiceOrder(order_dao.getOrderByCriterious("OR1112240302001").getFirst());
 //    }
 }
