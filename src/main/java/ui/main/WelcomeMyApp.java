@@ -1,11 +1,16 @@
 package ui.main;
 
 
-import dao.EmployeeDAO;
 import model.Employee;
+import service.EmployeeService;
 
 
 import javax.swing.*;
+
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 
 import static staticProcess.StaticProcess.*;
 
@@ -65,8 +70,8 @@ public class WelcomeMyApp {
         login.setVisible(false);
     }
 
-    public static Employee getEmployeeLogin(){
-        return new EmployeeDAO(Employee.class).findById(userlogin);
+    public static Employee getEmployeeLogin() throws MalformedURLException, NotBoundException, RemoteException {
+        return ((EmployeeService)Naming.lookup("rmi://localhost:7281/employeeService")).findById(userlogin);
     }
 
 }

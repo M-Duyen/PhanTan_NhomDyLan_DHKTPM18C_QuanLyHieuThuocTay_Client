@@ -9,6 +9,8 @@ import dao.ManagerDAO;
 import model.Account;
 import model.Employee;
 import model.Manager;
+import service.AccountService;
+import service.impl.AccountServiceImpl;
 import staticProcess.StaticProcess;
 import staticProcess.StaticProcess;
 import ui.main.WelcomeMyApp;
@@ -19,6 +21,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.RoundRectangle2D;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,11 +39,11 @@ public class Login extends JPanel implements ActionListener, KeyListener {
     private String tenDN;
     private JCheckBox checkBoxForgotPW;
     private List<ModelLocation> locations;
-    private AccountDAO accountDAO = new AccountDAO(Account.class);
+    private AccountService accountDAO = (AccountService) Naming.lookup("rmi://localhost:7281/accountService");
     private ForgotPassword panelForgot = new ForgotPassword();
     private static String currentAccount ;
 
-    public Login() {
+    public Login() throws MalformedURLException, NotBoundException, RemoteException {
         init();
 
         txtUsername.addKeyListener(this);
@@ -197,8 +203,17 @@ public class Login extends JPanel implements ActionListener, KeyListener {
                 lblErrorUser.setText("Vui lòng nhập tên tài khoản");
 
             } else {
-                tenDN = accountDAO.containUserName(username);
-                ArrayList<String> duLieu = (ArrayList<String>) accountDAO.login(username, password);
+                try {
+                    tenDN = accountDAO.containUserName(username);
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
+                ArrayList<String> duLieu = null;
+                try {
+                    duLieu = (ArrayList<String>) accountDAO.login(username, password);
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
 
                 if (!(duLieu.get(0) == null)) {
 

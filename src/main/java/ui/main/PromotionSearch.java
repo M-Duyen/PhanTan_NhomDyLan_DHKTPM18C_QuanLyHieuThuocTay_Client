@@ -4,8 +4,6 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
-import dao.PromotionDAO;
-import dao.PromotionTypeDAO;
 
 import model.Promotion;
 import model.PromotionType;

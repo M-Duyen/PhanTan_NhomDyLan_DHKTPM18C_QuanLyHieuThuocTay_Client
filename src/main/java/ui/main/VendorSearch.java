@@ -4,20 +4,24 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
-import dao.VendorDAO;
 
 import model.Vendor;
+import service.VendorService;
 import ui.table.TableCustom;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 public class VendorSearch extends javax.swing.JPanel {
 
-    public VendorSearch() {
+    public VendorSearch() throws MalformedURLException, NotBoundException, RemoteException {
         initComponents();
-        vendor_dao = new VendorDAO(Vendor.class);
+        vendorDAO = (VendorService) Naming.lookup("rmi://localhost:7281/vendorService");
         JTableHeader theader = tableVendor.getTableHeader();
         theader.setFont(new java.awt.Font("Segoe UI", 0, 18));
 
@@ -36,7 +40,11 @@ public class VendorSearch extends javax.swing.JPanel {
 
             @Override
             public void keyReleased(KeyEvent e) {
-                searchVendor();
+                try {
+                    searchVendor();
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         });
         txtVendorName.addKeyListener(new KeyListener() {
@@ -52,7 +60,11 @@ public class VendorSearch extends javax.swing.JPanel {
 
             @Override
             public void keyReleased(KeyEvent e) {
-                searchVendor();
+                try {
+                    searchVendor();
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         });
     }
@@ -143,7 +155,11 @@ public class VendorSearch extends javax.swing.JPanel {
         cbCountry.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         cbCountry.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cbCountryActionPerformed(evt);
+                try {
+                    cbCountryActionPerformed(evt);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -209,12 +225,12 @@ public class VendorSearch extends javax.swing.JPanel {
         // TODO add your handling code here:
     }
 
-    private void cbCountryActionPerformed(java.awt.event.ActionEvent evt) {
+    private void cbCountryActionPerformed(java.awt.event.ActionEvent evt) throws RemoteException {
         // TODO add your handling code here:
         searchVendor();
     }
 
-    private void searchVendor() {
+    private void searchVendor() throws RemoteException {
         // Xóa bảng hiện tại và thêm dữ liệu tìm kiếm
         DefaultTableModel model = (DefaultTableModel) tableVendor.getModel();
         model.setRowCount(0); // Xóa các dòng hiện tại
@@ -223,7 +239,7 @@ public class VendorSearch extends javax.swing.JPanel {
         String criteria;
         // Xác định tiêu chí tìm kiếm
         if (countryCriteria != null) {
-            ArrayList<Vendor> searchResults = (ArrayList<Vendor>) vendor_dao.searchByMultipleCriteria("Vendor", countryCriteria);
+            ArrayList<Vendor> searchResults = (ArrayList<Vendor>) vendorDAO.searchByMultipleCriteria("Vendor", countryCriteria);
             if (searchResults.isEmpty()) {
                 model.addRow(new Object[]{"...","...","..."});
                 // Tùy chọn: Căn chỉnh cột đầu tiên cho thông báo
@@ -231,7 +247,7 @@ public class VendorSearch extends javax.swing.JPanel {
                 loadTable(searchResults);
             }
             if (!nameCriteria_txt.isEmpty()) {
-                ArrayList<Vendor> searchByCountryAndCri = vendor_dao.getVendorListByCriteriasByCountry(nameCriteria_txt, searchResults);
+                ArrayList<Vendor> searchByCountryAndCri = vendorDAO.getVendorListByCriteriasByCountry(nameCriteria_txt, searchResults);
                 model.setRowCount(0);
                 if(!searchByCountryAndCri.isEmpty()){
                     loadTable(searchByCountryAndCri);
@@ -240,7 +256,7 @@ public class VendorSearch extends javax.swing.JPanel {
                 }
             }
         }else{
-            ArrayList<Vendor> searchResults = (ArrayList<Vendor>) vendor_dao.searchByMultipleCriteria("Vendor","nameCriteria_txt");
+            ArrayList<Vendor> searchResults = (ArrayList<Vendor>) vendorDAO.searchByMultipleCriteria("Vendor","nameCriteria_txt");
             if (searchResults.isEmpty()) {
                 model.addRow(new Object[]{"K...","...","..."});
                 // Tùy chọn: Căn chỉnh cột đầu tiên cho thông báo
@@ -273,6 +289,6 @@ public class VendorSearch extends javax.swing.JPanel {
     private javax.swing.JScrollPane scrollPane_tableVendor;
     private JTable tableVendor;
     private ui.textfield.TextField txtVendorName;
-    private VendorDAO vendor_dao;
+    private VendorService vendorDAO;
     // End of variables declaration
 }
