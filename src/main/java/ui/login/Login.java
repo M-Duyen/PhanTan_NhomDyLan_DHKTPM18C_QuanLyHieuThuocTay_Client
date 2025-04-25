@@ -325,4 +325,11 @@ public class Login extends JPanel implements ActionListener, KeyListener {
         }
         return false;
     }
+
+    public static void main(String[] args) throws MalformedURLException, NotBoundException, RemoteException {
+        AccountService accountService = (AccountService) Naming.lookup("rmi://localhost:7281/accountService");
+        System.out.println(accountService.containUserName("EP0302"));
+        employeeService = (EmployeeService) Naming.lookup("rmi://localhost:7281/employeeService");
+        System.out.println(employeeService.findById("EP0302"));
+    }
 }

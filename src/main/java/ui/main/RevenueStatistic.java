@@ -815,9 +815,9 @@ public class RevenueStatistic extends JPanel implements ActionListener {
     //Set biểu đồ tròn tỷ lệ
     public void setPgs() throws MalformedURLException, NotBoundException, RemoteException {
         OrderService orderDAO = (OrderService) Naming.lookup("rmi://localhost:7281/orderService");
-        pgsSanPhamBan.setValue((int) Math.round(orderDAO.getTotalProductsSold()));
-        pgsThuNhapBan.setValue((int) Math.round(orderDAO.getRevenueSoldPercentage()));
-        pgsLoiNhuan.setValue((int) Math.round(orderDAO.getProfit()));
+//        pgsSanPhamBan.setValue((int) Math.round(orderDAO.getTotalProductsSold()));
+//        pgsThuNhapBan.setValue((int) Math.round(orderDAO.getRevenueSoldPercentage()));
+//        pgsLoiNhuan.setValue((int) Math.round(orderDAO.getProfit()));
 
         pgsSanPhamBan.start();
         pgsThuNhapBan.start();
