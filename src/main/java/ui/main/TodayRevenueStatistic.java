@@ -33,7 +33,7 @@ public class TodayRevenueStatistic extends javax.swing.JPanel {
     /**
      * Creates new form TodayRevenueStatistic
      */
-    public TodayRevenueStatistic() throws Exception {
+    public TodayRevenueStatistic() {
         initComponents();
         setupTable();
         TableCustom.apply(jScrollPane_tableRevenue, TableCustom.TableType.MULTI_LINE);
@@ -41,7 +41,7 @@ public class TodayRevenueStatistic extends javax.swing.JPanel {
         edtEmplID.setText(StaticProcess.userlogin);
         edtEmplName.setText(StaticProcess.empLogin.getEmployeeName());
 
-        showDataCbbDate();
+//        showDataCbbDate();
 
     }
     private void setupTable() {
@@ -259,12 +259,12 @@ public class TodayRevenueStatistic extends javax.swing.JPanel {
     }
 
     public void showDataCbbDate() throws RemoteException, MalformedURLException, NotBoundException {
-            OrderService orderService = (OrderService) Naming.lookup("rmi://localhost:7281/OrderService");
-
-            List<LocalDate> rs = orderService.getAllDateHaveEmpID(StaticProcess.userlogin);
-
-            cbbDate.removeAllItems();
-            rs.forEach(date -> cbbDate.addItem(date));
+//            OrderService orderService = (OrderService) Naming.lookup("rmi://localhost:7281/OrderService");
+//
+//            List<LocalDate> rs = orderService.getAllDateHaveEmpID(StaticProcess.userlogin);
+//
+//            cbbDate.removeAllItems();
+//            rs.forEach(date -> cbbDate.addItem(date));
 
 
     }
