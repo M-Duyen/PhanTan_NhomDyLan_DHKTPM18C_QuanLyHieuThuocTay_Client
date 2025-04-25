@@ -1055,11 +1055,11 @@ public class TempOrderForm extends TabbedForm {
         for (int i = 0; i < model.getRowCount(); i++) {
             String id = (String) model.getValueAt(i, 0);
             String unit = (String) model.getValueAt(i, 2);
-//            PackagingUnit unitE = PackagingUnit.fromString(Unit_DAO.getInstance().getUnit_ByDes(unit).getUnitName());
+            PackagingUnit unitE = PackagingUnit.convertToEnum(unit);
 
-//            if (id.equals(productID) && unitE.equals(unitEnum)) {
-//                return i;
-//            }
+            if (id.equals(productID) && unitE.equals(unitEnum)) {
+                return i;
+            }
         }
         return -1;
     }

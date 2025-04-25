@@ -277,26 +277,26 @@ public class ProductStatistics extends javax.swing.JPanel implements ActionListe
             if(cellB11 == null) cellB11 = title1.createCell(1);
             cellB11.setCellValue("THỐNG KÊ SẢN PHẨM BÁN CHẠY_" + startDate.replace("-", "/") + "_ĐẾN_" + endDate.replace("-", "/"));
             createProductStatisticSheet(sheet1,orderDetailService.getProductStatistical(startDate, endDate));
-//
-//            //Sheet2: Biểu đồ tròn theo loại
-//            Sheet sheet2 = workbook.getSheetAt(1);
-//            workbook.setSheetName(1, "Thống kê theo loại");
-//            Row title2 = sheet2.getRow(0);
-//            if(title2 == null) title2 = sheet2.createRow(0);
-//            Cell cellB12 = title2.getCell(1);
-//            if(cellB12 == null) cellB12 = title2.createCell(1);
-//            cellB12.setCellValue("THỐNG KÊ SẢN PHẨM THEO LOẠI_" + startDate.replace("-", "/") + "_đến_" + endDate.replace("_", "/"));
-//            createProductCircleSheet(sheet2, OrderDetails_DAO.getInstance().getProductStatics_ByType(startDate, endDate));
-//
-//            //Sheet3: Biểu đồ tròn theo loại
-//            Sheet sheet3 = workbook.getSheetAt(2);
-//            workbook.setSheetName(2, "Thống kê theo danh mục");
-//            Row title3 = sheet3.getRow(0);
-//            if(title3 == null) title3 = sheet3.createRow(0);
-//            Cell cellB13 = title3.getCell(1);
-//            if(cellB13 == null) cellB13 = title3.createCell(1);
-//            cellB13.setCellValue("THỐNG KÊ SẢN PHẨM THEO DANH MỤC_" + startDate.replace("-", "/") + "_đến_" + endDate.replace("_", "/"));
-//            createProductCircleSheet(sheet3, OrderDetails_DAO.getInstance().getProductStatics_ByCategory(startDate, endDate));
+
+            //Sheet2: Biểu đồ tròn theo loại
+            Sheet sheet2 = workbook.getSheetAt(1);
+            workbook.setSheetName(1, "Thống kê theo loại");
+            Row title2 = sheet2.getRow(0);
+            if(title2 == null) title2 = sheet2.createRow(0);
+            Cell cellB12 = title2.getCell(1);
+            if(cellB12 == null) cellB12 = title2.createCell(1);
+            cellB12.setCellValue("THỐNG KÊ SẢN PHẨM THEO LOẠI_" + startDate.replace("-", "/") + "_đến_" + endDate.replace("_", "/"));
+            createProductCircleSheet(sheet2, orderDetailService.getProductStaticsByType(startDate, endDate));
+
+            //Sheet3: Biểu đồ tròn theo loại
+            Sheet sheet3 = workbook.getSheetAt(2);
+            workbook.setSheetName(2, "Thống kê theo danh mục");
+            Row title3 = sheet3.getRow(0);
+            if(title3 == null) title3 = sheet3.createRow(0);
+            Cell cellB13 = title3.getCell(1);
+            if(cellB13 == null) cellB13 = title3.createCell(1);
+            cellB13.setCellValue("THỐNG KÊ SẢN PHẨM THEO DANH MỤC_" + startDate.replace("-", "/") + "_đến_" + endDate.replace("_", "/"));
+            createProductCircleSheet(sheet3, orderDetailService.getProductStaticsByCategory(startDate, endDate));
 
             try (FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
                 workbook.write(fileOutputStream);
@@ -323,11 +323,11 @@ public class ProductStatistics extends javax.swing.JPanel implements ActionListe
 
             Cell cellC = row.getCell(2);
             if(cellC == null) cellC = row.createCell(2);
-            cellC.setCellValue(model.getPurchasePrice());
+            cellC.setCellValue(model.getPackagingUnit().convertUnit(model.getPackagingUnit()));
 
             Cell cellD = row.getCell(3);
             if(cellD == null) cellD = row.createCell(3);
-            cellD.setCellValue(model.getSellPrice());
+            cellD.setCellValue(model.getInStock());
 
             Cell cellE = row.getCell(4);
             if(cellE == null) cellE = row.createCell(4);
@@ -335,7 +335,7 @@ public class ProductStatistics extends javax.swing.JPanel implements ActionListe
 
             Cell cellG = row.getCell(5);
             if(cellG == null) cellG = row.createCell(6);
-            cellG.setCellValue(model.getInStock());
+            cellG.setCellValue(model.getTotalPriceSold());
         }
     }
 
@@ -459,7 +459,6 @@ public class ProductStatistics extends javax.swing.JPanel implements ActionListe
                 throw new RuntimeException(ex);
             }
             modelDataPSList.forEach(x -> System.out.println(x));
-            System.out.println(modelDataPSList.getFirst().getProductName());
             if(!modelDataPSList.isEmpty()){
                 dashboardForm1.barChart1.setDataset(dashboardForm1.createData(modelDataPSList, 0));
                 dashboardForm1.setFormattedDataset(dashboardForm1.createData(modelDataPSList, 0), dashboardForm1.barChart1);

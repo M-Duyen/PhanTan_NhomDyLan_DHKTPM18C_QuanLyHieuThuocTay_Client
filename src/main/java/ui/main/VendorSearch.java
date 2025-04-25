@@ -247,7 +247,7 @@ public class VendorSearch extends javax.swing.JPanel {
                 loadTable(searchResults);
             }
             if (!nameCriteria_txt.isEmpty()) {
-                ArrayList<Vendor> searchByCountryAndCri = vendorDAO.getVendorListByCriteriasByCountry(nameCriteria_txt, searchResults);
+                ArrayList<Vendor> searchByCountryAndCri = (ArrayList<Vendor>) vendorDAO.searchByMultipleCriteria("Vendor", "nameCriteria_txt");
                 model.setRowCount(0);
                 if(!searchByCountryAndCri.isEmpty()){
                     loadTable(searchByCountryAndCri);
