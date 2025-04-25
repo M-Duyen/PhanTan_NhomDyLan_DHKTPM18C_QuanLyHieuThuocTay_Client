@@ -23,6 +23,7 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -492,7 +493,7 @@ public class RevenueStatistic extends JPanel implements ActionListener {
             try (FileInputStream fis = new FileInputStream("src/main/java/ui/custom/Report_RevenueStatistic.xlsx");
                  Workbook workbook = new XSSFWorkbook(fis)) {
                 Sheet sheet = null;
-                OrderService orderDAO = ((OrderService) Naming.lookup("rmi://localhost:7281/orderService"));
+                OrderService orderDAO = ((OrderService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/orderService"));
                 ArrayList<Double> inf = new ArrayList<>();
                 ArrayList<ModelDataRS> listMD = new ArrayList<>();
                 switch ((String) cboThongKeTheo.getSelectedItem()) {
@@ -505,8 +506,8 @@ public class RevenueStatistic extends JPanel implements ActionListener {
                         cellB1.setCellValue("THỐNG KÊ DOANH THU NĂM " + (Integer) panelBarStatistical1.ycNam.getValue());
 
                         inf = orderDAO.getOverviewStatistical(
-                                LocalDate.of((Integer) (Integer) panelBarStatistical1.ycNam.getValue(), 1, 1),
-                                LocalDate.of((Integer) (Integer) panelBarStatistical1.ycNam.getValue(), 12, 31)
+                                LocalDate.of((Integer) (Integer) panelBarStatistical1.ycNam.getValue(), 1, 1).atStartOfDay(),
+                                LocalDate.of((Integer) (Integer) panelBarStatistical1.ycNam.getValue(), 12, 31).atTime(23, 59, 59)
                         );
                         listMD = orderDAO.getModelDataRSByYear((Integer) (Integer) panelBarStatistical1.ycNam.getValue());
                         break;
@@ -525,8 +526,8 @@ public class RevenueStatistic extends JPanel implements ActionListener {
                         cellBa.setCellValue("THỐNG KÊ DOANH THU THÁNG " + month + " NĂM " + (Integer) panelBarStatistical1.ycNam.getValue());
                         LocalDate firstDayOfMonth = LocalDate.of((Integer) (Integer) panelBarStatistical1.ycT.getValue(), month, 1);
                         inf = orderDAO.getOverviewStatistical(
-                                firstDayOfMonth,
-                                firstDayOfMonth.withDayOfMonth(firstDayOfMonth.lengthOfMonth())
+                                firstDayOfMonth.atStartOfDay(),
+                                firstDayOfMonth.withDayOfMonth(firstDayOfMonth.lengthOfMonth()).atTime(23, 59, 59)
                         );
                         listMD = orderDAO.getModelDataRSByYearByMonth(month, (Integer) (Integer) panelBarStatistical1.ycT.getValue());
                         break;
@@ -539,8 +540,8 @@ public class RevenueStatistic extends JPanel implements ActionListener {
                         cellBtc.setCellValue("THỐNG KÊ DOANH THU TỪ  " + panelBarStatistical1.txtStart.getText() + " ĐẾN " + panelBarStatistical1.txtStart.getText());
 
                         inf =orderDAO.getOverviewStatistical(
-                                convertStringToLocalDate(panelBarStatistical1.txtStart.getText()),
-                                convertStringToLocalDate(panelBarStatistical1.txtEnd.getText())
+                                convertStringToLocalDate(panelBarStatistical1.txtStart.getText()).atStartOfDay(),
+                                convertStringToLocalDate(panelBarStatistical1.txtEnd.getText()).atTime(23, 59, 59)
                         );
 //                            listMD = orderDAO.getModelDataRSByYearByTime(convertDateFormat(panelBarStatistical1.txtStart.getText()), convertDateFormat(panelBarStatistical1.txtEnd.getText()));
                         break;
@@ -660,7 +661,7 @@ public class RevenueStatistic extends JPanel implements ActionListener {
         Object source = e.getSource();
         OrderService orderDAO = null;
         try {
-            orderDAO = (OrderService) Naming.lookup("rmi://localhost:7281/orderService");
+            orderDAO = (OrderService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/orderService");
         } catch (NotBoundException ex) {
             throw new RuntimeException(ex);
         } catch (MalformedURLException ex) {
@@ -688,7 +689,7 @@ public class RevenueStatistic extends JPanel implements ActionListener {
                 case "Năm":
                     setNameLineChart("BIỂU ĐỒ ĐƯỜNG THỂ HIỆN DOANH THU NĂM " + (Integer) panelBarStatistical1.ycNam.getValue());
                     try {
-                        setOverView(LocalDate.of((Integer) panelBarStatistical1.ycNam.getValue(), 1, 1), LocalDate.of((Integer) panelBarStatistical1.ycNam.getValue(), 12, 31));
+                        setOverView(LocalDate.of((Integer) panelBarStatistical1.ycNam.getValue(), 1, 1).atStartOfDay(), LocalDate.of((Integer) panelBarStatistical1.ycNam.getValue(), 12, 31).atTime(23, 59, 59));
                     } catch (MalformedURLException ex) {
                         throw new RuntimeException(ex);
                     } catch (NotBoundException ex) {
@@ -712,7 +713,7 @@ public class RevenueStatistic extends JPanel implements ActionListener {
                     }
                     LocalDate firstDayOfMonth = LocalDate.of((Integer) panelBarStatistical1.ycT.getValue(), month, 1);
                     try {
-                        setOverView(firstDayOfMonth , firstDayOfMonth.withDayOfMonth(firstDayOfMonth.lengthOfMonth()));
+                        setOverView(firstDayOfMonth.atStartOfDay() , firstDayOfMonth.withDayOfMonth(firstDayOfMonth.lengthOfMonth()).atTime(23, 59, 59));
                     } catch (MalformedURLException ex) {
                         throw new RuntimeException(ex);
                     } catch (NotBoundException ex) {
@@ -733,7 +734,7 @@ public class RevenueStatistic extends JPanel implements ActionListener {
                     curveLineChart1.clear();
                     if(checkSelect(start, end)){
                         try {
-                            setOverView(convertStringToLocalDate(start), convertStringToLocalDate(end));
+                            setOverView(convertStringToLocalDate(start).atStartOfDay(), convertStringToLocalDate(end).atTime(23, 59, 59));
                         } catch (MalformedURLException ex) {
                             throw new RuntimeException(ex);
                         } catch (NotBoundException ex) {
@@ -790,12 +791,11 @@ public class RevenueStatistic extends JPanel implements ActionListener {
         }
     }
 
-    public void setOverView(LocalDate startD, LocalDate endD) throws MalformedURLException, NotBoundException, RemoteException {
-        //TODO
-//        ArrayList<Double> inf = ((OrderService)Naming.lookup("rmi://localhost:7281/orderService")).getOverviewStatistical(startD, endD);
-//        lbCreatedNumber.setText(inf.get(0).intValue() + "");
-//        lbSoldNumber.setText(inf.get(2).intValue() + "");
-//        lbNumberRevenue.setText( formatCurrency(inf.get(1)));
+    public void setOverView(LocalDateTime startD, LocalDateTime endD) throws MalformedURLException, NotBoundException, RemoteException {
+        ArrayList<Double> inf = ((OrderService)Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/orderService")).getOverviewStatistical(startD, endD);
+        lbCreatedNumber.setText(inf.get(0).intValue() + "");
+        lbSoldNumber.setText(inf.get(2).intValue() + "");
+        lbNumberRevenue.setText( formatCurrency(inf.get(1)));
     }
 
     //Chuyển định dạng tiền
@@ -815,11 +815,10 @@ public class RevenueStatistic extends JPanel implements ActionListener {
 
     //Set biểu đồ tròn tỷ lệ
     public void setPgs() throws MalformedURLException, NotBoundException, RemoteException {
-        OrderService orderDAO = (OrderService) Naming.lookup("rmi://localhost:7281/orderService");
-        //TODO
-//        pgsSanPhamBan.setValue((int) Math.round(orderDAO.getTotalProductsSold()));
-//        pgsThuNhapBan.setValue((int) Math.round(orderDAO.getRevenueSoldPercentage()));
-//        pgsLoiNhuan.setValue((int) Math.round(orderDAO.getProfit()));
+        OrderService orderDAO = (OrderService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/orderService");
+        pgsSanPhamBan.setValue((int) Math.round(orderDAO.getTotalProductsSold()));
+        pgsThuNhapBan.setValue((int) Math.round(orderDAO.getRevenueSoldPercentage()));
+        pgsLoiNhuan.setValue((int) Math.round(orderDAO.getProfit()));
 
         pgsSanPhamBan.start();
         pgsThuNhapBan.start();

@@ -26,10 +26,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class CategorySearch extends JPanel {
-    AdministrationRouteService administrationRouteService = (AdministrationRouteService)  Naming.lookup("rmi://localhost:7281/administrationRouteService");
-    ProductService productService = (ProductService) Naming.lookup("rmi://localhost:7281/productService");
-    VendorService vendorService = (VendorService) Naming.lookup("rmi://localhost:7281/vendorService");
-    CategoryService categoryService = (CategoryService) Naming.lookup("rmi://localhost:7281/categoryService");
+    AdministrationRouteService administrationRouteService = (AdministrationRouteService)  Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/administrationRouteService");
+    ProductService productService = (ProductService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/productService");
+    VendorService vendorService = (VendorService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/vendorService");
+    CategoryService categoryService = (CategoryService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/categoryService");
 
     private final ArrayList<Product> proFetchList;
     private HomePage homePage;

@@ -18,6 +18,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.rmi.Naming;
@@ -33,8 +34,8 @@ import static staticProcess.StaticProcess.userlogin;
 
 
 public class HomePage extends JFrame implements ActionListener{
-    EmployeeService employeeService = (EmployeeService) Naming.lookup("rmi://localhost:7281/employeeService");
-    ManagerService managerService = (ManagerService) Naming.lookup("rmi://localhost:7281/managerService");
+    EmployeeService employeeService = (EmployeeService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/employeeService");
+    ManagerService managerService = (ManagerService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/managerService");
     private JPanel currentPanel;
 
     private final HomeSlide homeSlide = new HomeSlide();
@@ -481,7 +482,7 @@ public class HomePage extends JFrame implements ActionListener{
                             throw new RuntimeException(ex);
                         } catch (NotBoundException ex) {
                             throw new RuntimeException(ex);
-                        } catch (RemoteException ex) {
+                        } catch (IOException ex) {
                             throw new RuntimeException(ex);
                         }
                         HomePage.this.dispose();

@@ -18,7 +18,7 @@ import java.rmi.RemoteException;
 import java.util.List;
 
 public class AddVendor extends JPanel implements ActionListener {
-    VendorService vendorService = (VendorService)  Naming.lookup("rmi://localhost:7281/vendorService");
+    VendorService vendorService = (VendorService)  Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/vendorService");
     public AddVendor() throws MalformedURLException, NotBoundException, RemoteException {
         initComponents();
 

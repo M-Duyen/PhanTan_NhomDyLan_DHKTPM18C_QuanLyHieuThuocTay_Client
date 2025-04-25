@@ -30,8 +30,8 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 
 public class OrderHistory extends javax.swing.JPanel {
-    EmployeeService employeeService = (EmployeeService) Naming.lookup("rmi://localhost:7281/employeeService");
-    OrderService orderService = (OrderService) Naming.lookup("rmi://localhost:7281/orderService");
+    EmployeeService employeeService = (EmployeeService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/employeeService");
+    OrderService orderService = (OrderService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/orderService");
     private HomePage homePage;
 
     ArrayList<Order> listT = (ArrayList<Order>) orderService.getAll();

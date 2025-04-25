@@ -51,7 +51,7 @@ public class TodayRevenueStatistic extends javax.swing.JPanel {
 //                repaint();
             }
 
-            Employee employ = ((EmployeeService)Naming.lookup("rmi://localhost:7281/employeeService")).findById(role);
+            Employee employ = ((EmployeeService)Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/employeeService")).findById(role);
             if(employ != null){
                 lblEmpID_show.setText(role);
                 lblEmpName_show.setText(employee.getEmployeeName());
