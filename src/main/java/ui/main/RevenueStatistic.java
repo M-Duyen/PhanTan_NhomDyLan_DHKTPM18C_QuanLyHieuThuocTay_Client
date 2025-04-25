@@ -735,10 +735,11 @@ public class RevenueStatistic extends JPanel implements ActionListener {
     }
 
     public void setOverView(LocalDate startD, LocalDate endD){
-        ArrayList<Double> inf = new OrderDAO(Order.class).getOverviewStatistical(startD, endD);
-        lbCreatedNumber.setText(inf.get(0).intValue() + "");
-        lbSoldNumber.setText(inf.get(2).intValue() + "");
-        lbNumberRevenue.setText( formatCurrency(inf.get(1)));
+        //TODO: Bên entity là kiểu LocalDateTime
+//        ArrayList<Double> inf = new OrderDAO(Order.class).getOverviewStatistical(startD, endD);
+//        lbCreatedNumber.setText(inf.get(0).intValue() + "");
+//        lbSoldNumber.setText(inf.get(2).intValue() + "");
+//        lbNumberRevenue.setText( formatCurrency(inf.get(1)));
     }
 
     //Chuyển định dạng tiền
@@ -760,7 +761,7 @@ public class RevenueStatistic extends JPanel implements ActionListener {
     public void setPgs(){
         OrderDAO orderDAO = new OrderDAO(Order.class);
         pgsSanPhamBan.setValue((int) Math.round(orderDAO.getTotalProductsSold()));
-        pgsThuNhapBan.setValue((int) Math.round(orderDAO.getRevenueSoldPercentage()));
+//        pgsThuNhapBan.setValue((int) Math.round(orderDAO.getRevenueSoldPercentage()));
         pgsLoiNhuan.setValue((int) Math.round(orderDAO.getProfit()));
 
         pgsSanPhamBan.start();

@@ -198,36 +198,8 @@ public class Login extends JPanel implements ActionListener, KeyListener {
 
             } else {
                 tenDN = accountDAO.containUserName(username);
-                ArrayList<String> duLieu = (ArrayList<String>) accountDAO.login(username, password);
-
-                if (!(duLieu.get(0) == null)) {
-
-                    if (txtUsername.getText().equals(duLieu.get(0))) {
-                        if (txtPassword.getText().equals(duLieu.get(1))) {
-                            kqCheck = true;
-                        } else {
-                            kqCheck = false;
-                            txtPassword.requestFocus();
-                            lblErrorUser.setText("");
-                            lblErrorPass.setText("Mật khẩu không đúng");
-
-                        }
-                    } else {
-                        kqCheck = false;
-                        JOptionPane.showMessageDialog(this, "Tài khoản không tồn tại");
-                    }
-                    if (kqCheck) {
-                        currentAccount = txtUsername.getText().trim();
-
-                        lblErrorUser.setText("");
-                        lblErrorPass.setText("");
-                        StaticProcess.userlogin = txtUsername.getText();
-                        StaticProcess.empLogin = new EmployeeDAO(Employee.class).findById(txtUsername.getText());
-                        StaticProcess.loginSuccess = true;
-                        closeLoginWindow();
-
-                    }
-                } else {
+                List<String> duLieu =  accountDAO.login(username, password);
+                if (duLieu.isEmpty()) {
                     if (tenDN != null) {
                         if (tenDN.equals(txtUsername.getText()) == true) {
                             txtPassword.requestFocus();
@@ -236,7 +208,38 @@ public class Login extends JPanel implements ActionListener, KeyListener {
                     } else {
                         JOptionPane.showMessageDialog(this, "Tài khoản không tồn tại");
                     }
+                } else{
+                    if (!(duLieu.get(0) == null)) {
+
+                        if (txtUsername.getText().equals(duLieu.get(0))) {
+                            if (txtPassword.getText().equals(duLieu.get(1))) {
+                                kqCheck = true;
+                            } else {
+                                kqCheck = false;
+                                txtPassword.requestFocus();
+                                lblErrorUser.setText("");
+                                lblErrorPass.setText("Mật khẩu không đúng");
+
+                            }
+                        } else {
+                            kqCheck = false;
+                            JOptionPane.showMessageDialog(this, "Tài khoản không tồn tại");
+                        }
+                        if (kqCheck) {
+                            currentAccount = txtUsername.getText().trim();
+
+                            lblErrorUser.setText("");
+                            lblErrorPass.setText("");
+                            StaticProcess.userlogin = txtUsername.getText();
+                            StaticProcess.empLogin = new EmployeeDAO(Employee.class).findById(txtUsername.getText());
+                            StaticProcess.loginSuccess = true;
+                            closeLoginWindow();
+
+                        }
+                    }
+
                 }
+
             }
         } else if (o.equals(checkBoxForgotPW)) {
             if (checkBoxForgotPW.isSelected()) {
