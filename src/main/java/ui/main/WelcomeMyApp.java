@@ -16,7 +16,7 @@ import static staticProcess.StaticProcess.*;
 
 public class WelcomeMyApp {
     public static boolean doneLoading = false;
-    public static void main(String[] args) {
+    public static void main(String[] args) throws MalformedURLException, NotBoundException, RemoteException {
         Loading load = new Loading();
         login = new Login_GUI();
         SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {

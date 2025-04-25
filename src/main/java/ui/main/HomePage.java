@@ -475,7 +475,15 @@ public class HomePage extends JFrame implements ActionListener{
                     int response = dialog.getResponse();
                     if(response == 1) {
                         StaticProcess.loginSuccess = false;
-                        WelcomeMyApp.main(null);
+                        try {
+                            WelcomeMyApp.main(null);
+                        } catch (MalformedURLException ex) {
+                            throw new RuntimeException(ex);
+                        } catch (NotBoundException ex) {
+                            throw new RuntimeException(ex);
+                        } catch (RemoteException ex) {
+                            throw new RuntimeException(ex);
+                        }
                         HomePage.this.dispose();
 //                        new ui.dialog.Message(HomePage.this, true, "Thông báo", "Đăng xuất thành công", "src/main/java/ui/dialog/done.png").showAlert();
                     }

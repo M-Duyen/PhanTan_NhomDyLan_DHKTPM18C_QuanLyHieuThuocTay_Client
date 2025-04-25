@@ -21,7 +21,19 @@ public class Login_GUI extends JFrame implements ActionListener {
 
     public static Home home;
 
-    public static Login loginPanel = new Login();
+    public static Login loginPanel;
+
+    static {
+        try {
+            loginPanel = new Login();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        } catch (NotBoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public Login_GUI() throws MalformedURLException, NotBoundException, RemoteException {
         init();
@@ -39,7 +51,15 @@ public class Login_GUI extends JFrame implements ActionListener {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowOpened(WindowEvent e) {
-                home.initOverlay(StaticProcess.login);
+                try {
+                    home.initOverlay(StaticProcess.login);
+                } catch (MalformedURLException ex) {
+                    throw new RuntimeException(ex);
+                } catch (NotBoundException ex) {
+                    throw new RuntimeException(ex);
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
                 home.play(0);
                 home.getHomeOverlay().showLoginForm();
             }
