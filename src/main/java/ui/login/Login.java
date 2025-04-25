@@ -38,7 +38,7 @@ public class Login extends JPanel implements ActionListener, KeyListener {
     private String tenDN;
     private JCheckBox checkBoxForgotPW;
     private List<ModelLocation> locations;
-    private AccountService accountDAO = (AccountService) Naming.lookup("rmi://localhost:7281/accountService");
+    private AccountService accountDAO = (AccountService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/accountService");
     private ForgotPassword panelForgot = new ForgotPassword();
     private static String currentAccount ;
 
