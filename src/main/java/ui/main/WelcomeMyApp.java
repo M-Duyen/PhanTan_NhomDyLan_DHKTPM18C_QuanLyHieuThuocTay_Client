@@ -7,6 +7,9 @@ import service.EmployeeService;
 
 import javax.swing.*;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
@@ -16,7 +19,10 @@ import static staticProcess.StaticProcess.*;
 
 public class WelcomeMyApp {
     public static boolean doneLoading = false;
-    public static void main(String[] args) throws MalformedURLException, NotBoundException, RemoteException {
+    public static void main(String[] args) throws IOException, NotBoundException {
+        FileInputStream fin = new FileInputStream(new File("lib/config.properties"));
+        properties.load(fin);
+
         Loading load = new Loading();
         login = new Login_GUI();
         SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
@@ -71,7 +77,7 @@ public class WelcomeMyApp {
     }
 
     public static Employee getEmployeeLogin() throws MalformedURLException, NotBoundException, RemoteException {
-        return ((EmployeeService)Naming.lookup("rmi://localhost:7281/employeeService")).findById(userlogin);
+        return ((EmployeeService)Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/employeeService")).findById(userlogin);
     }
 
 }

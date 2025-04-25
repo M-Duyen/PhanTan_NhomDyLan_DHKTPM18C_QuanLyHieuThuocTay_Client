@@ -40,9 +40,9 @@ import java.util.Locale;
 
 public class ProcessOrder extends JFrame implements ActionListener {
 
-    OrderService orderService = (OrderService) Naming.lookup("rmi://localhost:7281/orderService");
-    OrderDetailService orderDetailService = (OrderDetailService) Naming.lookup("rmi://localhost:7281/orderDetailService");
-    ProductService productService = (ProductService) Naming.lookup("rmi://localhost:7281/productService");
+    OrderService orderService = (OrderService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/orderService");
+    OrderDetailService orderDetailService = (OrderDetailService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/orderDetailService");
+    ProductService productService = (ProductService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/productService");
     private Order orderTemp = new Order();
     private ArrayList<OrderDetail> orderDetailsTemp = new ArrayList<>();
     private ArrayList<OrderDetail> listOrderConfirm = new ArrayList<>();

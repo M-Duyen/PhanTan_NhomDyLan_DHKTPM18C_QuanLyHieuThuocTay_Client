@@ -26,7 +26,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class CreateOrder extends JPanel {
-    ProductService productService = (ProductService) Naming.lookup("rmi://localhost:7281/productService");
+    ProductService productService = (ProductService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/productService");
     private HomePage homePage;
 
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);

@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class ProductStatistics extends javax.swing.JPanel implements ActionListener {
-    OrderDetailService orderDetailService = (OrderDetailService) Naming.lookup("rmi://localhost:7281/orderDetailService");
+    OrderDetailService orderDetailService = (OrderDetailService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/orderDetailService");
     HomePage homePage;
     ArrayList<ModelDataPS> modelDataPSList = new ArrayList<>();
     ArrayList<ModelDataPS_Circle> listCircle1 = new ArrayList<>();

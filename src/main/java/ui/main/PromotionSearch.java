@@ -27,8 +27,8 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 public class PromotionSearch extends JPanel{
-    PromotionService promotionService = (PromotionService) Naming.lookup("rmi://localhost:7281/promotionService");
-    PromotionTypeService promotionTypeService = (PromotionTypeService) Naming.lookup("rmi://localhost:7281/promotionTypeService");
+    PromotionService promotionService = (PromotionService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/promotionService");
+    PromotionTypeService promotionTypeService = (PromotionTypeService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/promotionTypeService");
     
     public PromotionSearch() throws MalformedURLException, NotBoundException, RemoteException {
         initComponents();
