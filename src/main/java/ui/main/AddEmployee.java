@@ -1,7 +1,8 @@
 package ui.main;
 
-import dao.EmployeeDAO;
+
 import model.Employee;
+import service.EmployeeService;
 import staticProcess.StaticProcess;
 import ui.dialog.Message;
 import ui.table.TableCustom;
@@ -13,6 +14,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
@@ -20,10 +25,9 @@ import java.util.ArrayList;
 
 
 public class AddEmployee extends JPanel implements ActionListener, MouseListener {
-
-    public AddEmployee() {
+    EmployeeService employeeService = (EmployeeService) Naming.lookup("rmi://localhost:7281/employeeService");
+    public AddEmployee() throws MalformedURLException, NotBoundException, RemoteException {
         initComponents();
-        employee_dao = new EmployeeDAO(Employee.class);
         TableCustom.apply(scrollPane_tableEmployee, TableCustom.TableType.MULTI_LINE);
         btnAdd.addActionListener(this);
         btnRefresh.addActionListener(this);
@@ -357,13 +361,12 @@ public class AddEmployee extends JPanel implements ActionListener, MouseListener
     private ui.textfield.TextField txtEmplName;
     private ui.textfield.TextField txtEmplPhone;
     private ui.textfield.TextField txtMail;
-    private EmployeeDAO employee_dao;
     private DefaultTableModel model;
 
 
 
-    private void loadTable() {
-        ArrayList<Employee> emp = (ArrayList<Employee>) employee_dao.getAll();
+    private void loadTable() throws RemoteException {
+        ArrayList<Employee> emp = (ArrayList<Employee>) employeeService.getAll();
         DefaultTableModel model = (DefaultTableModel) tableEmployee.getModel();
         for (Employee employee : emp) {
             model.addRow(new Object[]{
@@ -475,7 +478,7 @@ public class AddEmployee extends JPanel implements ActionListener, MouseListener
                 String address = txtAddress.getText().trim();
                 boolean stt = comboBoxStatus.getSelectedItem().equals("Đang làm") ? true : false;
                 try {
-                    String id = employee_dao.createEmployeeID(phone);
+                    String id = employeeService.createEmployeeID(phone);
                     Employee emp = new Employee();
 
                     emp.setEmployeeID(id);
@@ -486,7 +489,7 @@ public class AddEmployee extends JPanel implements ActionListener, MouseListener
                     emp.setAddress(address);
                     emp.setStatus(stt);
                     emp.setDegree(degree);
-                    if (employee_dao.create(emp)) {
+                    if (employeeService.create(emp)) {
                         new Message(StaticProcess.homePage, true, "Thông báo", "Thêm nhân viên thành công", "src/main/java/ui/dialog/checked.png").showAlert();
                         Object[] row = {id,name, phone, date, sex ? "Nam" : "Nữ", degree, mail, address, stt};
                         model.addRow(row);
@@ -526,18 +529,22 @@ public class AddEmployee extends JPanel implements ActionListener, MouseListener
                     emp.setStatus(stt);
                     emp.setDegree(degree);
 
-                    if (employee_dao.update(emp)) {
-                        new Message(StaticProcess.homePage, true, "Thông báo", "Cập nhật nhân viên thành công !!!", "src/main/java/ui/dialog/checked.png").showAlert();
-                        model.setValueAt(emp.getEmployeeName(),row, 1);
-                        model.setValueAt(emp.getPhoneNumber(),row, 2);
-                        model.setValueAt(emp.getBirthDate(),row, 3);
-                        model.setValueAt(emp.isGender()?"Nữ":"Nam",row, 4);
-                        model.setValueAt(emp.getDegree(),row,5);
-                        model.setValueAt(emp.getEmail(),row, 6);
-                        model.setValueAt(emp.getAddress(),row, 7);
-                        model.setValueAt(emp.isStatus() ? "Đang làm" : "Nghỉ làm", row,8);
-                        clearData();
+                    try {
+                        if (employeeService.update(emp)) {
+                            new Message(StaticProcess.homePage, true, "Thông báo", "Cập nhật nhân viên thành công !!!", "src/main/java/ui/dialog/checked.png").showAlert();
+                            model.setValueAt(emp.getEmployeeName(),row, 1);
+                            model.setValueAt(emp.getPhoneNumber(),row, 2);
+                            model.setValueAt(emp.getBirthDate(),row, 3);
+                            model.setValueAt(emp.isGender()?"Nữ":"Nam",row, 4);
+                            model.setValueAt(emp.getDegree(),row,5);
+                            model.setValueAt(emp.getEmail(),row, 6);
+                            model.setValueAt(emp.getAddress(),row, 7);
+                            model.setValueAt(emp.isStatus() ? "Đang làm" : "Nghỉ làm", row,8);
+                            clearData();
 
+                        }
+                    } catch (RemoteException ex) {
+                        throw new RuntimeException(ex);
                     }
                 }
 

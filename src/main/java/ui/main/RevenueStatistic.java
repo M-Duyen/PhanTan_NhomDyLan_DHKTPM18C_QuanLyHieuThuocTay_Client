@@ -1,7 +1,8 @@
 package ui.main;
 
-import dao.OrderDAO;
+
 import model.Order;
+import service.OrderService;
 import ui.model.ModelDataRS;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -14,6 +15,10 @@ import java.awt.event.ActionListener;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -487,7 +492,7 @@ public class RevenueStatistic extends JPanel implements ActionListener {
             try (FileInputStream fis = new FileInputStream("src/main/java/ui/custom/Report_RevenueStatistic.xlsx");
                  Workbook workbook = new XSSFWorkbook(fis)) {
                     Sheet sheet = null;
-                    OrderDAO orderDAO = new OrderDAO(Order.class);
+                    OrderService orderDAO = ((OrderService) Naming.lookup("rmi://localhost:7281/orderService"));
                     ArrayList<Double> inf = new ArrayList<>();
                     ArrayList<ModelDataRS> listMD = new ArrayList<>();
                     switch ((String) cboThongKeTheo.getSelectedItem()) {
@@ -611,6 +616,8 @@ public class RevenueStatistic extends JPanel implements ActionListener {
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(null, "Lỗi khi mở file mẫu.", "Lỗi", JOptionPane.ERROR_MESSAGE);
                 e.printStackTrace();
+            } catch (NotBoundException e) {
+                throw new RuntimeException(e);
             }
         } else {
             JOptionPane.showMessageDialog(null, "Thao tác xuất báo cáo đã bị hủy");
@@ -651,21 +658,50 @@ public class RevenueStatistic extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         Object source = e.getSource();
-        OrderDAO orderDAO = new OrderDAO(Order.class);
+        OrderService orderDAO = null;
+        try {
+            orderDAO = (OrderService) Naming.lookup("rmi://localhost:7281/orderService");
+        } catch (NotBoundException ex) {
+            throw new RuntimeException(ex);
+        } catch (MalformedURLException ex) {
+            throw new RuntimeException(ex);
+        } catch (RemoteException ex) {
+            throw new RuntimeException(ex);
+        }
         if (source.equals(panelBarStatistical1.btnSelectStart)) {
             dcStart.showPopup();
         } else if (source.equals(panelBarStatistical1.btnSelectEnd)) {
             dcEnd.showPopup();
         }
         if (source.equals(btnLamMoi)) {
-            setPgs();
+            try {
+                setPgs();
+            } catch (MalformedURLException ex) {
+                throw new RuntimeException(ex);
+            } catch (NotBoundException ex) {
+                throw new RuntimeException(ex);
+            } catch (RemoteException ex) {
+                throw new RuntimeException(ex);
+            }
             String loaiThongKe = (String) cboThongKeTheo.getSelectedItem();
             switch (loaiThongKe) {
                 case "Năm":
                     setNameLineChart("BIỂU ĐỒ ĐƯỜNG THỂ HIỆN DOANH THU NĂM " + (Integer) panelBarStatistical1.ycNam.getValue());
-                    setOverView(LocalDate.of((Integer) panelBarStatistical1.ycNam.getValue(), 1, 1), LocalDate.of((Integer) panelBarStatistical1.ycNam.getValue(), 12, 31));
+                    try {
+                        setOverView(LocalDate.of((Integer) panelBarStatistical1.ycNam.getValue(), 1, 1), LocalDate.of((Integer) panelBarStatistical1.ycNam.getValue(), 12, 31));
+                    } catch (MalformedURLException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (NotBoundException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (RemoteException ex) {
+                        throw new RuntimeException(ex);
+                    }
                     curveLineChart1.clear();
-                    setDataLineChart(orderDAO.getModelDataRSByYear((Integer) panelBarStatistical1.ycNam.getValue()));
+                    try {
+                        setDataLineChart(orderDAO.getModelDataRSByYear((Integer) panelBarStatistical1.ycNam.getValue()));
+                    } catch (RemoteException ex) {
+                        throw new RuntimeException(ex);
+                    }
                     break;
                 case "Tháng":
                     curveLineChart1.clear();
@@ -675,16 +711,36 @@ public class RevenueStatistic extends JPanel implements ActionListener {
                         month = Integer.parseInt(parts[1]);
                     }
                     LocalDate firstDayOfMonth = LocalDate.of((Integer) panelBarStatistical1.ycT.getValue(), month, 1);
-                    setOverView(firstDayOfMonth , firstDayOfMonth.withDayOfMonth(firstDayOfMonth.lengthOfMonth()));
+                    try {
+                        setOverView(firstDayOfMonth , firstDayOfMonth.withDayOfMonth(firstDayOfMonth.lengthOfMonth()));
+                    } catch (MalformedURLException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (NotBoundException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (RemoteException ex) {
+                        throw new RuntimeException(ex);
+                    }
                     setNameLineChart("BIỂU ĐỒ ĐƯỜNG THỂ HIỆN DOANH THU THÁNG " + month + " NĂM " + (Integer) panelBarStatistical1.ycT.getValue());
-                    setDataLineChart(orderDAO.getModelDataRSByYearByMonth(month, (Integer) panelBarStatistical1.ycT.getValue()));
+                    try {
+                        setDataLineChart(orderDAO.getModelDataRSByYearByMonth(month, (Integer) panelBarStatistical1.ycT.getValue()));
+                    } catch (RemoteException ex) {
+                        throw new RuntimeException(ex);
+                    }
                     break;
                 case "Tùy chỉnh":
                     String start = panelBarStatistical1.txtStart.getText();
                     String end = panelBarStatistical1.txtEnd.getText();
                     curveLineChart1.clear();
                     if(checkSelect(start, end)){
-                        setOverView(convertStringToLocalDate(start), convertStringToLocalDate(end));
+                        try {
+                            setOverView(convertStringToLocalDate(start), convertStringToLocalDate(end));
+                        } catch (MalformedURLException ex) {
+                            throw new RuntimeException(ex);
+                        } catch (NotBoundException ex) {
+                            throw new RuntimeException(ex);
+                        } catch (RemoteException ex) {
+                            throw new RuntimeException(ex);
+                        }
                         curveLineChart1.clear();
                         setNameLineChart("BIỂU ĐỒ ĐƯỜNG THỂ HIỆN DOANH THU TỪ " + convertDateFormat(start) + " ĐẾN " + convertDateFormat(end));
 //                        setDataLineChart(orderDAO.getModelDataRSByYearByTime(convertDateFormat(start), convertDateFormat(end)));
@@ -734,8 +790,8 @@ public class RevenueStatistic extends JPanel implements ActionListener {
         }
     }
 
-    public void setOverView(LocalDate startD, LocalDate endD){
-        ArrayList<Double> inf = new OrderDAO(Order.class).getOverviewStatistical(startD, endD);
+    public void setOverView(LocalDate startD, LocalDate endD) throws MalformedURLException, NotBoundException, RemoteException {
+        ArrayList<Double> inf = ((OrderService)Naming.lookup("rmi://localhost:7281/orderService")).getOverviewStatistical(startD, endD);
         lbCreatedNumber.setText(inf.get(0).intValue() + "");
         lbSoldNumber.setText(inf.get(2).intValue() + "");
         lbNumberRevenue.setText( formatCurrency(inf.get(1)));
@@ -757,8 +813,8 @@ public class RevenueStatistic extends JPanel implements ActionListener {
     }
 
     //Set biểu đồ tròn tỷ lệ
-    public void setPgs(){
-        OrderDAO orderDAO = new OrderDAO(Order.class);
+    public void setPgs() throws MalformedURLException, NotBoundException, RemoteException {
+        OrderService orderDAO = (OrderService) Naming.lookup("rmi://localhost:7281/orderService");
         pgsSanPhamBan.setValue((int) Math.round(orderDAO.getTotalProductsSold()));
         pgsThuNhapBan.setValue((int) Math.round(orderDAO.getRevenueSoldPercentage()));
         pgsLoiNhuan.setValue((int) Math.round(orderDAO.getProfit()));

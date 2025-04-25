@@ -1,12 +1,12 @@
 package ui.main;
 
-import dao.OrderDetailDAO;
 import model.OrderDetail;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import service.OrderDetailService;
 import ui.dialog.Message;
 import ui.model.ModelDataPS;
 import ui.model.ModelDataPS_Circle;
@@ -14,6 +14,10 @@ import ui.model.ModelDataPS_Circle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -22,29 +26,30 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class ProductStatistics extends javax.swing.JPanel implements ActionListener {
+    OrderDetailService orderDetailService = (OrderDetailService) Naming.lookup("rmi://localhost:7281/orderDetailService");
     HomePage homePage;
     ArrayList<ModelDataPS> modelDataPSList = new ArrayList<>();
     ArrayList<ModelDataPS_Circle> listCircle1 = new ArrayList<>();
     ArrayList<ModelDataPS_Circle> listCircle2 = new ArrayList<>();
 
-    public ProductStatistics(HomePage homePage) {
+    public ProductStatistics(HomePage homePage) throws MalformedURLException, NotBoundException, RemoteException {
         this.homePage = homePage;
         initComponents();
 
-        ArrayList<ModelDataPS> modelDataPSList = new OrderDetailDAO(OrderDetail.class).getProductStatistical(convertDateFormat(txtStartDate.getText()), convertDateFormat(txtEndDate.getText()));
+        ArrayList<ModelDataPS> modelDataPSList = orderDetailService.getProductStatistical(convertDateFormat(txtStartDate.getText()), convertDateFormat(txtEndDate.getText()));
         if(!modelDataPSList.isEmpty()){
             dashboardForm1.setFormattedDataset(dashboardForm1.createData(modelDataPSList, 0), dashboardForm1.barChart1);
             dashboardForm1.setFormattedDataset(dashboardForm1.createData(modelDataPSList, 1), dashboardForm1.barChart2);
         }
 
-        ArrayList<ModelDataPS_Circle> listCircle1 = new OrderDetailDAO(OrderDetail.class).getProductStaticsByType(convertDateFormat(txtStartDate.getText()), convertDateFormat(txtEndDate.getText()));
+        ArrayList<ModelDataPS_Circle> listCircle1 = orderDetailService.getProductStaticsByType(convertDateFormat(txtStartDate.getText()), convertDateFormat(txtEndDate.getText()));
         if(!listCircle1.isEmpty()){
             dashboardForm11.setFormattedDataset(dashboardForm11.createData(listCircle1), dashboardForm11.pieChart1);
             dashboardForm11.pieChart1.startAnimation();
             dashboardForm11.repaint();
         }
 
-        ArrayList<ModelDataPS_Circle> listCircle2 = new OrderDetailDAO(OrderDetail.class).getProductStaticsByCategory(convertDateFormat(txtStartDate.getText()), convertDateFormat(txtEndDate.getText()));
+        ArrayList<ModelDataPS_Circle> listCircle2 = orderDetailService.getProductStaticsByCategory(convertDateFormat(txtStartDate.getText()), convertDateFormat(txtEndDate.getText()));
         if(!listCircle2.isEmpty()){
             dashboardForm21.setFormattedDataset(dashboardForm21.createData(listCircle2), dashboardForm21.pieChart1);
             dashboardForm21.pieChart1.startAnimation();
@@ -271,7 +276,7 @@ public class ProductStatistics extends javax.swing.JPanel implements ActionListe
             Cell cellB11 = title1.getCell(1);
             if(cellB11 == null) cellB11 = title1.createCell(1);
             cellB11.setCellValue("THỐNG KÊ SẢN PHẨM BÁN CHẠY_" + startDate.replace("-", "/") + "_ĐẾN_" + endDate.replace("-", "/"));
-            createProductStatisticSheet(sheet1, new OrderDetailDAO(OrderDetail.class).getProductStatistical(startDate, endDate));
+            createProductStatisticSheet(sheet1,orderDetailService.getProductStatistical(startDate, endDate));
 //
 //            //Sheet2: Biểu đồ tròn theo loại
 //            Sheet sheet2 = workbook.getSheetAt(1);
@@ -448,7 +453,11 @@ public class ProductStatistics extends javax.swing.JPanel implements ActionListe
         Object o = e.getSource();
         if (o.equals(btnRefresh)) {
             //Đưa dữ liệu vào biểu đồ cột
-            modelDataPSList = new OrderDetailDAO(OrderDetail.class).getProductStatistical(convertDateFormat(txtStartDate.getText()), convertDateFormat(txtEndDate.getText()));
+            try {
+                modelDataPSList = orderDetailService.getProductStatistical(convertDateFormat(txtStartDate.getText()), convertDateFormat(txtEndDate.getText()));
+            } catch (RemoteException ex) {
+                throw new RuntimeException(ex);
+            }
             modelDataPSList.forEach(x -> System.out.println(x));
             System.out.println(modelDataPSList.getFirst().getProductName());
             if(!modelDataPSList.isEmpty()){
@@ -462,7 +471,11 @@ public class ProductStatistics extends javax.swing.JPanel implements ActionListe
             }
 
             //Đưa dữ liệu vào biểu đồ tròn, thống kê theo loại sản phẩm
-            listCircle1 = new OrderDetailDAO(OrderDetail.class).getProductStaticsByType(convertDateFormat(txtStartDate.getText()), convertDateFormat(txtEndDate.getText()));
+            try {
+                listCircle1 =orderDetailService.getProductStaticsByType(convertDateFormat(txtStartDate.getText()), convertDateFormat(txtEndDate.getText()));
+            } catch (RemoteException ex) {
+                throw new RuntimeException(ex);
+            }
             if(!listCircle1.isEmpty()){
                 dashboardForm11.setFormattedDataset(dashboardForm11.createData(listCircle1), dashboardForm11.pieChart1);
                 dashboardForm11.pieChart1.startAnimation();
@@ -472,7 +485,11 @@ public class ProductStatistics extends javax.swing.JPanel implements ActionListe
             }
 
             //Đưa dữ liệu vào biểu đồ tròn, thống kê theo danh mục
-            listCircle2 = new OrderDetailDAO(OrderDetail.class).getProductStaticsByCategory(convertDateFormat(txtStartDate.getText()), convertDateFormat(txtEndDate.getText()));
+            try {
+                listCircle2 = orderDetailService.getProductStaticsByCategory(convertDateFormat(txtStartDate.getText()), convertDateFormat(txtEndDate.getText()));
+            } catch (RemoteException ex) {
+                throw new RuntimeException(ex);
+            }
             if(!listCircle2.isEmpty()){
                 dashboardForm21.setFormattedDataset(dashboardForm21.createData(listCircle2), dashboardForm21.pieChart1);
                 dashboardForm21.pieChart1.startAnimation();

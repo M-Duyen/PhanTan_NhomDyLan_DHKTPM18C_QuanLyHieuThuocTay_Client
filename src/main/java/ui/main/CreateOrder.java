@@ -1,9 +1,9 @@
 package ui.main;
 
-import dao.ProductDAO;
 
 import model.PackagingUnit;
 import model.Product;
+import service.ProductService;
 import ui.button.Button;
 import ui.dialog.Message;
 import ui.dialog.ProductConfirm;
@@ -13,6 +13,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.*;
@@ -22,12 +26,13 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class CreateOrder extends JPanel {
+    ProductService productService = (ProductService) Naming.lookup("rmi://localhost:7281/productService");
     private HomePage homePage;
 
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private Map<String, ScheduledFuture<?>> tabRemovalTasks = new HashMap<>();
 
-    public CreateOrder(HomePage homePage) {
+    public CreateOrder(HomePage homePage) throws MalformedURLException, NotBoundException, RemoteException {
         this.homePage = homePage;
         initComponents();
         initFirstTab();
@@ -68,7 +73,11 @@ public class CreateOrder extends JPanel {
         });
         txtSearch.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                txtSearchActionPerformed(evt);
+                try {
+                    txtSearchActionPerformed(evt);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -79,7 +88,11 @@ public class CreateOrder extends JPanel {
         btnSearch.setShadowColor(new Color(102, 204, 255));
         btnSearch.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                btnSearchActionPerformed(evt);
+                try {
+                    btnSearchActionPerformed(evt);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -88,7 +101,15 @@ public class CreateOrder extends JPanel {
         btnAddTab.setRound(50);
         btnAddTab.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                btnAddTabActionPerformed(evt);
+                try {
+                    btnAddTabActionPerformed(evt);
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException(e);
+                } catch (NotBoundException e) {
+                    throw new RuntimeException(e);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -126,12 +147,12 @@ public class CreateOrder extends JPanel {
         add(pCenter, BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void txtSearchActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtSearchActionPerformed
+    private void txtSearchActionPerformed(ActionEvent evt) throws RemoteException {//GEN-FIRST:event_txtSearchActionPerformed
         String searchText = txtSearch.getText().trim();
         if (!searchText.isEmpty()) {
             if (tabbedPane.getSelectedComponent() instanceof TempOrderForm) {
                 TempOrderForm currentTab = (TempOrderForm) tabbedPane.getSelectedComponent();
-                Product product = new ProductDAO(Product.class).getProduct_ByBarcode(searchText);
+                Product product = productService.getProduct_ByBarcode(searchText);
                 if (product != null) {
                     ProductConfirm productConfirm = new ProductConfirm(homePage, product, true);
                     openProductConfirm(productConfirm, product, currentTab, false);
@@ -191,12 +212,12 @@ public class CreateOrder extends JPanel {
         }
     }
 
-    private void btnSearchActionPerformed(ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
+    private void btnSearchActionPerformed(ActionEvent evt) throws RemoteException {//GEN-FIRST:event_btnSearchActionPerformed
         String searchText = txtSearch.getText().trim();
         if (!searchText.isEmpty()) {
             if (tabbedPane.getSelectedComponent() instanceof TempOrderForm) {
                 TempOrderForm currentTab = (TempOrderForm) tabbedPane.getSelectedComponent();
-                Product product = new ProductDAO(Product.class).getProduct_ByBarcode(searchText);
+                Product product =productService.getProduct_ByBarcode(searchText);
                 if (product != null) {
                     ProductConfirm productConfirm = new ProductConfirm(homePage, product, true);
                     openProductConfirm(productConfirm, product, currentTab, false);
@@ -215,7 +236,7 @@ public class CreateOrder extends JPanel {
     private List<String> availableCounts = new ArrayList<>(List.of("1", "2", "3", "4", "5"));
     private List<String> usedCounts = new ArrayList<>();
 
-    private void btnAddTabActionPerformed(ActionEvent evt) {//GEN-FIRST:event_btnAddTabActionPerformed
+    private void btnAddTabActionPerformed(ActionEvent evt) throws MalformedURLException, NotBoundException, RemoteException {//GEN-FIRST:event_btnAddTabActionPerformed
         if (!availableCounts.isEmpty()) {
             String countString = availableCounts.remove(0);
             usedCounts.add(countString);
@@ -245,7 +266,7 @@ public class CreateOrder extends JPanel {
     /**
      * Khởi tạo tab khi mở trang CreatOrder
      */
-    public void initFirstTab() {
+    public void initFirstTab() throws MalformedURLException, NotBoundException, RemoteException {
         String countString = availableCounts.remove(0);
         usedCounts.add(countString);
 
@@ -310,7 +331,15 @@ public class CreateOrder extends JPanel {
                 if (index != -1 && tabbedPane.getTabCount() > 1) {
                     removeTabAt(index);
                 } else if (tabbedPane.getTabCount() == 1) {
-                    replaceLastTabWithInvoiceOne();
+                    try {
+                        replaceLastTabWithInvoiceOne();
+                    } catch (MalformedURLException e) {
+                        throw new RuntimeException(e);
+                    } catch (NotBoundException e) {
+                        throw new RuntimeException(e);
+                    } catch (RemoteException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             });
         }, 30, TimeUnit.MINUTES);
@@ -354,7 +383,7 @@ public class CreateOrder extends JPanel {
     /**
      * Nếu xóa tất cả tab sẽ reset về 1
      */
-    private void replaceLastTabWithInvoiceOne() {
+    private void replaceLastTabWithInvoiceOne() throws MalformedURLException, NotBoundException, RemoteException {
         if (tabbedPane.getTabCount() == 1) {
             removeTabAt(0);
             String newTabTitle = "Hóa đơn 1";

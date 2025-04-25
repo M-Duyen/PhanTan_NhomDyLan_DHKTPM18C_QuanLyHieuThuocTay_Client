@@ -1,11 +1,17 @@
 package ui.glasspanepupup;
 
-import dao.AccountDAO;
+
 import model.Account;
+import service.AccountService;
+import service.CustomerService;
 import ui.login.Login;
 
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 public class ChangePassword extends javax.swing.JPanel {
@@ -63,7 +69,15 @@ public class ChangePassword extends javax.swing.JPanel {
         btnChange.setShadowColor(new Color(0, 0, 0));
         btnChange.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnChangeActionPerformed(evt);
+                try {
+                    btnChangeActionPerformed(evt);
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException(e);
+                } catch (NotBoundException e) {
+                    throw new RuntimeException(e);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -139,16 +153,16 @@ public class ChangePassword extends javax.swing.JPanel {
         // TODO add your handling code here:
     }
 
-    private void btnChangeActionPerformed(java.awt.event.ActionEvent evt) {
+    private void btnChangeActionPerformed(java.awt.event.ActionEvent evt) throws MalformedURLException, NotBoundException, RemoteException {
         Login login = new Login();
-        AccountDAO accountDAO = new AccountDAO(Account.class);
+        AccountService accountService =  (AccountService) Naming.lookup("rmi://localhost:7281/accountService");
 
 
         if (!txtNew.getText().isEmpty() && !txtConfirm.getText().isEmpty() && !txtCurrent.getText().isEmpty()) {
             if (txtNew.getText().equals(txtConfirm.getText())) {
-                ArrayList<String> account = (ArrayList<String>) accountDAO.login(login.getTxtUsername().getText(), txtCurrent.getText());
+                ArrayList<String> account = (ArrayList<String>) accountService.login(login.getTxtUsername().getText(), txtCurrent.getText());
                 if (account.get(0) != null) {
-                    accountDAO.updatePasswordByAccountID(account.get(0), txtNew.getText());
+                    accountService.updatePasswordByAccountID(account.get(0), txtNew.getText());
                     lblError.setForeground(Color.green);
                     lblError.setText("Cập nhật mật khẩu thành công");
 

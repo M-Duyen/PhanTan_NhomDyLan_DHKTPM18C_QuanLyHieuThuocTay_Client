@@ -2,27 +2,42 @@ package ui.login;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.util.UIScale;
-
-import dao.AccountDAO;
-import dao.EmployeeDAO;
-import dao.ManagerDAO;
-import model.Account;
 import model.Employee;
 import model.Manager;
-import staticProcess.StaticProcess;
-import staticProcess.StaticProcess;
-import ui.main.WelcomeMyApp;
 import net.miginfocom.swing.MigLayout;
-
+import service.AccountService;
+import service.EmployeeService;
+import service.ManagerService;
+import staticProcess.StaticProcess;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.RoundRectangle2D;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Login extends JPanel implements ActionListener, KeyListener {
+    static EmployeeService employeeService;
+    static ManagerService managerService;
+
+    static {
+        try {
+            employeeService = (EmployeeService) Naming.lookup("rmi://localhost:7281/employeeService");
+            managerService = (ManagerService) Naming.lookup("rmi://localhost:7281/managerService");
+        } catch (NotBoundException e) {
+            throw new RuntimeException(e);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    AccountService accountService = (AccountService) Naming.lookup("rmi://localhost:7281/accountService");
     Font f = new Font("Times New Romam", Font.PLAIN, 20);
     Font f1 = new Font("Times New Romam", Font.ITALIC, 15);
     public JButton btnLogin;
@@ -33,11 +48,10 @@ public class Login extends JPanel implements ActionListener, KeyListener {
     private String tenDN;
     private JCheckBox checkBoxForgotPW;
     private List<ModelLocation> locations;
-    private AccountDAO accountDAO = new AccountDAO(Account.class);
     private ForgotPassword panelForgot = new ForgotPassword();
     private static String currentAccount ;
 
-    public Login() {
+    public Login() throws MalformedURLException, NotBoundException, RemoteException {
         init();
 
         txtUsername.addKeyListener(this);
@@ -131,7 +145,7 @@ public class Login extends JPanel implements ActionListener, KeyListener {
     /**
      * xử lý checkbox forgot password
      */
-    private void handleForgotPasswordCheckbox() {
+    private void handleForgotPasswordCheckbox() throws MalformedURLException, NotBoundException, RemoteException {
         if (checkBoxForgotPW.isSelected()) {
             // Tạo và hiển thị dialog cho quên mật khẩu
             panelForgot = new ForgotPassword();
@@ -197,9 +211,50 @@ public class Login extends JPanel implements ActionListener, KeyListener {
                 lblErrorUser.setText("Vui lòng nhập tên tài khoản");
 
             } else {
-                tenDN = accountDAO.containUserName(username);
-                List<String> duLieu = accountDAO.login(username, password);
-                if (duLieu.isEmpty()) {
+                try {
+                    tenDN = accountService.containUserName(username);
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
+                ArrayList<String> duLieu = null;
+                try {
+                    duLieu = (ArrayList<String>) accountService.login(username, password);
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
+
+                if (!(duLieu.get(0) == null)) {
+
+                    if (txtUsername.getText().equals(duLieu.get(0))) {
+                        if (txtPassword.getText().equals(duLieu.get(1))) {
+                            kqCheck = true;
+                        } else {
+                            kqCheck = false;
+                            txtPassword.requestFocus();
+                            lblErrorUser.setText("");
+                            lblErrorPass.setText("Mật khẩu không đúng");
+
+                        }
+                    } else {
+                        kqCheck = false;
+                        JOptionPane.showMessageDialog(this, "Tài khoản không tồn tại");
+                    }
+                    if (kqCheck) {
+                        currentAccount = txtUsername.getText().trim();
+
+                        lblErrorUser.setText("");
+                        lblErrorPass.setText("");
+                        StaticProcess.userlogin = txtUsername.getText();
+                        try {
+                            StaticProcess.empLogin = employeeService.findById(txtUsername.getText());
+                        } catch (RemoteException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                        StaticProcess.loginSuccess = true;
+                        closeLoginWindow();
+
+                    }
+                } else {
                     if (tenDN != null) {
                         if (tenDN.equals(txtUsername.getText()) == true) {
                             txtPassword.requestFocus();
@@ -208,43 +263,19 @@ public class Login extends JPanel implements ActionListener, KeyListener {
                     } else {
                         JOptionPane.showMessageDialog(this, "Tài khoản không tồn tại");
                     }
-                }else {
-                    if (!(duLieu.get(0) == null)) {
-
-                        if (txtUsername.getText().equals(duLieu.get(0))) {
-                            if (txtPassword.getText().equals(duLieu.get(1))) {
-                                kqCheck = true;
-                            } else {
-                                kqCheck = false;
-                                txtPassword.requestFocus();
-                                lblErrorUser.setText("");
-                                lblErrorPass.setText("Mật khẩu không đúng");
-
-                            }
-                        } else {
-                            kqCheck = false;
-                            JOptionPane.showMessageDialog(this, "Tài khoản không tồn tại");
-                        }
-                        if (kqCheck) {
-                            currentAccount = txtUsername.getText().trim();
-
-                            lblErrorUser.setText("");
-                            lblErrorPass.setText("");
-                            StaticProcess.userlogin = txtUsername.getText();
-                            StaticProcess.empLogin = new EmployeeDAO(Employee.class).findById(txtUsername.getText());
-                            StaticProcess.loginSuccess = true;
-                            closeLoginWindow();
-
-                        }
-                    }
                 }
-
-
-
             }
         } else if (o.equals(checkBoxForgotPW)) {
             if (checkBoxForgotPW.isSelected()) {
-                handleForgotPasswordCheckbox();
+                try {
+                    handleForgotPasswordCheckbox();
+                } catch (MalformedURLException ex) {
+                    throw new RuntimeException(ex);
+                } catch (NotBoundException ex) {
+                    throw new RuntimeException(ex);
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
 
             }
 
@@ -280,16 +311,16 @@ public class Login extends JPanel implements ActionListener, KeyListener {
         }
     }
 
-    public static Employee getEmployeeLogin(){
-        return new EmployeeDAO(Employee.class).findById(currentAccount);
+    public static Employee getEmployeeLogin() throws RemoteException {
+        return employeeService.findById(currentAccount);
     }
 
-    public static Manager getManagerLogin(){
-        return new ManagerDAO(Manager.class).findById(currentAccount);
+    public static Manager getManagerLogin() throws RemoteException {
+        return managerService.findById(currentAccount);
     }
 
-    public static boolean checkRole(){
-        if (new EmployeeDAO(Employee.class).findById(currentAccount) != null){
+    public static boolean checkRole() throws RemoteException {
+        if (employeeService.findById(currentAccount) != null){
             return true;
         }
         return false;

@@ -10,6 +10,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
+import java.net.MalformedURLException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.List;
 
 public class HomeOverlay extends JWindow {
@@ -21,13 +24,13 @@ public class HomeOverlay extends JWindow {
     private PanelOverlay overlay;
     private List<ModelLocation> locations;
 
-    public HomeOverlay(JFrame frame, List<ModelLocation> locations) {
+    public HomeOverlay(JFrame frame, List<ModelLocation> locations) throws MalformedURLException, NotBoundException, RemoteException {
         super(frame);
         this.locations = locations;
         init();
     }
 
-    private void init() {
+    private void init() throws MalformedURLException, NotBoundException, RemoteException {
         setBackground(new Color(0, 0, 0, 0));
         setLayout(new BorderLayout());
         overlay = new PanelOverlay();
@@ -55,11 +58,11 @@ public class HomeOverlay extends JWindow {
             textDescription.setText(location.getDescription());
         }
 
-        public PanelOverlay() {
+        public PanelOverlay() throws MalformedURLException, NotBoundException, RemoteException {
             init();
         }
 
-        private void init() {
+        private void init() throws MalformedURLException, NotBoundException, RemoteException {
             setOpaque(false); // Thay đổi thành true để cho phép màu nền
 //            setBackground(Color.WHITE);
             migLayout = new MigLayout("fill, insets 5 100 5 100", "fill", "[grow 0][]");
@@ -149,7 +152,7 @@ public class HomeOverlay extends JWindow {
             add(header, "wrap");
         }
 
-        private void createLogin() {
+        private void createLogin() throws MalformedURLException, NotBoundException, RemoteException {
             panelLogin = new Login();
             add(panelLogin, "pos 100% 0.5al, w 600, h 600");
         }

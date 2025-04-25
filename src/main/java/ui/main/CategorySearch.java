@@ -1,10 +1,10 @@
 package ui.main;
 
-import dao.AdministrationRouteDAO;
-import dao.CategoryDAO;
-import dao.ProductDAO;
-import dao.VendorDAO;
 import model.*;
+import service.AdministrationRouteService;
+import service.CategoryService;
+import service.ProductService;
+import service.VendorService;
 import ui.table.TableCustom;
 
 import javax.swing.*;
@@ -15,6 +15,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -22,11 +26,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class CategorySearch extends JPanel {
+    AdministrationRouteService administrationRouteService = (AdministrationRouteService)  Naming.lookup("rmi://localhost:7281/administrationRouteService");
+    ProductService productService = (ProductService) Naming.lookup("rmi://localhost:7281/productService");
+    VendorService vendorService = (VendorService) Naming.lookup("rmi://localhost:7281/vendorService");
+    CategoryService categoryService = (CategoryService) Naming.lookup("rmi://localhost:7281/categoryService");
+
     private final ArrayList<Product> proFetchList;
     private HomePage homePage;
     private ArrayList<Product> productsListTemp;
 
-    public CategorySearch(HomePage homePage) {
+    public CategorySearch(HomePage homePage) throws MalformedURLException, NotBoundException, RemoteException {
         this.homePage = homePage;
         initComponents();
         JTableHeader theader = tableProduct.getTableHeader();
@@ -37,7 +46,7 @@ public class CategorySearch extends JPanel {
         showDataComboBoxVendor();
         showDataComboBoxCategory();
         showDataComboBoxAdmintrationRoute();
-        proFetchList = (ArrayList<Product>) productDAO.fetchProducts();
+        proFetchList = (ArrayList<Product>) productService.fetchProducts();
     }
 
 
@@ -98,7 +107,11 @@ public class CategorySearch extends JPanel {
         txtDate.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent evt) {
-                txtDateActionPerformed(evt);
+                try {
+                    txtDateActionPerformed(evt);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -109,7 +122,11 @@ public class CategorySearch extends JPanel {
         btnCalendar.setShadowColor(new Color(255, 255, 255));
         btnCalendar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                btnCalendarActionPerformed(evt);
+                try {
+                    btnCalendarActionPerformed(evt);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -123,7 +140,15 @@ public class CategorySearch extends JPanel {
         btnAdd.setShadowColor(new Color(0, 0, 0));
         btnAdd.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                btnAddActionPerformed(evt);
+                try {
+                    btnAddActionPerformed(evt);
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException(e);
+                } catch (NotBoundException e) {
+                    throw new RuntimeException(e);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -137,7 +162,11 @@ public class CategorySearch extends JPanel {
         cbbCategory.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 if (txtSearch.getText().equals("Nhập tiêu chí tìm kiếm ...")) {
-                    cbbCategoryActionPerformed(evt);
+                    try {
+                        cbbCategoryActionPerformed(evt);
+                    } catch (RemoteException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
 
             }
@@ -153,7 +182,11 @@ public class CategorySearch extends JPanel {
         cbbVendor.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 if (txtSearch.getText().equals("Nhập tiêu chí tìm kiếm ...")) {
-                    cbbVendorActionPerformed(evt);
+                    try {
+                        cbbVendorActionPerformed(evt);
+                    } catch (RemoteException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         });
@@ -169,7 +202,11 @@ public class CategorySearch extends JPanel {
         cbbMethod.setName(""); // NOI18N
         cbbMethod.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                cbbMethodActionPerformed(evt);
+                try {
+                    cbbMethodActionPerformed(evt);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
             }
 
         });
@@ -217,7 +254,11 @@ public class CategorySearch extends JPanel {
         cbbAdministration.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 if (txtSearch.getText().equals("Nhập tiêu chí tìm kiếm ...")) {
-                    cbbAdministrationActionPerformed(evt);
+                    try {
+                        cbbAdministrationActionPerformed(evt);
+                    } catch (RemoteException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         });
@@ -366,19 +407,19 @@ public class CategorySearch extends JPanel {
         );
     }// </editor-fold>
 
-    private void txtDateActionPerformed(ActionEvent evt) {
-        ArrayList<Product> proListByDate = (ArrayList<Product>) productDAO.searchByMultipleCriteria("Product",convertDateFormat(txtDate.getText()));
+    private void txtDateActionPerformed(ActionEvent evt) throws RemoteException {
+        ArrayList<Product> proListByDate = (ArrayList<Product>) productService.searchByMultipleCriteria("Product",convertDateFormat(txtDate.getText()));
         showTable(proListByDate);
 
     }
 
-    private void btnCalendarActionPerformed(ActionEvent evt) {
+    private void btnCalendarActionPerformed(ActionEvent evt) throws RemoteException {
         date.showPopup();
-        ArrayList<Product> proListByDate = (ArrayList<Product>) productDAO.searchByMultipleCriteria("Product",convertDateFormat(txtDate.getText()));
+        ArrayList<Product> proListByDate = (ArrayList<Product>) productService.searchByMultipleCriteria("Product",convertDateFormat(txtDate.getText()));
         showTable(proListByDate);
     }
 
-    private void btnAddActionPerformed(ActionEvent evt) {
+    private void btnAddActionPerformed(ActionEvent evt) throws MalformedURLException, NotBoundException, RemoteException {
         AddProduct addProduct = new AddProduct();
         homePage.updateCurretPanel(addProduct);
 
@@ -391,22 +432,22 @@ public class CategorySearch extends JPanel {
         pCenter.repaint();
     }
 
-    private void cbbCategoryActionPerformed(ActionEvent evt) {
-        ArrayList<Product> proListByCategory = (ArrayList<Product>) productDAO.searchByMultipleCriteria("Product",(String) cbbCategory.getSelectedItem());
+    private void cbbCategoryActionPerformed(ActionEvent evt) throws RemoteException {
+        ArrayList<Product> proListByCategory = (ArrayList<Product>) productService.searchByMultipleCriteria("Product",(String) cbbCategory.getSelectedItem());
         showTable(proListByCategory);
     }
 
-    private void cbbVendorActionPerformed(ActionEvent evt) {
-        ArrayList<Product> proListByVendor = (ArrayList<Product>) productDAO.searchByMultipleCriteria("Product",(String) cbbVendor.getSelectedItem());
+    private void cbbVendorActionPerformed(ActionEvent evt) throws RemoteException {
+        ArrayList<Product> proListByVendor = (ArrayList<Product>) productService.searchByMultipleCriteria("Product",(String) cbbVendor.getSelectedItem());
         showTable(proListByVendor);
     }
 
-    private void cbbMethodActionPerformed(ActionEvent evt) {
+    private void cbbMethodActionPerformed(ActionEvent evt) throws RemoteException {
         searchByOtherCriterious();
     }
 
-    private void cbbAdministrationActionPerformed(ActionEvent evt) {
-        ArrayList<Product> proListByAdmin = (ArrayList<Product>) productDAO.searchByMultipleCriteria("Product",(String) cbbAdministration.getSelectedItem());
+    private void cbbAdministrationActionPerformed(ActionEvent evt) throws RemoteException {
+        ArrayList<Product> proListByAdmin = (ArrayList<Product>) productService.searchByMultipleCriteria("Product",(String) cbbAdministration.getSelectedItem());
         showTable(proListByAdmin);
     }
 
@@ -440,7 +481,6 @@ public class CategorySearch extends JPanel {
     private ui.table.TableScrollButton tableScrollButton_Product;
     private ui.textfield.TextField txtDate;
     private ui.textfield.TextField txtSearch;
-    ProductDAO productDAO = new ProductDAO(Product.class );
 
 
     public void showTable(ArrayList<Product> arrayList) {
@@ -507,9 +547,9 @@ public class CategorySearch extends JPanel {
         }
     }
 
-    public void showDataComboBoxVendor() {
-        VendorDAO vendor_dao = new VendorDAO(Vendor.class);
-        List<Vendor> list = vendor_dao.getAll();
+    public void showDataComboBoxVendor() throws RemoteException {
+
+        List<Vendor> list = vendorService.getAll();
 
         Set<Vendor> uniqueValues = new LinkedHashSet<>(list);
         List<Vendor> uniqueList = new ArrayList<>(uniqueValues);
@@ -520,9 +560,8 @@ public class CategorySearch extends JPanel {
 
     }
 
-    public void showDataComboBoxCategory() {
-        CategoryDAO category_dao = new CategoryDAO(Category.class);
-        List<Category> list = category_dao.getAll();
+    public void showDataComboBoxCategory() throws RemoteException {
+        List<Category> list = categoryService.getAll();
 
         Set<Category> uniqueValues = new LinkedHashSet<>(list);
         List<Category> uniqueList = new ArrayList<>(uniqueValues);
@@ -532,9 +571,8 @@ public class CategorySearch extends JPanel {
         }
     }
 
-    public void showDataComboBoxAdmintrationRoute() {
-        AdministrationRouteDAO administrationRoute_dao = new AdministrationRouteDAO(AdministrationRoute.class);
-        List<AdministrationRoute> list = administrationRoute_dao.getAll();
+    public void showDataComboBoxAdmintrationRoute() throws RemoteException {
+        List<AdministrationRoute> list = administrationRouteService.getAll();
 
         Set<AdministrationRoute> uniqueValues = new LinkedHashSet<>(list);
         List<AdministrationRoute> uniqueList = new ArrayList<>(uniqueValues);
@@ -558,17 +596,16 @@ public class CategorySearch extends JPanel {
         }
     }
 
-    public void searchByOtherCriterious() {
-        ProductDAO productDAO = new ProductDAO(Product.class);
+    public void searchByOtherCriterious() throws RemoteException {
         String searchByOther = (String) cbbMethod.getSelectedItem();
         if (searchByOther != null) {
             if (searchByOther.equals("Sản phẩm sắp hết hạn")) {
-                ArrayList<Product> proNearExpire = (ArrayList<Product>) productDAO.getProductListNearExpire();
+                ArrayList<Product> proNearExpire = (ArrayList<Product>) productService.getProductListNearExpire();
                 showTable(proNearExpire);
 
             } else if (searchByOther.equals("Sản phẩm tồn kho thấp")) {
                 DefaultTableModel model = (DefaultTableModel) tableProduct.getModel();
-                ArrayList<Product> lowStockProductsList = (ArrayList<Product>) productDAO.getLowStockProducts(25);
+                ArrayList<Product> lowStockProductsList = (ArrayList<Product>) productService.getLowStockProducts(25);
                 if (lowStockProductsList.isEmpty()) {
                     model.addRow(new Object[]{"...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "..."});
                 } else {

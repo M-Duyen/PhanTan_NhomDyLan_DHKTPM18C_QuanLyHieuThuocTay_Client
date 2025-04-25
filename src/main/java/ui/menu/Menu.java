@@ -7,7 +7,9 @@ import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -109,9 +111,11 @@ public class Menu extends JComponent{
                 if(event != null){
                     try {
                         event.selected(index, 0);
-                    } catch (RemoteException ex) {
+                    } catch (MalformedURLException ex) {
                         throw new RuntimeException(ex);
-                    } catch (Exception ex) {
+                    } catch (NotBoundException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (RemoteException ex) {
                         throw new RuntimeException(ex);
                     }
                 }
@@ -132,7 +136,11 @@ public class Menu extends JComponent{
                 if(event != null){
                     try {
                         event.selected(index, subItem.getIndex());
-                    } catch (Exception ex) {
+                    } catch (MalformedURLException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (NotBoundException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (RemoteException ex) {
                         throw new RuntimeException(ex);
                     }
                 }

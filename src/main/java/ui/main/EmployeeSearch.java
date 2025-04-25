@@ -4,19 +4,22 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
-import dao.EmployeeDAO;
 import model.Employee;
+import service.EmployeeService;
 import ui.table.TableCustom;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 public class EmployeeSearch extends JPanel {
-
-    public EmployeeSearch() {
+    EmployeeService employeeService = (EmployeeService) Naming.lookup("rmi://localhost:7281/employeeService");
+    public EmployeeSearch() throws MalformedURLException, NotBoundException, RemoteException {
         initComponents();
-        employee_dao = new EmployeeDAO(model.Employee.class);
         JTableHeader theader = tableEmployee.getTableHeader();
         theader.setFont(new java.awt.Font("Segoe UI", 0, 18));
 
@@ -46,7 +49,11 @@ public class EmployeeSearch extends JPanel {
 
             @Override
             public void keyReleased(KeyEvent e) {
-                searchEmployee();
+                try {
+                    searchEmployee();
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         });
     }
@@ -157,13 +164,13 @@ public class EmployeeSearch extends JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtEmplIDActionPerformed
 
-    private void searchEmployee(){
+    private void searchEmployee() throws RemoteException {
         DefaultTableModel model = (DefaultTableModel) tableEmployee.getModel();
         model.setRowCount(0); // Xóa các dòng hiện tại
         String criteria = txtEmplID.getText().trim();
 
         // Gọi phương thức tìm kiếm từ Customer_DAO
-        ArrayList<Employee> searchResults = (ArrayList<Employee>) employee_dao.searchByMultipleCriteria("Employee",criteria);
+        ArrayList<Employee> searchResults = (ArrayList<Employee>) employeeService.searchByMultipleCriteria("Employee",criteria);
         if(searchResults.isEmpty()){
             model.addRow(new Object[] {"...","...","...","...","...","...","...","...","..."});
             // Tùy chọn: Căn chỉnh cột đầu tiên cho thông báo
@@ -194,7 +201,6 @@ public class EmployeeSearch extends JPanel {
     private JScrollPane scrollPane_tableEmployee;
     private JTable tableEmployee;
     private ui.textfield.TextField txtEmplID;
-    private EmployeeDAO employee_dao;
     // End of variables declaration//GEN-END:variables
 
 }

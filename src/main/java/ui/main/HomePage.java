@@ -1,12 +1,9 @@
 package ui.main;
 
-
-
-import dao.EmployeeDAO;
-import dao.ManagerDAO;
-import lombok.SneakyThrows;
 import model.Employee;
 import model.Manager;
+import service.EmployeeService;
+import service.ManagerService;
 import staticProcess.StaticProcess;
 import ui.dialog.Confirm;
 import ui.forms.TempOrderForm;
@@ -21,7 +18,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
@@ -33,12 +33,14 @@ import static staticProcess.StaticProcess.userlogin;
 
 
 public class HomePage extends JFrame implements ActionListener{
+    EmployeeService employeeService = (EmployeeService) Naming.lookup("rmi://localhost:7281/employeeService");
+    ManagerService managerService = (ManagerService) Naming.lookup("rmi://localhost:7281/managerService");
     private JPanel currentPanel;
 
     private final HomeSlide homeSlide = new HomeSlide();
     private final CreateOrder createOrder = new CreateOrder(this);
     //private final OrderHistory orderHistory = new OrderHistory(this);
-//    private final RevenueStatistic revenueStatistic = new RevenueStatistic();
+    private final RevenueStatistic revenueStatistic = new RevenueStatistic();
     //private CategorySearch category = new CategorySearch();
     private final AddProduct addProduct = new AddProduct();
     private final UpdateProduct updateProduct = new UpdateProduct();
@@ -51,10 +53,11 @@ public class HomePage extends JFrame implements ActionListener{
     private final AddEmployee addEmployee = new AddEmployee();
     private final PromotionSearch promotionSearch = new PromotionSearch();
     private final AddPromotion addPromotion = new AddPromotion();
+    private final TodayRevenueStatistic todayRevenueStatistic = new TodayRevenueStatistic();
     private final ProcessOrder processOrder = new ProcessOrder();
     private static String accLoginID;
 
-    public HomePage() throws RemoteException {
+    public HomePage() throws MalformedURLException, NotBoundException, RemoteException {
         initComponents();
         setFullScreen();
         updateDateLable();
@@ -64,7 +67,7 @@ public class HomePage extends JFrame implements ActionListener{
         GlassPanePopup.install(this);
         menu.setEvent(new MenuEvent() {
             @Override
-            public void selected(int index, int subIndex) throws Exception {
+            public void selected(int index, int subIndex) throws MalformedURLException, NotBoundException, RemoteException {
                 openFrame(index, subIndex);
             }
         });
@@ -84,13 +87,16 @@ public class HomePage extends JFrame implements ActionListener{
         btnAvatar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                EmployeeDAO employee_dao = new EmployeeDAO(Employee.class);
-                ManagerDAO manager_dao = new ManagerDAO(Manager.class);
 
                 Message message = new Message();
 
                 if(userlogin.startsWith("MN")){
-                    Manager emp = manager_dao.findById(userlogin);
+                    Manager emp = null;
+                    try {
+                        emp = managerService.findById(userlogin);
+                    } catch (RemoteException ex) {
+                        throw new RuntimeException(ex);
+                    }
                     message.lblEmpID_show.setText(emp.getManagerID());
                     message.lblEmpName_show.setText(emp.getManagerName());
                     message.lblPhoneNumber_show.setText(emp.getPhoneNumber());
@@ -100,7 +106,12 @@ public class HomePage extends JFrame implements ActionListener{
                     message.lblDegree_show.setText("");
                     message.lblEmail_show.setText("");
                 }else {
-                    Employee emp = employee_dao.getListEmployeeByAccountID(userlogin);
+                    Employee emp = null;
+                    try {
+                        emp = employeeService.getListEmployeeByAccountID(userlogin);
+                    } catch (RemoteException ex) {
+                        throw new RuntimeException(ex);
+                    }
                     message.lblEmpID_show.setText(emp.getEmployeeName());
                     message.lblEmpName_show.setText(emp.getEmployeeID());
                     message.lblPhoneNumber_show.setText(emp.getPhoneNumber());
@@ -126,7 +137,7 @@ public class HomePage extends JFrame implements ActionListener{
         accLoginID = s;
     }
 
-    private void openFrame(int index,int subIndex) throws Exception {
+    private void openFrame(int index,int subIndex) throws MalformedURLException, NotBoundException, RemoteException {
         //Trang chủ
         if(index == 0 && subIndex == 0){
             replacePanel(homeSlide);
@@ -139,7 +150,7 @@ public class HomePage extends JFrame implements ActionListener{
         } else if(index == 1 && subIndex == 3){
             replacePanel(processOrder.getPnlProcessPanel());
         } else if(index == 1 && subIndex == 4){
-//            replacePanel(revenueStatistic);
+            replacePanel(revenueStatistic);
         } else if(index == 1 && subIndex == 5){
             replacePanel(new TodayRevenueStatistic());
         }
@@ -230,7 +241,7 @@ public class HomePage extends JFrame implements ActionListener{
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
+    private void initComponents() throws RemoteException {
 
         pNorth = new JPanel();
         lbHeaderDate = new JLabel();
@@ -275,7 +286,7 @@ public class HomePage extends JFrame implements ActionListener{
         lblEmplName.setFont(new Font("Segoe UI", 0, 18)); // NOI18N
         lblEmplName.setForeground(new Color(255, 255, 255));
         lblEmplName.setHorizontalAlignment(SwingConstants.RIGHT);
-        String userName = userlogin.startsWith("MN")?new ManagerDAO(Manager.class).findById(userlogin).getManagerName():new EmployeeDAO(Employee.class).findById(userlogin).getEmployeeName();
+        String userName = userlogin.startsWith("MN")?managerService.findById(userlogin).getManagerName():employeeService.findById(userlogin).getEmployeeName();
         lblEmplName.setText(userName);
 
         GroupLayout pNorthLayout = new GroupLayout(pNorth);
@@ -420,9 +431,16 @@ public class HomePage extends JFrame implements ActionListener{
 
         /* Create and display the form */
         EventQueue.invokeLater(new Runnable() {
-            @SneakyThrows
             public void run() {
-                StaticProcess.homePage = new HomePage();
+                try {
+                    StaticProcess.homePage = new HomePage();
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException(e);
+                } catch (NotBoundException e) {
+                    throw new RuntimeException(e);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
                 homePage.setVisible(true);
                 StaticProcess.login.setVisible(false);
             }
@@ -457,7 +475,15 @@ public class HomePage extends JFrame implements ActionListener{
                     int response = dialog.getResponse();
                     if(response == 1) {
                         StaticProcess.loginSuccess = false;
-                        WelcomeMyApp.main(null);
+                        try {
+                            WelcomeMyApp.main(null);
+                        } catch (MalformedURLException ex) {
+                            throw new RuntimeException(ex);
+                        } catch (NotBoundException ex) {
+                            throw new RuntimeException(ex);
+                        } catch (RemoteException ex) {
+                            throw new RuntimeException(ex);
+                        }
                         HomePage.this.dispose();
 //                        new ui.dialog.Message(HomePage.this, true, "Thông báo", "Đăng xuất thành công", "src/main/java/ui/dialog/done.png").showAlert();
                     }
