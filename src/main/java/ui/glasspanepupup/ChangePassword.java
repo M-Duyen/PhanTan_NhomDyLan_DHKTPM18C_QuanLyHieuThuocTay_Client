@@ -1,7 +1,9 @@
 package ui.glasspanepupup;
 
+
 import model.Account;
 import service.AccountService;
+import service.CustomerService;
 import ui.login.Login;
 
 import java.awt.*;
@@ -153,14 +155,14 @@ public class ChangePassword extends javax.swing.JPanel {
 
     private void btnChangeActionPerformed(java.awt.event.ActionEvent evt) throws MalformedURLException, NotBoundException, RemoteException {
         Login login = new Login();
-        AccountService accountDAO = (AccountService) Naming.lookup("rmi://localhost:7281/accountService");
+        AccountService accountService =  (AccountService) Naming.lookup("rmi://localhost:7281/accountService");
 
 
         if (!txtNew.getText().isEmpty() && !txtConfirm.getText().isEmpty() && !txtCurrent.getText().isEmpty()) {
             if (txtNew.getText().equals(txtConfirm.getText())) {
-                ArrayList<String> account = (ArrayList<String>) accountDAO.login(login.getTxtUsername().getText(), txtCurrent.getText());
+                ArrayList<String> account = (ArrayList<String>) accountService.login(login.getTxtUsername().getText(), txtCurrent.getText());
                 if (account.get(0) != null) {
-                    accountDAO.updatePasswordByAccountID(account.get(0), txtNew.getText());
+                    accountService.updatePasswordByAccountID(account.get(0), txtNew.getText());
                     lblError.setForeground(Color.green);
                     lblError.setText("Cập nhật mật khẩu thành công");
 

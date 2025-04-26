@@ -41,11 +41,11 @@ public class HomePage extends JFrame implements ActionListener{
     private final HomeSlide homeSlide = new HomeSlide();
     private final CreateOrder createOrder = new CreateOrder(this);
     //private final OrderHistory orderHistory = new OrderHistory(this);
-    private final RevenueStatistic revenueStatistic = new RevenueStatistic();
+//    private final RevenueStatistic revenueStatistic = new RevenueStatistic();
     //private CategorySearch category = new CategorySearch();
     private final AddProduct addProduct = new AddProduct();
     private final UpdateProduct updateProduct = new UpdateProduct();
-    private final ProductStatistics productStatistics = new ProductStatistics(this);
+//    private final ProductStatistics productStatistics = new ProductStatistics(this);
     private final AddCustomer addCustomer = new AddCustomer();
     private final CustomerSearch customerSearch = new CustomerSearch();
     private final VendorSearch vendorSearch = new VendorSearch();
@@ -58,7 +58,7 @@ public class HomePage extends JFrame implements ActionListener{
     private final ProcessOrder processOrder = new ProcessOrder();
     private static String accLoginID;
 
-    public HomePage() throws MalformedURLException, NotBoundException, RemoteException {
+    public HomePage() throws Exception {
         initComponents();
         setFullScreen();
         updateDateLable();
@@ -68,7 +68,7 @@ public class HomePage extends JFrame implements ActionListener{
         GlassPanePopup.install(this);
         menu.setEvent(new MenuEvent() {
             @Override
-            public void selected(int index, int subIndex) throws MalformedURLException, NotBoundException, RemoteException {
+            public void selected(int index, int subIndex) throws Exception {
                 openFrame(index, subIndex);
             }
         });
@@ -138,7 +138,7 @@ public class HomePage extends JFrame implements ActionListener{
         accLoginID = s;
     }
 
-    private void openFrame(int index,int subIndex) throws MalformedURLException, NotBoundException, RemoteException {
+    private void openFrame(int index,int subIndex) throws Exception {
         //Trang chủ
         if(index == 0 && subIndex == 0){
             replacePanel(homeSlide);
@@ -151,7 +151,7 @@ public class HomePage extends JFrame implements ActionListener{
         } else if(index == 1 && subIndex == 3){
             replacePanel(processOrder.getPnlProcessPanel());
         } else if(index == 1 && subIndex == 4){
-            replacePanel(revenueStatistic);
+//            replacePanel(revenueStatistic);
         } else if(index == 1 && subIndex == 5){
             replacePanel(new TodayRevenueStatistic());
         }
@@ -161,8 +161,8 @@ public class HomePage extends JFrame implements ActionListener{
         } else if(index == 2 && subIndex == 2){
             replacePanel(addProduct);
         } else if(index == 2 && subIndex == 3){
-            replacePanel(productStatistics);
-            productStatistics.startAnimation();
+//            replacePanel(productStatistics);
+//            productStatistics.startAnimation();
         }
         //Khách hàng
         else if(index == 3 && subIndex == 1){
@@ -439,7 +439,7 @@ public class HomePage extends JFrame implements ActionListener{
                     throw new RuntimeException(e);
                 } catch (NotBoundException e) {
                     throw new RuntimeException(e);
-                } catch (RemoteException e) {
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
                 homePage.setVisible(true);

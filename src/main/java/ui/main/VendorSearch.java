@@ -16,12 +16,13 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class VendorSearch extends javax.swing.JPanel {
 
     public VendorSearch() throws MalformedURLException, NotBoundException, RemoteException {
         initComponents();
-        vendorDAO = (VendorService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/vendorService");
+        vendorDAO = (VendorService) Naming.lookup("rmi://localhost:7281/vendorService");
         JTableHeader theader = tableVendor.getTableHeader();
         theader.setFont(new java.awt.Font("Segoe UI", 0, 18));
 
@@ -247,8 +248,7 @@ public class VendorSearch extends javax.swing.JPanel {
                 loadTable(searchResults);
             }
             if (!nameCriteria_txt.isEmpty()) {
-                //TODO:
-//                ArrayList<Vendor> searchByCountryAndCri = vendorDAO.getVendorListByCriteriasByCountry(nameCriteria_txt, searchResults);
+//                List<Vendor> searchByCountryAndCri = vendorDAO.getVendorListByCriteriasByCountry(nameCriteria_txt, searchResults);
 //                model.setRowCount(0);
 //                if(!searchByCountryAndCri.isEmpty()){
 //                    loadTable(searchByCountryAndCri);

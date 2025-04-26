@@ -1,222 +1,319 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
+ */
 package ui.main;
-
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
-
-import model.Employee;
-import model.Manager;
+import dao.GenericDAO;
+import dao.OrderDAO;
+import lombok.SneakyThrows;
 import model.Order;
-import service.EmployeeService;
+import service.OrderService;
+import service.impl.OrderServiceImpl;
 import staticProcess.StaticProcess;
-import ui.login.Login;
 import ui.table.TableCustom;
+import utils.JPAUtil;
 
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
+import java.time.LocalDate;
+import java.util.List;
 
-
+/**
+ * @author nguye
+ */
 public class TodayRevenueStatistic extends javax.swing.JPanel {
 
-    public TodayRevenueStatistic() throws MalformedURLException, NotBoundException, RemoteException {
+    private final OrderService orderService = (OrderService) Naming.lookup("rmi://localhost:7281/orderService");
+    ;
+
+    /**
+     * Creates new form TodayRevenueStatistic
+     */
+    public TodayRevenueStatistic() throws Exception {
         initComponents();
-
         setupTable();
-        TableCustom.apply(scrollPane_tableCustomer, TableCustom.TableType.MULTI_LINE);
+        TableCustom.apply(jScrollPane_tableRevenue, TableCustom.TableType.MULTI_LINE);
 
-        String role = "";
-        if(!Login.checkRole()){
-            Manager manager = Login.getManagerLogin();
-            if(manager != null){
-                role = manager.getManagerID();
-            }
-        } else {
-            Employee employee = Login.getEmployeeLogin();
-            if(employee != null){
-                role = employee.getEmployeeID();
+        edtEmplID.setText(StaticProcess.userlogin);
+        edtEmplName.setText(StaticProcess.empLogin.getEmployeeName());
 
-//                ArrayList<Order> orderList = new OrderDAO(Order.class).filterOrderByEmpID(role);
-//                for (Order o : orderList){
-//                    DefaultTableModel model = (DefaultTableModel) tableStatictis.getModel();
-//                    model.addRow(new Object[]{o.getOrderID(), o.getCustomer().getCustomerName(), o.getEmployee().getEmployeeName(), o.getOrderDate()
-//                            , o.getPrescription() == null ?"": o.getPrescription().getPrescriptionID()
-//                            , o.getDiscount(), o.getTotalDue() });
-//                }
-//                lblSum_number.setText(StaticProcess.df.format(new OrderDAO(Order.class).calculateTotalAllOrder(role)));
-//                repaint();
-            }
-
-            Employee employ = ((EmployeeService)Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/employeeService")).findById(role);
-            if(employ != null){
-                lblEmpID_show.setText(role);
-                lblEmpName_show.setText(employee.getEmployeeName());
-            }
-        }
-
+        showDataCbbDate();
 
 
     }
 
     private void setupTable() {
-        JTableHeader theader = tableStatictis.getTableHeader();
+        JTableHeader theader = tableRevenue.getTableHeader();
         theader.setFont(new java.awt.Font("Segoe UI", 0, 18));
-        tableStatictis.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        if (tableStatictis.getColumnModel().getColumnCount() > 0) {
-            tableStatictis.getColumnModel().getColumn(0).setPreferredWidth(200);
-            tableStatictis.getColumnModel().getColumn(1).setPreferredWidth(250);
-            tableStatictis.getColumnModel().getColumn(2).setPreferredWidth(250);
-            tableStatictis.getColumnModel().getColumn(3).setPreferredWidth(250);
-            tableStatictis.getColumnModel().getColumn(4).setPreferredWidth(150);
-            tableStatictis.getColumnModel().getColumn(5).setPreferredWidth(182);
-            tableStatictis.getColumnModel().getColumn(6).setPreferredWidth(200);
+        tableRevenue.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        if (tableRevenue.getColumnModel().getColumnCount() > 0) {
+            tableRevenue.getColumnModel().getColumn(0).setPreferredWidth(220);
+            tableRevenue.getColumnModel().getColumn(1).setPreferredWidth(280);
+            tableRevenue.getColumnModel().getColumn(2).setPreferredWidth(280);
+            tableRevenue.getColumnModel().getColumn(3).setPreferredWidth(240);
+            tableRevenue.getColumnModel().getColumn(4).setPreferredWidth(252);
+            tableRevenue.getColumnModel().getColumn(5).setPreferredWidth(300);
         }
     }
+
 
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
-     * regenerated by the FormEditor.
+     * regenerated by the Form Editor.
      */
+    @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">
     private void initComponents() {
 
         pCenter = new javax.swing.JPanel();
-        scrollPane_tableCustomer = new javax.swing.JScrollPane();
-        tableStatictis = new JTable();
+        lbEmplID = new javax.swing.JLabel();
+        cbbDate = new ui.combobox.Combobox();
         lbTitlePane = new javax.swing.JLabel();
-        lblEmpName_show = new javax.swing.JLabel();
-        lblEmpID_show = new javax.swing.JLabel();
-        lblEmpID = new javax.swing.JLabel();
-        lblEmpName = new javax.swing.JLabel();
-        lblSum_number = new javax.swing.JLabel();
-        lblSum = new javax.swing.JLabel();
-
-        setPreferredSize(new java.awt.Dimension(1620, 1000));
-        setLayout(new java.awt.BorderLayout());
+        lbEmplName = new javax.swing.JLabel();
+        edtEmplName = new javax.swing.JLabel();
+        edtSum = new javax.swing.JLabel();
+        tableScrollButton_Product = new ui.table.TableScrollButton();
+        jScrollPane_tableRevenue = new javax.swing.JScrollPane();
+        tableRevenue = new javax.swing.JTable();
+        lbSum = new javax.swing.JLabel();
+        edtEmplID = new javax.swing.JLabel();
 
         pCenter.setBackground(new java.awt.Color(242, 249, 255));
         pCenter.setPreferredSize(new java.awt.Dimension(1600, 1000));
 
-        scrollPane_tableCustomer.setBackground(new java.awt.Color(221, 221, 221));
-        scrollPane_tableCustomer.setBorder(null);
+        lbEmplID.setFont(new java.awt.Font("Segoe UI", 0, 20)); // NOI18N
+        lbEmplID.setText("Mã nhân viên:");
 
-        tableStatictis.setBackground(new java.awt.Color(221, 221, 221));
-        tableStatictis.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        tableStatictis.setModel(new DefaultTableModel(
-                new Object [][] {
-
-                },
-                new String [] {
-                        "Mã hóa đơn", "Khách hàng", "Người tạo", "Thời gian", "Hình thức", "Khuyến mãi", "Tổng tiền"
-                }
-        ) {
-            boolean[] canEdit = new boolean [] {
-                    false, false, false, false, false, false, false
-            };
-
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
+        cbbDate.setBackground(new java.awt.Color(242, 249, 255));
+        cbbDate.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        cbbDate.setForeground(new java.awt.Color(102, 102, 102));
+        cbbDate.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
+        cbbDate.setSelectedIndex(-1);
+        cbbDate.setLabeText("Ngày");
+        cbbDate.addActionListener(new java.awt.event.ActionListener() {
+            @SneakyThrows
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbbDateActionPerformed(evt);
             }
         });
-        tableStatictis.setGridColor(new java.awt.Color(218, 247, 249));
-        scrollPane_tableCustomer.setViewportView(tableStatictis);
 
         lbTitlePane.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
         lbTitlePane.setForeground(new java.awt.Color(102, 204, 255));
         lbTitlePane.setText("THỐNG KÊ DOANH THU");
 
-        lblEmpName_show.setFont(new java.awt.Font("Segoe UI", 0, 22)); // NOI18N
+        lbEmplName.setFont(new java.awt.Font("Segoe UI", 0, 20)); // NOI18N
+        lbEmplName.setText("Tên nhân viên:");
 
-        lblEmpID_show.setFont(new java.awt.Font("Segoe UI", 0, 22)); // NOI18N
+        edtEmplName.setFont(new java.awt.Font("Segoe UI", 0, 20)); // NOI18N
 
-        lblEmpID.setFont(new java.awt.Font("Segoe UI", 0, 22)); // NOI18N
-        lblEmpID.setText("Mã nhân viên:");
+        edtSum.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
 
-        lblEmpName.setFont(new java.awt.Font("Segoe UI", 0, 22)); // NOI18N
-        lblEmpName.setText("Họ và tên:");
+        tableScrollButton_Product.setMinimumSize(new java.awt.Dimension(200, 15));
+        tableScrollButton_Product.setPreferredSize(new java.awt.Dimension(1190, 400));
 
-        lblSum_number.setFont(new java.awt.Font("Segoe UI", 0, 28)); // NOI18N
-        lblSum_number.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        jScrollPane_tableRevenue.setBackground(new java.awt.Color(221, 221, 221));
+        jScrollPane_tableRevenue.setBorder(null);
+        jScrollPane_tableRevenue.setPreferredSize(new java.awt.Dimension(950, 400));
 
-        lblSum.setFont(new java.awt.Font("Segoe UI", 0, 28)); // NOI18N
-        lblSum.setText("Tổng tiền");
+        tableRevenue.setBackground(new java.awt.Color(242, 249, 255));
+        tableRevenue.setFont(new java.awt.Font("Segoe UI", 0, 20)); // NOI18N
+        tableRevenue.setModel(new javax.swing.table.DefaultTableModel(
+                new Object[][]{
+
+                },
+                new String[]{
+                        "Mã hóa đơn", "Khách hàng", "Thời gian", "Hình thức", "Khuyến mãi", "Tổng tiền"
+                }
+        ));
+        tableRevenue.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        tableRevenue.setGridColor(new java.awt.Color(218, 247, 249));
+        tableRevenue.setRequestFocusEnabled(false);
+        tableRevenue.setShowVerticalLines(true);
+        jScrollPane_tableRevenue.setViewportView(tableRevenue);
+
+        tableScrollButton_Product.add(jScrollPane_tableRevenue, java.awt.BorderLayout.CENTER);
+
+        lbSum.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        lbSum.setForeground(new java.awt.Color(102, 204, 255));
+        lbSum.setText("TỔNG TIỀN: ");
+
+        edtEmplID.setFont(new java.awt.Font("Segoe UI", 0, 20)); // NOI18N
 
         javax.swing.GroupLayout pCenterLayout = new javax.swing.GroupLayout(pCenter);
         pCenter.setLayout(pCenterLayout);
         pCenterLayout.setHorizontalGroup(
                 pCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(pCenterLayout.createSequentialGroup()
-                                .addGap(68, 68, 68)
-                                .addComponent(scrollPane_tableCustomer, javax.swing.GroupLayout.PREFERRED_SIZE, 1482, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap(70, Short.MAX_VALUE))
                         .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pCenterLayout.createSequentialGroup()
                                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(lbSum)
+                                .addGap(18, 18, 18)
+                                .addComponent(edtSum, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(34, 34, 34))
+                        .addGroup(pCenterLayout.createSequentialGroup()
                                 .addGroup(pCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pCenterLayout.createSequentialGroup()
+                                        .addGroup(pCenterLayout.createSequentialGroup()
+                                                .addGap(24, 24, 24)
+                                                .addComponent(cbbDate, javax.swing.GroupLayout.PREFERRED_SIZE, 196, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGroup(pCenterLayout.createSequentialGroup()
+                                                .addGap(596, 596, 596)
                                                 .addGroup(pCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                                        .addGroup(pCenterLayout.createSequentialGroup()
-                                                                .addGroup(pCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                                                        .addComponent(lblEmpName)
-                                                                        .addComponent(lblEmpID))
+                                                        .addComponent(lbTitlePane, javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, pCenterLayout.createSequentialGroup()
+                                                                .addGap(33, 33, 33)
                                                                 .addGroup(pCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                                        .addGroup(pCenterLayout.createSequentialGroup()
-                                                                                .addGap(18, 18, 18)
-                                                                                .addComponent(lblEmpName_show))
-                                                                        .addGroup(pCenterLayout.createSequentialGroup()
-                                                                                .addGap(77, 77, 77)
-                                                                                .addComponent(lblEmpID_show)))
-                                                                .addGap(19, 19, 19))
-                                                        .addComponent(lbTitlePane))
-                                                .addGap(597, 597, 597))
-                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pCenterLayout.createSequentialGroup()
-                                                .addComponent(lblSum, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(lblSum_number, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addGap(62, 62, 62))))
+                                                                        .addComponent(lbEmplName)
+                                                                        .addComponent(lbEmplID))
+                                                                .addGap(18, 18, 18)
+                                                                .addGroup(pCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                                        .addComponent(edtEmplID, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                        .addComponent(edtEmplName, javax.swing.GroupLayout.PREFERRED_SIZE, 227, javax.swing.GroupLayout.PREFERRED_SIZE))))))
+                                .addGap(618, 618, 618))
+                        .addGroup(pCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(pCenterLayout.createSequentialGroup()
+                                        .addGap(24, 24, 24)
+                                        .addComponent(tableScrollButton_Product, javax.swing.GroupLayout.PREFERRED_SIZE, 1572, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
         pCenterLayout.setVerticalGroup(
                 pCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(pCenterLayout.createSequentialGroup()
-                                .addGap(19, 19, 19)
-                                .addComponent(lbTitlePane, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
-                                .addGroup(pCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(lblEmpID_show)
-                                        .addComponent(lblEmpID))
+                                .addComponent(lbTitlePane, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(pCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(lblEmpName)
-                                        .addComponent(lblEmpName_show))
-                                .addGap(84, 84, 84)
-                                .addComponent(scrollPane_tableCustomer, javax.swing.GroupLayout.DEFAULT_SIZE, 619, Short.MAX_VALUE)
+                                        .addComponent(lbEmplID, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(edtEmplID, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addGroup(pCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(lblSum)
-                                        .addComponent(lblSum_number))
-                                .addGap(97, 97, 97))
+                                        .addComponent(edtEmplName, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(lbEmplName, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(48, 48, 48)
+                                .addComponent(cbbDate, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 686, Short.MAX_VALUE)
+                                .addGroup(pCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(lbSum, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(edtSum, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(22, 22, 22))
+                        .addGroup(pCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(pCenterLayout.createSequentialGroup()
+                                        .addGap(275, 275, 275)
+                                        .addComponent(tableScrollButton_Product, javax.swing.GroupLayout.PREFERRED_SIZE, 641, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addContainerGap(84, Short.MAX_VALUE)))
         );
 
-        add(pCenter, java.awt.BorderLayout.CENTER);
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+        this.setLayout(layout);
+        layout.setHorizontalGroup(
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(pCenter, javax.swing.GroupLayout.DEFAULT_SIZE, 1632, Short.MAX_VALUE)
+        );
+        layout.setVerticalGroup(
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(pCenter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        );
+
     }// </editor-fold>
 
+    private void cbbDateActionPerformed(java.awt.event.ActionEvent evt) throws RemoteException {
+
+        String choice = cbbDate.getSelectedItem().toString();
+        List<Order> list = orderService.filterOrderByEmpID(StaticProcess.userlogin, choice);
+        showDataTable(list);
+        edtSum.setText(String.valueOf(orderService.calculateTotalAllOrder(StaticProcess.userlogin, choice)));
+
+
+    }
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(TodayRevenueStatistic.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(TodayRevenueStatistic.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(TodayRevenueStatistic.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(TodayRevenueStatistic.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            @SneakyThrows
+            public void run() {
+                new TodayRevenueStatistic().setVisible(true);
+            }
+        });
+    }
+
+    public void showDataCbbDate() throws Exception {
+        assert orderService != null;
+        List<LocalDate> rs = orderService.getAllDateHaveEmpID(StaticProcess.userlogin);
+        if (rs != null && !rs.isEmpty()) {
+            cbbDate.removeAllItems();
+            rs.forEach(date -> cbbDate.addItem(date.toString()));
+        } else {
+            System.out.println("Khong co du lieu");
+        }
+
+    }
+
+    private void showDataTable(List<Order> list) {
+        DefaultTableModel model = new DefaultTableModel(
+                new Object[][]{},
+                new String[]{"Mã hóa đơn", "Khách hàng", "Thời gian", "Hình thức", "Khuyến mãi", "Tổng tiền"}
+        );
+        tableRevenue.setModel(model); // Reset lại model
+
+        for (Order order : list) {
+            model.addRow(new Object[]{
+                    order.getOrderID(),
+                    order.getCustomer().getPhoneNumber(),
+                    order.getOrderDate(),
+                    order.getPaymentMethod(),
+                    order.getDiscount(),
+                    order.getTotalDue()
+            });
+        }
+
+        setupTable();
+    }
 
 
     // Variables declaration - do not modify
+    private ui.combobox.Combobox cbbDate;
+    private javax.swing.JLabel edtEmplID;
+    private javax.swing.JLabel edtEmplName;
+    private javax.swing.JLabel edtSum;
+    private javax.swing.JScrollPane jScrollPane_tableRevenue;
+    private javax.swing.JLabel lbEmplID;
+    private javax.swing.JLabel lbEmplName;
+    private javax.swing.JLabel lbSum;
     private javax.swing.JLabel lbTitlePane;
-    private javax.swing.JLabel lblEmpID;
-    private javax.swing.JLabel lblEmpID_show;
-    private javax.swing.JLabel lblEmpName;
-    private javax.swing.JLabel lblEmpName_show;
-    private javax.swing.JLabel lblSum;
-    private javax.swing.JLabel lblSum_number;
     private javax.swing.JPanel pCenter;
-    private javax.swing.JScrollPane scrollPane_tableCustomer;
-    private JTable tableStatictis;
+    private javax.swing.JTable tableRevenue;
+    private ui.table.TableScrollButton tableScrollButton_Product;
     // End of variables declaration
 }
-

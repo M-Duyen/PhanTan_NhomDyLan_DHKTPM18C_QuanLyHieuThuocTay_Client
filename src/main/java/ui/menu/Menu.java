@@ -111,6 +111,10 @@ public class Menu extends JComponent{
                 if(event != null){
                     try {
                         event.selected(index, 0);
+                    } catch (MalformedURLException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (NotBoundException ex) {
+                        throw new RuntimeException(ex);
                     } catch (Exception ex) {
                         throw new RuntimeException(ex);
                     }
@@ -132,6 +136,10 @@ public class Menu extends JComponent{
                 if(event != null){
                     try {
                         event.selected(index, subItem.getIndex());
+                    } catch (MalformedURLException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (NotBoundException ex) {
+                        throw new RuntimeException(ex);
                     } catch (Exception ex) {
                         throw new RuntimeException(ex);
                     }
