@@ -1,7 +1,8 @@
 package ui.glasspanepupup;
 
-import dao.PrescriptionDAO;
 import model.Prescription;
+import service.PrescriptionService;
+import staticProcess.StaticProcess;
 import ui.dialog.Confirm;
 import ui.dialog.Message;
 import ui.forms.TempOrderForm;
@@ -11,6 +12,10 @@ import ui.panel.PanelRound;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -18,8 +23,9 @@ import java.time.format.DateTimeParseException;
 public class CreateOrderWithPres extends PanelRound{
     private HomePage homePage;
     private TempOrderForm tempOrderForm;
+    private PrescriptionService prescriptionSevervice = (PrescriptionService) Naming.lookup("rmi://"+ StaticProcess.properties.get("ServerName") +":" + StaticProcess.properties.get("Port") + "/prescriptionService");
 
-    public CreateOrderWithPres(HomePage homePage, TempOrderForm tempOrderForm) {
+    public CreateOrderWithPres(HomePage homePage, TempOrderForm tempOrderForm) throws MalformedURLException, NotBoundException, RemoteException {
         this.homePage = homePage;
         this.tempOrderForm = tempOrderForm;
         initComponents();
@@ -91,7 +97,11 @@ public class CreateOrderWithPres extends PanelRound{
         btnAdd.setShadowColor(new Color(51, 153, 255));
         btnAdd.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                btnAddActionPerformed(evt);
+                try {
+                    btnAddActionPerformed(evt);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -160,7 +170,7 @@ public class CreateOrderWithPres extends PanelRound{
         );
     }// </editor-fold>
 
-    private void btnAddActionPerformed(ActionEvent evt) {
+    private void btnAddActionPerformed(ActionEvent evt) throws RemoteException {
         String presID = txtPresID.getText().trim();
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
@@ -180,7 +190,7 @@ public class CreateOrderWithPres extends PanelRound{
         pres.setCreatedDate(createDate.atStartOfDay());
         pres.setDiagnosis(diagnosis);
         pres.setMedicalFacility(facility);
-        if(new PrescriptionDAO(Prescription.class).create(pres)){
+        if(prescriptionSevervice.create(pres)){
             new Message(homePage, true, "Thông báo", "Thêm đơn thuốc thành công", "src/main/java/ui/dialog/checked.png").showAlert();
             tempOrderForm.setPrescription(pres);
             homePage.closePres();

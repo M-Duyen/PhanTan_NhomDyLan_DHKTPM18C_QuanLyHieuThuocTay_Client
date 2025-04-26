@@ -3,16 +3,12 @@ package ui.login;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.util.UIScale;
 
-import model.Account;
 import model.Employee;
 import model.Manager;
 import service.AccountService;
 import service.EmployeeService;
 import service.ManagerService;
-import service.impl.AccountServiceImpl;
 import staticProcess.StaticProcess;
-import staticProcess.StaticProcess;
-import ui.main.WelcomeMyApp;
 import net.miginfocom.swing.MigLayout;
 
 

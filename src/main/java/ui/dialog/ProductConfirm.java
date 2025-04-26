@@ -1,7 +1,6 @@
 package ui.dialog;
 
 
-import dao.ProductDAO;
 import model.*;
 import staticProcess.StaticProcess;
 
@@ -100,7 +99,6 @@ public class ProductConfirm extends SweetAlert {
 
             @Override
             public void keyReleased(KeyEvent e) {
-                ProductDAO productDAO = new ProductDAO(Product.class);
                 String quantity = txtQuantity.getText().trim();
 //                String unitName = Unit_DAO.getInstance().convertDes_ToUnit(String.valueOf(cbbUnit.getSelectedItem()));
 //                PackagingUnit unitEnum = PackagingUnit.fromString(unitName);

@@ -520,7 +520,15 @@ public class TempOrderForm extends TabbedForm {
         ckbPres.setFont(new Font("Segoe UI", 0, 18)); // NOI18N
         ckbPres.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                ckbPresActionPerformed(evt);
+                try {
+                    ckbPresActionPerformed(evt);
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException(e);
+                } catch (NotBoundException e) {
+                    throw new RuntimeException(e);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -733,7 +741,7 @@ public class TempOrderForm extends TabbedForm {
         add(panelRound2, BorderLayout.CENTER);
     }// </editor-fold>
 
-    private void ckbPresActionPerformed(ActionEvent evt) {
+    private void ckbPresActionPerformed(ActionEvent evt) throws MalformedURLException, NotBoundException, RemoteException {
         if (ckbPres.isSelected()) {
             if (homePage != null) {
                 homePage.showPres(this);
