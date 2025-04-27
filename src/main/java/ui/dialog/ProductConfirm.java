@@ -91,7 +91,6 @@ public class ProductConfirm extends SweetAlert {
         txtInStock.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
 
         txtQuantity.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        String quantity = txtQuantity.getText().trim();
         txtQuantity.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {

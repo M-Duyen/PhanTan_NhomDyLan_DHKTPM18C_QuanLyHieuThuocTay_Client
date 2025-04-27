@@ -966,10 +966,10 @@ public class TempOrderForm extends TabbedForm {
                         new Message(homePage, true, "Thông báo", "Thêm chi tiết đơn hàng thất bại " + i + " !", "src/main/java/ui/dialog/warning.png").showAlert();
                         return;
                     }
-                if (!productService.update(afterProduct)) {
-                    new Message(homePage, true, "Thông báo", "Cập nhật số lượng tồn kho thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
-                    return;
-                }
+                    if (!productService.update(afterProduct)) {
+                        new Message(homePage, true, "Thông báo", "Cập nhật số lượng tồn kho thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
+                        return;
+                    }
                 }
 
                 if (customer != null) {
@@ -980,11 +980,11 @@ public class TempOrderForm extends TabbedForm {
                 }
 
                 new Message(homePage, true, "Xác nhận", "Thêm đơn hàng thành công!", "src/main/java/ui/dialog/checked.png").showAlert();
-                /*try {
+                try {
                     invoiceOrder(order);
                 } catch (IOException | NotBoundException e) {
                     throw new RuntimeException(e);
-                }*/
+                }
                 clearAll();
             } catch (Exception e) {
                e.printStackTrace();
@@ -1092,9 +1092,8 @@ public class TempOrderForm extends TabbedForm {
         }
 
         public static void invoiceOrder (Order order) throws IOException, NotBoundException {
-            OrderService orderService = (OrderService) Naming.lookup("rmi://localhost:7281/orderService");
-            OrderDetailService orderDetailService = (OrderDetailService) Naming.lookup("rmi://localhost:7281/orderDetailService");
-
+            OrderService orderService  = (OrderService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/orderService");
+            OrderDetailService orderDetailService  = (OrderDetailService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/orderDetailService");
             String path = "invoice.pdf";
             PdfWriter pdfWriter = new PdfWriter(path);
             PdfDocument pdfDocument = new PdfDocument(pdfWriter);

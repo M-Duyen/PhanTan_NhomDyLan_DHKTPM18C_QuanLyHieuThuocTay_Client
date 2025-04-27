@@ -495,7 +495,7 @@ public class OrderHistory extends javax.swing.JPanel {
         model.setRowCount(0);
         for (Order o : arrayList) {
             model.addRow(new Object[]{
-                    o.getOrderID(), o.getCustomer().getCustomerName(), o.getEmployee().getEmployeeName(), o.getOrderDate(), o.getPrescription() == null ? "Không kê đơn" : o.getPrescription().getPrescriptionID(), o.getDiscount(), o.getTotalDue()
+                    o.getOrderID(), o.getCustomer() == null ? "Khách vãng lai" : o.getCustomer().getCustomerName(), o.getEmployee().getEmployeeName(), o.getOrderDate(), o.getPrescription() == null ? "Không kê đơn" : o.getPrescription().getPrescriptionID(), o.getDiscount(), o.getTotalDue()
             });
         }
 
