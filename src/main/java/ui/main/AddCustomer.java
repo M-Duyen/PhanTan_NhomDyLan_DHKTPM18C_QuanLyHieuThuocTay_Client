@@ -1,6 +1,6 @@
 package ui.main;
 
-
+import static staticProcess.StaticProcess.*;
 import model.Customer;
 
 import service.CustomerService;
@@ -25,7 +25,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class AddCustomer extends JPanel implements ActionListener, MouseListener {
-    CustomerService customerService = (CustomerService) Naming.lookup("rmi://localhost:7281/customerService");
+    CustomerService customerService = (CustomerService) Naming.lookup("rmi://" + properties.get("ServerName") + ":" + properties.get("Port") + "/customerService");
     public AddCustomer() throws MalformedURLException, NotBoundException, RemoteException {
         initComponents();
         customer =new Customer();

@@ -14,29 +14,32 @@ import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.property.TextAlignment;
 
-import dao.OrderDAO;
-import dao.OrderDetailDAO;
 
 import model.Order;
 import model.OrderDetail;
 import model.PackagingUnit;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.printing.PDFPageable;
+import service.OrderDetailService;
+import service.OrderService;
+import staticProcess.StaticProcess;
 
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
 import java.awt.print.PrinterJob;
 import java.io.File;
 import java.io.IOException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 
 public class PDF {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, NotBoundException {
 
-        OrderDetailDAO orderDetails_dao = new OrderDetailDAO(OrderDetail.class);
-        OrderDAO orderDAO = new OrderDAO(Order.class);
+        OrderDetailService orderDetailService = (OrderDetailService) Naming.lookup("rmi://"+ StaticProcess.properties.get("ServerName") +":" + StaticProcess.properties.get("Port") + "/orderDetailService");
+        OrderService orderService = (OrderService) Naming.lookup("rmi://"+ StaticProcess.properties.get("ServerName") +":" + StaticProcess.properties.get("Port") + "/orderService");
 
         String path = "invoice.pdf";
         PdfWriter pdfWriter = new PdfWriter(path);
@@ -68,7 +71,7 @@ public class PDF {
 //        nestedtabe.addCell(getHeaderTextCellValue("22715701").setFontSize(8f));
 //        table2.addCell(new Cell().add(nestedtabe).setBorder(Border.NO_BORDER));
 
-        ArrayList<Order> list = (ArrayList<Order>) orderDAO.searchByMultipleCriteria("Order","OR241124000001");
+        ArrayList<Order> list = (ArrayList<Order>) orderService.searchByMultipleCriteria("Order","OR241124000001");
         Order o = new Order();
         if (!list.isEmpty()) { // Kiểm tra xem danh sách có phần tử hay không
             o = list.get(0); // Lấy phần tử đầu tiên
@@ -78,7 +81,7 @@ public class PDF {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         // Chuyển đổi LocalDateTime thành String
         String formattedDateTime = o.getOrderDate().format(formatter);
-        ArrayList<OrderDetail> listOD = (ArrayList<OrderDetail>) orderDetails_dao.searchByMultipleCriteria("OrderDetail", "OR241124000001");
+        ArrayList<OrderDetail> listOD = (ArrayList<OrderDetail>) orderDetailService.searchByMultipleCriteria("OrderDetail", "OR241124000001");
 
         Table tableInformation = new Table(columnWidths);
         tableInformation.addCell(getCell10Left("Thời gian", false).setFont(font));

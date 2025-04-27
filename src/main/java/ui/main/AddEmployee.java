@@ -1,6 +1,6 @@
 package ui.main;
 
-
+import static staticProcess.StaticProcess.*;
 import model.Employee;
 import service.EmployeeService;
 import staticProcess.StaticProcess;
@@ -25,7 +25,7 @@ import java.util.ArrayList;
 
 
 public class AddEmployee extends JPanel implements ActionListener, MouseListener {
-    EmployeeService employeeService = (EmployeeService) Naming.lookup("rmi://localhost:7281/employeeService");
+    EmployeeService employeeService = (EmployeeService) Naming.lookup("rmi://" + properties.get("ServerName") + ":" + properties.get("Port") + "/employeeService");
     public AddEmployee() throws MalformedURLException, NotBoundException, RemoteException {
         initComponents();
         TableCustom.apply(scrollPane_tableEmployee, TableCustom.TableType.MULTI_LINE);

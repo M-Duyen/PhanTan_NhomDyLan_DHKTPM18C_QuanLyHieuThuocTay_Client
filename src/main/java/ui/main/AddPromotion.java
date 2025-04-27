@@ -32,8 +32,8 @@ import java.util.ArrayList;
 
 public class AddPromotion extends JPanel {
 
-    PromotionService promotionService = (PromotionService) Naming.lookup("rmi://localhost:7281/promotionService");
-    PromotionTypeService promotionTypeService = (PromotionTypeService) Naming.lookup("rmi://localhost:7281/promotionTypeService");
+    PromotionService promotionService = (PromotionService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/promotionService");
+    PromotionTypeService promotionTypeService = (PromotionTypeService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/promotionTypeService");
     public AddPromotion() throws MalformedURLException, NotBoundException, RemoteException {
         initComponents();
 
@@ -452,11 +452,13 @@ public class AddPromotion extends JPanel {
         } else if (cri_type != null && crt_sta != null) {
             ArrayList<Promotion> proList_1 = (ArrayList<Promotion>) promotionService.searchByMultipleCriteria("Promotion",cri_type.toString());
             if (crt_sta.equals("Đang áp dụng")) {
-                promotionList = promotionService.getPromotionListByCriterous(true, proList_1);
+                //TODO
+//                promotionList = promotionService.getPromotionListByCriterous(true, proList_1);
 
 
             } else if (crt_sta.equals("Ngừng áp dụng")) {
-                promotionList = promotionService.getPromotionListByCriterous(false, proList_1);
+                //TODO
+//                promotionList = promotionService.getPromotionListByCriterous(false, proList_1);
 
             } else if (crt_sta.equals("")) {
                 promotionList = (ArrayList<Promotion>) promotionService.searchByMultipleCriteria("Promotion",cri_type.toString());

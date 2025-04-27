@@ -1,7 +1,4 @@
 package ui.main;
-
-
-
 import model.*;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -29,17 +26,14 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AddProduct extends JPanel {
-    ProductService productService = (ProductService) Naming.lookup("rmi://localhost:7281/productService");
-    VendorService vendorService = (VendorService) Naming.lookup("rmi://localhost:7281/vendorService");
-    CategoryService categoryService = (CategoryService) Naming.lookup("rmi://localhost:7281/categoryService");
+    ProductService productService = (ProductService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/productService");
+    VendorService vendorService = (VendorService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/vendorService");
+    CategoryService categoryService = (CategoryService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/categoryService");
     //    private final ArrayList<Product> listPd;
     private boolean flag = false;
     ArrayList<Product> temp = new ArrayList<>();
@@ -51,7 +45,7 @@ public class AddProduct extends JPanel {
 
         initComponents();
         setupTable();
-//        setDataTable(tableProduct, listPd);  // H: Bổ sung tiêu chí rồi mới load
+//        setDataTable(tableProduct, listPd);
 //        testData(tableProduct);
         TableCustom.apply(jScrollPane_tableProduct, TableCustom.TableType.MULTI_LINE);
         showDataComboBoxCategory();
@@ -288,7 +282,11 @@ public class AddProduct extends JPanel {
     private ui.textfield.TextField txtSearch;
     // End of variables declaration//GEN-END:variables
 
-    //Hàm load data sản phẩm từ excel
+    /**
+     * Load data product from excel file
+     * @param path
+     * @return
+     */
     public ArrayList<Product> loadDataProduct(String path) {
         ArrayList<Product> listProduct = new ArrayList();
         int xM = 0, xFF = 0, xMS = 0;
@@ -319,37 +317,39 @@ public class AddProduct extends JPanel {
                 String noteUnit = row.getCell(20).getStringCellValue();
                 switch (row.getCell(11).getStringCellValue()) {
                     case "M": {
-//                        String activeIngredient = row.getCell(13).getStringCellValue();
-//                        String administrationID = row.getCell(15).getStringCellValue();
-//                        String administrationName = row.getCell(16).getStringCellValue();
-//                        Medicine medicine = new Medicine(new ProductDAO(Product.class).getIDProduct("PM", xM), productName, registrationNumber, purchasePrice, taxPercentage, new Vendor(vendorID, vendorName, vendorCountry), new Category(categoryID, categoryName), null, endDate, activeIngredient, conversionUnit, new AdministrationRoute(administrationID, administrationName), noteUnit);
-//                        medicine.addUnit(PackagingUnit.fromString(conversionUnit), calSellPrice(purchasePrice , medicine), quantityInStock);
-//                        //Các đơn vị còn lại
-//                        addUnitByString(row.getCell(20).getStringCellValue(), purchasePrice, medicine);
-//                        xM++;
-//                        listProduct.add(medicine);
+                        String activeIngredient = row.getCell(13).getStringCellValue();
+                        String administrationID = row.getCell(15).getStringCellValue();
+                        String administrationName = row.getCell(16).getStringCellValue();
+
+                        Map<PackagingUnit, ProductUnit> unitMap = new HashMap<>();
+                        Medicine medicine = new Medicine(productService.getIDProduct("PM", xM), productName, registrationNumber, purchasePrice, taxPercentage, new Vendor(vendorID, vendorName, vendorCountry), new Category(categoryID, categoryName, null), endDate, activeIngredient, conversionUnit, new AdministrationRoute(administrationID, administrationName), noteUnit);
+                        medicine.addUnit(PackagingUnit.fromString(conversionUnit), new ProductUnit(calSellPrice(purchasePrice , medicine), quantityInStock));
+                        //Các đơn vị còn lại
+                        addUnitByString(row.getCell(20).getStringCellValue(), purchasePrice, medicine);
+                        xM++;
+                        listProduct.add(medicine);
                         break;
                     }
                     case "FF": {
-//                        String mainNutrients = row.getCell(17).getStringCellValue();
-//                        String supplementaryIngredients = row.getCell(18).getStringCellValue();
-//                        FunctionalFood ff = new FunctionalFood(new ProductDAO(Product.class).getIDProduct("PF", xFF), productName, registrationNumber, purchasePrice, taxPercentage, new Vendor(vendorID, vendorName, vendorCountry), new Category(categoryID, categoryName), null, endDate, mainNutrients, supplementaryIngredients, noteUnit);
-//                        xFF++;
-//
-//                        ff.addUnit(PackagingUnit.fromString(conversionUnit), calSellPrice(purchasePrice , ff), quantityInStock);
-//                        //Các đơn vị còn lại
-//                        addUnitByString(row.getCell(20).getStringCellValue(), purchasePrice, ff);
-//                        listProduct.add(ff);
-//                        break;
+                        String mainNutrients = row.getCell(17).getStringCellValue();
+                        String supplementaryIngredients = row.getCell(18).getStringCellValue();
+                        FunctionalFood ff = new FunctionalFood(productService.getIDProduct("PF", xFF), productName, registrationNumber, purchasePrice, taxPercentage, new Vendor(vendorID, vendorName, vendorCountry), new Category(categoryID, categoryName, null), endDate, mainNutrients, supplementaryIngredients, noteUnit);
+                        xFF++;
+
+                        ff.addUnit(PackagingUnit.fromString(conversionUnit), new ProductUnit(calSellPrice(purchasePrice , ff), quantityInStock));
+                        //Các đơn vị còn lại
+                        addUnitByString(row.getCell(20).getStringCellValue(), purchasePrice, ff);
+                        listProduct.add(ff);
+                        break;
                     }
                     case "MS": {
-//                        String medicalSupplyType = row.getCell(19).getStringCellValue();
-//                        MedicalSupply ms = new MedicalSupply(new ProductDAO(Product.class).getIDProduct("PS", xMS), productName, registrationNumber, purchasePrice, taxPercentage, new Vendor(vendorID, vendorName, vendorCountry), new Category(categoryID, categoryName), null, endDate, medicalSupplyType, noteUnit);
-//                        xMS++;
-////                        ms.addUnit(PackagingUnit.fromString(conversionUnit), calSellPrice(purchasePrice , ms), quantityInStock);
-//                        //Các đơn vị còn lại
-//                        addUnitByString(row.getCell(20).getStringCellValue(), purchasePrice,  ms);
-//                        listProduct.add(ms);
+                        String medicalSupplyType = row.getCell(19).getStringCellValue();
+                        MedicalSupply ms = new MedicalSupply(productService.getIDProduct("PS", xMS), productName, registrationNumber, purchasePrice, taxPercentage, new Vendor(vendorID, vendorName, vendorCountry), new Category(categoryID, categoryName, null), endDate, medicalSupplyType, noteUnit);
+                        xMS++;
+                        ms.addUnit(PackagingUnit.fromString(conversionUnit), new ProductUnit(calSellPrice(purchasePrice , ms), quantityInStock));
+                        //Các đơn vị còn lại
+                        addUnitByString(row.getCell(20).getStringCellValue(), purchasePrice,  ms);
+                        listProduct.add(ms);
                         break;
                     }
                     default: {
@@ -369,14 +369,8 @@ public class AddProduct extends JPanel {
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         model.setRowCount(0);
         for (Product product : listProduct) {
-//            System.out.println(product);
-//            for (Map.Entry<Enum_PackagingUnit, Double> entry : product.getUnitPrice().entrySet()) {
-//                String packagingUnitStr = entry.getKey().name();
-//                System.out.println(product.getProductID() + "//" + entry.getKey().name() + "//" + entry.getValue());
-//            }
             String unitTemp = "";
             int multiplier = 0;
-//            System.out.println("unitNote: " + product.getUnitNote());
             String[] parts = product.getUnitNote().split(",\\s*");
             for (String part : parts) {
                 Pattern pattern = Pattern.compile("([A-Z ]+)(?:\\((\\d+)\\))?");
@@ -393,11 +387,9 @@ public class AddProduct extends JPanel {
     }
 
     /**
-     * Hàm phân tích chuỗi để xử lý đơn vị
-     * @param unitNote
-     * @param purchasePrice
-     * @param product
+     * Thêm các đơn vị còn lại
      */
+
     public static void addUnitByString(String unitNote, double purchasePrice, Product product){
         String[] parts = unitNote.split(",\\s*");
         int unitTL = 1;
@@ -419,7 +411,7 @@ public class AddProduct extends JPanel {
                 PackagingUnit unit = PackagingUnit.fromString(enumName);
                 double unitPrice = purchasePrice / priceTL;
                 int quantity =unitTL * multiplier;
-//                product.addUnit(unit, calSellPrice(unitPrice, product), quantity);
+                product.addUnit(unit, new ProductUnit(calSellPrice(unitPrice, product), quantity));
                 unitTL *= multiplier;
             }
         }
@@ -527,9 +519,9 @@ public class AddProduct extends JPanel {
             cbbCategory.addItem(category.getCategoryName());
         }
     }
+
     /**
-     *
-     * @return
+     * Tinh toán giá bán
      */
     public static double calSellPrice(double purchasePrice, Product p){
         double sellPrice = 0.0;
@@ -542,4 +534,6 @@ public class AddProduct extends JPanel {
         }
         return sellPrice;
     }
+
+
 }

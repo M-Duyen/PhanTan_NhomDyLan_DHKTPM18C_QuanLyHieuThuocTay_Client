@@ -17,7 +17,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 public class EmployeeSearch extends JPanel {
-    EmployeeService employeeService = (EmployeeService) Naming.lookup("rmi://localhost:7281/employeeService");
+    EmployeeService employeeService = (EmployeeService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/employeeService");
     public EmployeeSearch() throws MalformedURLException, NotBoundException, RemoteException {
         initComponents();
         JTableHeader theader = tableEmployee.getTableHeader();

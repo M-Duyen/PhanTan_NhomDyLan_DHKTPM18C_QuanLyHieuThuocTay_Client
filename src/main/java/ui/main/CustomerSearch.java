@@ -20,7 +20,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 public class CustomerSearch extends javax.swing.JPanel {
-    CustomerService customerService = (CustomerService) Naming.lookup("rmi://localhost:7281/customerService");
+    CustomerService customerService = (CustomerService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/customerService");
     public CustomerSearch() throws MalformedURLException, NotBoundException, RemoteException {
         initComponents();
         setupTable();

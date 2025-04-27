@@ -26,7 +26,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class CreateOrder extends JPanel {
-    ProductService productService = (ProductService) Naming.lookup("rmi://localhost:7281/productService");
+    ProductService productService = (ProductService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/productService");
     private HomePage homePage;
 
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
@@ -404,8 +404,8 @@ public class CreateOrder extends JPanel {
      */
     private void addRow(TempOrderForm tempOrderForm, Product product, int quantity, PackagingUnit unit) {
         DecimalFormat df = new DecimalFormat("#,##0.00 VND");
-//        Object[] rowData = {product.getProductID(), product.getProductName(), new Unit_DAO().convertUnit(unit), quantity, df.format(product.getSellPrice(unit)), df.format(quantity * product.getSellPrice(unit))}; //product.getSellPrice(), product.getSellPrice()
-//        tempOrderForm.addProductRow(rowData);
+        Object[] rowData = {product.getProductID(), product.getProductName(), unit.convertUnit(unit), quantity, df.format(product.getSellPrice(unit)), df.format(quantity * product.getSellPrice(unit))}; //product.getSellPrice(), product.getSellPrice()
+        tempOrderForm.addProductRow(rowData);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

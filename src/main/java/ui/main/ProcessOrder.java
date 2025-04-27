@@ -40,9 +40,9 @@ import java.util.Locale;
 
 public class ProcessOrder extends JFrame implements ActionListener {
 
-    OrderService orderService = (OrderService) Naming.lookup("rmi://localhost:7281/orderService");
-    OrderDetailService orderDetailService = (OrderDetailService) Naming.lookup("rmi://localhost:7281/orderDetailService");
-    ProductService productService = (ProductService) Naming.lookup("rmi://localhost:7281/productService");
+    OrderService orderService = (OrderService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/orderService");
+    OrderDetailService orderDetailService = (OrderDetailService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/orderDetailService");
+    ProductService productService = (ProductService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/productService");
     private Order orderTemp = new Order();
     private ArrayList<OrderDetail> orderDetailsTemp = new ArrayList<>();
     private ArrayList<OrderDetail> listOrderConfirm = new ArrayList<>();
@@ -872,7 +872,8 @@ public class ProcessOrder extends JFrame implements ActionListener {
         }
         return true;
     }
-//Hóa đơn tạm đã tồn tại chưa
+
+    //Hóa đơn tạm đã tồn tại chưa
     public boolean checkOrder(){
         if(txtSearch.getText().trim().equals("")){
             new Message(StaticProcess.homePage, true, "Thông báo", "Vui lòng nhập mã hóa đơn đổi trả", "src/main/java/ui/dialog/warning.png").showAlert();
@@ -881,25 +882,28 @@ public class ProcessOrder extends JFrame implements ActionListener {
         }
         return true;
     }
-public void fillInfo(Order o){
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-       lbltxtMaHoaDon.setText(o.getOrderID());
-       lbltxtKhachHang.setText(o.getCustomer().getCustomerID() + " / " + o.getCustomer().getCustomerName());
-       lbltxtNhanVien.setText(o.getEmployee().getEmployeeID() + " / " + o.getEmployee().getEmployeeName());
-       lbltxtThoiGianTao.setText(o.getOrderDate().format(formatter));
-       lbltxtTongTienTT.setText(currencyFormatter.format(o.getTotalDue()));
-}
-public void loadTableCTHD(JTable table, ArrayList<OrderDetail> listCTHD){
-    isUpdating = true;
-    DefaultTableModel model = (DefaultTableModel) table.getModel();
-    model.setRowCount(0);
-    int count = 1;
-    for (OrderDetail o : listCTHD){
-        model.addRow(new Object[] {count, o.getProduct().getProductID(), o.getProduct().getProductName(), o.getUnit().name(), o.getOrderQuantity(), o.getLineTotal()/o.getOrderQuantity(), o.getLineTotal(), checkCondition(o), false});
-        count++;
+
+    public void fillInfo(Order o){
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+           lbltxtMaHoaDon.setText(o.getOrderID());
+           lbltxtKhachHang.setText(o.getCustomer().getCustomerID() + " / " + o.getCustomer().getCustomerName());
+           lbltxtNhanVien.setText(o.getEmployee().getEmployeeID() + " / " + o.getEmployee().getEmployeeName());
+           lbltxtThoiGianTao.setText(o.getOrderDate().format(formatter));
+           lbltxtTongTienTT.setText(currencyFormatter.format(o.getTotalDue()));
     }
-    isUpdating = false;
-}
+
+    public void loadTableCTHD(JTable table, ArrayList<OrderDetail> listCTHD){
+        isUpdating = true;
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+        model.setRowCount(0);
+        int count = 1;
+        for (OrderDetail o : listCTHD){
+            model.addRow(new Object[] {count, o.getProduct().getProductID(), o.getProduct().getProductName(), o.getUnit().name(), o.getOrderQuantity(), o.getLineTotal()/o.getOrderQuantity(), o.getLineTotal(), checkCondition(o), false});
+            count++;
+        }
+        isUpdating = false;
+    }
+
     public void loadTableSPTra(JTable table, ArrayList<OrderDetail> listCTHD){
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         model.setRowCount(0);
@@ -910,33 +914,35 @@ public void loadTableCTHD(JTable table, ArrayList<OrderDetail> listCTHD){
         }
     }
 
-public boolean checkCondition(OrderDetail odt){
-        LocalDateTime currentDateTime = LocalDateTime.now();
-        LocalDateTime thirtyDaysAgo = currentDateTime.minus(30, ChronoUnit.DAYS);
-        if (odt.getProduct().isFunctionalFood() && (!orderTemp.getCustomer().getPhoneNumber().equals("")) && orderTemp.getOrderDate().isAfter(thirtyDaysAgo)){
-            return true;
-        }
-        return false;
-}
-public OrderDetail searchOrderDetail(String productID){
-        for(OrderDetail odt : orderDetailsTemp){
-            if(odt.getProduct().getProductID().equals(productID)){
-                return odt;
+    public boolean checkCondition(OrderDetail odt){
+            LocalDateTime currentDateTime = LocalDateTime.now();
+            LocalDateTime thirtyDaysAgo = currentDateTime.minus(30, ChronoUnit.DAYS);
+            if (odt.getProduct().isFunctionalFood() && (!orderTemp.getCustomer().getPhoneNumber().equals("")) && orderTemp.getOrderDate().isAfter(thirtyDaysAgo)){
+                return true;
             }
-        }
-        return null;
-}
-//Xử lý thông tin hoàn tiền
-    public void infoRefund(){
-        panelProcess1.lbltxtTS_SPC.setText(listOrderConfirm.size() + "");
-        double tienHoan = 0.0;
-        for(OrderDetail odt : listOrderConfirm){
-            tienHoan += odt.getLineTotal();
-        }
-        panelProcess1.lbltxtTTongTien.setText(currencyFormatter.format(tienHoan));
-        panelProcess1.lbltxtTPhiHoanTien.setText(currencyFormatter.format(tienHoan * 0.01));
-        panelProcess1.lbltxtTTongHoanTien.setText(currencyFormatter.format(tienHoan - (tienHoan * 0.01)));
+            return false;
     }
+
+    public OrderDetail searchOrderDetail(String productID){
+            for(OrderDetail odt : orderDetailsTemp){
+                if(odt.getProduct().getProductID().equals(productID)){
+                    return odt;
+                }
+            }
+            return null;
+    }
+
+    //Xử lý thông tin hoàn tiền
+        public void infoRefund(){
+            panelProcess1.lbltxtTS_SPC.setText(listOrderConfirm.size() + "");
+            double tienHoan = 0.0;
+            for(OrderDetail odt : listOrderConfirm){
+                tienHoan += odt.getLineTotal();
+            }
+            panelProcess1.lbltxtTTongTien.setText(currencyFormatter.format(tienHoan));
+            panelProcess1.lbltxtTPhiHoanTien.setText(currencyFormatter.format(tienHoan * 0.01));
+            panelProcess1.lbltxtTTongHoanTien.setText(currencyFormatter.format(tienHoan - (tienHoan * 0.01)));
+        }
     //=========================================================================================
     //Đối với hoàn tiền nó sẽ tạo ra hóa đơn mới với tổng tiền là số âm, vd mã hóa đơn đổi trả OR101124000001 thì tạo hóa đơn mới với mã là OC101124000001
 
@@ -949,6 +955,7 @@ public OrderDetail searchOrderDetail(String productID){
         }
         return orderID;
     }
+
     //Hàm đặt lại khi hóa đơn xử lý thành công
     public void reset(){
         txtSearch.setText("");
@@ -979,55 +986,57 @@ public OrderDetail searchOrderDetail(String productID){
 
         cboLoaiXuLy.setSelectedIndex(0);
     }
-//Hàm chuyển đổi về barcode
-private String convertProductIDToBarcode(String productID) {
-    if (productID == null || productID.length() < 2) {
-        return null;
-    }
-    String prefix = productID.substring(0, 2);
-    String numericPart = productID.substring(2);
-    switch (prefix) {
-        case "PF":
-            return "7" + numericPart;
-        case "PM":
-            return "8" + numericPart;
-        case "PS":
-            return "9" + numericPart;
-        default:
-            return null;
-    }
-}
-//Hàm chuyển đổi ngược lại
-private String convertBarcodeToProductID(String barcode) {
-    if (barcode == null || barcode.length() < 2) {
-        return null;
-    }
-    char prefix = barcode.charAt(0);
-    String numericPart = barcode.substring(1);
-    switch (prefix) {
-        case '7':
-            return "PF" + numericPart;
-        case '8':
-            return "PM" + numericPart;
-        case '9':
-            return "PS" + numericPart;
-        default:
-            return null;
-    }
-}
 
-//Hàm addRow
-private void addRow(JTable table, ArrayList<Product> listProduct, int quantity){
-    DecimalFormat df = new DecimalFormat("#,##0.00 VND");
-    DefaultTableModel model = (DefaultTableModel) table.getModel();
-    model.setRowCount(0);
-    int count = 1;
-    for (Product o : listProduct){
-        model.addRow(new Object[] {count, o.getProductID(), o.getProductName(), });
-//        Object[] rowData = {product.getProductID(), product.getProductName(), "Đơn vị", quantity, df.format(product.getSellPrice()), df.format(quantity * product.getSellPrice())};
-        count++;
+    //Hàm chuyển đổi về barcode
+    private String convertProductIDToBarcode(String productID) {
+        if (productID == null || productID.length() < 2) {
+            return null;
+        }
+        String prefix = productID.substring(0, 2);
+        String numericPart = productID.substring(2);
+        switch (prefix) {
+            case "PF":
+                return "7" + numericPart;
+            case "PM":
+                return "8" + numericPart;
+            case "PS":
+                return "9" + numericPart;
+            default:
+                return null;
+        }
     }
-}
+
+    //Hàm chuyển đổi ngược lại
+    private String convertBarcodeToProductID(String barcode) {
+        if (barcode == null || barcode.length() < 2) {
+            return null;
+        }
+        char prefix = barcode.charAt(0);
+        String numericPart = barcode.substring(1);
+        switch (prefix) {
+            case '7':
+                return "PF" + numericPart;
+            case '8':
+                return "PM" + numericPart;
+            case '9':
+                return "PS" + numericPart;
+            default:
+                return null;
+        }
+    }
+
+    //Hàm addRow
+    private void addRow(JTable table, ArrayList<Product> listProduct, int quantity){
+        DecimalFormat df = new DecimalFormat("#,##0.00 VND");
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+        model.setRowCount(0);
+        int count = 1;
+        for (Product o : listProduct){
+            model.addRow(new Object[] {count, o.getProductID(), o.getProductName(), });
+    //        Object[] rowData = {product.getProductID(), product.getProductName(), "Đơn vị", quantity, df.format(product.getSellPrice()), df.format(quantity * product.getSellPrice())};
+            count++;
+        }
+    }
     /**
      * Kiểm tra mã sản phẩm có tồn tại trong cột 2 của bảng hay không.
      *
@@ -1061,6 +1070,7 @@ private void addRow(JTable table, ArrayList<Product> listProduct, int quantity){
         }
         return t;
     }
+
     //Load thông tin tổng quan đổi trả hàng
     public void fillInfoPC(){
         double tienBanDau = getProductListPrice(listOrderConfirm);

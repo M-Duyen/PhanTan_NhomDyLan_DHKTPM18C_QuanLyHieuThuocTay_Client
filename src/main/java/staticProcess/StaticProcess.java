@@ -8,6 +8,7 @@ import ui.main.Login_GUI;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
+import java.util.Properties;
 
 public class StaticProcess {
     public static DecimalFormat df = new DecimalFormat("#,##0.00 VND");
@@ -17,4 +18,5 @@ public class StaticProcess {
     public static String userlogin = "";
     public static Employee empLogin;
     public static HomePage homePage;
+    public static Properties properties = new Properties();
 }
