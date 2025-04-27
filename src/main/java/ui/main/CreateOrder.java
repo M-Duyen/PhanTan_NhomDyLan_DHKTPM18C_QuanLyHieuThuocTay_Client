@@ -26,7 +26,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class CreateOrder extends JPanel {
-    ProductService productService = (ProductService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/productService");
+    ProductService productService = (ProductService) Naming.lookup("rmi://localhost:7281/productService");
     private HomePage homePage;
 
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
@@ -77,6 +77,10 @@ public class CreateOrder extends JPanel {
                     txtSearchActionPerformed(evt);
                 } catch (RemoteException e) {
                     throw new RuntimeException(e);
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException(e);
+                } catch (NotBoundException e) {
+                    throw new RuntimeException(e);
                 }
             }
         });
@@ -91,6 +95,10 @@ public class CreateOrder extends JPanel {
                 try {
                     btnSearchActionPerformed(evt);
                 } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException(e);
+                } catch (NotBoundException e) {
                     throw new RuntimeException(e);
                 }
             }
@@ -147,7 +155,7 @@ public class CreateOrder extends JPanel {
         add(pCenter, BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void txtSearchActionPerformed(ActionEvent evt) throws RemoteException {//GEN-FIRST:event_txtSearchActionPerformed
+    private void txtSearchActionPerformed(ActionEvent evt) throws RemoteException, MalformedURLException, NotBoundException {//GEN-FIRST:event_txtSearchActionPerformed
         String searchText = txtSearch.getText().trim();
         if (!searchText.isEmpty()) {
             if (tabbedPane.getSelectedComponent() instanceof TempOrderForm) {
@@ -212,12 +220,12 @@ public class CreateOrder extends JPanel {
         }
     }
 
-    private void btnSearchActionPerformed(ActionEvent evt) throws RemoteException {//GEN-FIRST:event_btnSearchActionPerformed
+    private void btnSearchActionPerformed(ActionEvent evt) throws RemoteException, MalformedURLException, NotBoundException {//GEN-FIRST:event_btnSearchActionPerformed
         String searchText = txtSearch.getText().trim();
         if (!searchText.isEmpty()) {
             if (tabbedPane.getSelectedComponent() instanceof TempOrderForm) {
                 TempOrderForm currentTab = (TempOrderForm) tabbedPane.getSelectedComponent();
-                Product product =productService.getProduct_ByBarcode(searchText);
+                Product product = productService.getProduct_ByBarcode(searchText);
                 if (product != null) {
                     ProductConfirm productConfirm = new ProductConfirm(homePage, product, true);
                     openProductConfirm(productConfirm, product, currentTab, false);
