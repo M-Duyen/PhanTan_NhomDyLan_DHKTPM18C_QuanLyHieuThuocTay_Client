@@ -27,7 +27,7 @@ import java.util.List;
  */
 public class TodayRevenueStatistic extends javax.swing.JPanel {
 
-    private final OrderService orderService = (OrderService) Naming.lookup("rmi://localhost:7281/orderService");
+    private final OrderService orderService = (OrderService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/orderService");
     ;
 
     /**
@@ -287,7 +287,7 @@ public class TodayRevenueStatistic extends javax.swing.JPanel {
         for (Order order : list) {
             model.addRow(new Object[]{
                     order.getOrderID(),
-                    order.getCustomer().getPhoneNumber(),
+                    order.getCustomer().getCustomerName(),
                     order.getOrderDate(),
                     order.getPaymentMethod(),
                     order.getDiscount(),

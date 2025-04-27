@@ -23,7 +23,10 @@ public class WelcomeMyApp {
     public static boolean doneLoading = false;
 
     public static void main(String[] args) throws IOException, NotBoundException {
-        AccountService accountService = (AccountService) Naming.lookup("rmi://localhost:7281/accountService");
+        FileInputStream fin = new FileInputStream(new File("lib/config.properties"));
+        properties.load(fin);
+
+        AccountService accountService = (AccountService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/accountService");
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
@@ -34,15 +37,11 @@ public class WelcomeMyApp {
 
         }));
 
-
-        FileInputStream fin = new FileInputStream(new File("lib/config.properties"));
-        properties.load(fin);
-
-        Loading load = new Loading();
         login = new LoginGUI();
         SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() {
+                Loading load = new Loading();
                 Loading.main(load);
                 while (!doneLoading) {
                     try {

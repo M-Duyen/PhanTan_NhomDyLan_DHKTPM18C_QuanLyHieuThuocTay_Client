@@ -69,10 +69,10 @@ import java.util.Locale;
 import java.util.Map;
 
 public class TempOrderForm extends TabbedForm {
-    OrderService orderService  = (OrderService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/orderService");
-    OrderDetailService orderDetailService  = (OrderDetailService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/orderDetailService");
-    ProductService productService  = (ProductService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/productService");
-    CustomerService customerService = (CustomerService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/customerService");
+    OrderService orderService  = (OrderService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/orderService");
+    OrderDetailService orderDetailService  = (OrderDetailService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/orderDetailService");
+    ProductService productService  = (ProductService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/productService");
+    CustomerService customerService = (CustomerService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/customerService");
 
     private HomePage homePage;
     private DefaultTableModel model;

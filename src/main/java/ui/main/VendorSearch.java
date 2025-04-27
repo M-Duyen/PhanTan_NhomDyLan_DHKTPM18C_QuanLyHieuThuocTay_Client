@@ -7,6 +7,7 @@ import javax.swing.table.JTableHeader;
 
 import model.Vendor;
 import service.VendorService;
+import staticProcess.StaticProcess;
 import ui.table.TableCustom;
 
 import java.awt.event.KeyEvent;
@@ -22,7 +23,7 @@ public class VendorSearch extends javax.swing.JPanel {
 
     public VendorSearch() throws MalformedURLException, NotBoundException, RemoteException {
         initComponents();
-        vendorDAO = (VendorService) Naming.lookup("rmi://localhost:7281/vendorService");
+        vendorDAO = (VendorService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/vendorService");
         JTableHeader theader = tableVendor.getTableHeader();
         theader.setFont(new java.awt.Font("Segoe UI", 0, 18));
 
