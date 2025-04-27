@@ -17,7 +17,7 @@ import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
-public class Login_GUI extends JFrame implements ActionListener {
+public class LoginGUI extends JFrame implements ActionListener {
 
     public static Home home;
 
@@ -35,7 +35,7 @@ public class Login_GUI extends JFrame implements ActionListener {
         }
     }
 
-    public Login_GUI() throws MalformedURLException, NotBoundException, RemoteException {
+    public LoginGUI() throws MalformedURLException, NotBoundException, RemoteException {
         init();
         getRootPane().setDefaultButton(loginPanel.btnLogin);
     }
@@ -74,7 +74,7 @@ public class Login_GUI extends JFrame implements ActionListener {
     public String getUserLogin(){
         return loginPanel.txtUsername.getText();
     }
-    public static void main(Login_GUI login) {
+    public static void main(LoginGUI login) {
         FlatRobotoFont.install();
         FlatLaf.registerCustomDefaultsSource("ui.themes");
         FlatMacDarkLaf.setup();

@@ -24,7 +24,7 @@ public class WelcomeMyApp {
         properties.load(fin);
 
         Loading load = new Loading();
-        login = new Login_GUI();
+        login = new LoginGUI();
         SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() {
@@ -45,7 +45,7 @@ public class WelcomeMyApp {
                     @Override
                     protected Void doInBackground() {
 
-                        Login_GUI.main(login);
+                        LoginGUI.main(login);
                         while (!loginSuccess) {
                             try {
                                 Thread.sleep(1);
