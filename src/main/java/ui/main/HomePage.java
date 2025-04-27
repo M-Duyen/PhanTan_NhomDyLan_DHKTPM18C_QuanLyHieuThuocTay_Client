@@ -48,7 +48,7 @@ public class HomePage extends JFrame implements ActionListener{
     private CategorySearch category = new CategorySearch(this);
     private final AddProduct addProduct = new AddProduct();
     private final UpdateProduct updateProduct = new UpdateProduct();
-//    private final ProductStatistics productStatistics = new ProductStatistics(this);
+    private final ProductStatistics productStatistics = new ProductStatistics(this);
     private final AddCustomer addCustomer = new AddCustomer();
     private final CustomerSearch customerSearch = new CustomerSearch();
     private final VendorSearch vendorSearch = new VendorSearch();
@@ -116,8 +116,8 @@ public class HomePage extends JFrame implements ActionListener{
                     } catch (RemoteException ex) {
                         throw new RuntimeException(ex);
                     }
-                    message.lblEmpID_show.setText(emp.getEmployeeName());
-                    message.lblEmpName_show.setText(emp.getEmployeeID());
+                    message.lblEmpID_show.setText(emp.getEmployeeID());
+                    message.lblEmpName_show.setText(emp.getEmployeeName());
                     message.lblPhoneNumber_show.setText(emp.getPhoneNumber());
                     message.lblDOB_show.setText(emp.getBirthDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
                     message.lblGender_show.setText((emp.isGender()) ? "Nữ" : "Nam");
@@ -164,8 +164,8 @@ public class HomePage extends JFrame implements ActionListener{
         } else if(index == 2 && subIndex == 2){
             replacePanel(addProduct);
         } else if(index == 2 && subIndex == 3){
-//            replacePanel(productStatistics);
-//            productStatistics.startAnimation();
+            replacePanel(productStatistics);
+            productStatistics.startAnimation();
         }
         //Khách hàng
         else if(index == 3 && subIndex == 1){
