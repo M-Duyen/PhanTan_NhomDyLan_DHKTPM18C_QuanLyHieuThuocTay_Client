@@ -106,10 +106,13 @@ public class ProductConfirm extends SweetAlert {
             @Override
             public void keyReleased(KeyEvent e) {
                 String quantity = txtQuantity.getText().trim();
-//                String unitName = Unit_DAO.getInstance().convertDes_ToUnit(String.valueOf(cbbUnit.getSelectedItem()));
-//                PackagingUnit unitEnum = PackagingUnit.fromString(unitName);
+                PackagingUnit unitEnum = PackagingUnit.convertToEnum(cbbUnit.getSelectedItem().toString());
                 int inStock = 0;
-//                int inStock =productDAO.findById(product.getProductID()).getInStockByUnit(unitEnum);
+                try {
+                    inStock = productService.findById(product.getProductID()).getInstockQuantity(unitEnum);
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
 
                 if(!quantity.isEmpty()){
                     if(Integer.parseInt(quantity) > inStock) {
@@ -335,14 +338,12 @@ public class ProductConfirm extends SweetAlert {
         txtProductName.setText(product.getProductName());
     }
 
-//String orderID, LocalDateTime orderDate, String shipToAddress, PaymentMethod paymentMethod, double discount, Employee employee, Customer customer, Prescription prescription
     public OrderDetail getOrderDetails(Order or, String orderIDNew) throws RemoteException {
-//        return new OrderDetail(Integer.parseInt(txtQuantity.getText().trim()), new Order(orderIDNew,
-//                LocalDateTime.now(), or.getShipToAddress(),
-//                or.getPaymentMethod(), or.getDiscount(), StaticProcess.empLogin,
-//                or.getCustomer(), or.getPrescription()), productService.findById(txtProductID.getText()),
-//                PackagingUnit.convertToEnum(cbbUnit.getSelectedItem().toString()));
-    return null;
+        Order order = new Order(orderIDNew,
+                LocalDateTime.now(), or.getShipToAddress(),
+                or.getPaymentMethod(), or.getDiscount(), StaticProcess.empLogin,
+                or.getCustomer(), or.getPrescription());
+        return new OrderDetail(order, productService.findById(txtProductID.getText()), PackagingUnit.convertToEnum(cbbUnit.getSelectedItem().toString()), Integer.parseInt(txtQuantity.getText().trim()));
     }
 
     public void updateComboboxUnit(){

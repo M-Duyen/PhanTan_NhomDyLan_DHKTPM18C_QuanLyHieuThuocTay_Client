@@ -69,10 +69,10 @@ import java.util.Locale;
 import java.util.Map;
 
 public class TempOrderForm extends TabbedForm {
-    OrderService orderService  = (OrderService) Naming.lookup("rmi://localhost:7281/orderService");
-    OrderDetailService orderDetailService  = (OrderDetailService) Naming.lookup("rmi://localhost:7281/orderDetailService");
-    ProductService productService  = (ProductService) Naming.lookup("rmi://localhost:7281/productService");
-    CustomerService customerService = (CustomerService) Naming.lookup("rmi://localhost:7281/customerService");
+    OrderService orderService  = (OrderService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/orderService");
+    OrderDetailService orderDetailService  = (OrderDetailService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/orderDetailService");
+    ProductService productService  = (ProductService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/productService");
+    CustomerService customerService = (CustomerService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/customerService");
 
     private HomePage homePage;
     private DefaultTableModel model;
@@ -894,7 +894,7 @@ public class TempOrderForm extends TabbedForm {
                 customer = customerService.getCustomerByPhone(txtCustPhone.getText().trim());
             }
 
-            Employee employee = new Login().getEmployeeLogin();
+            Employee employee = Login.getEmployeeLogin();
 
             Prescription prescription = this.prescription;
 
@@ -907,11 +907,8 @@ public class TempOrderForm extends TabbedForm {
             order.setEmployee(employee);
             order.setCustomer(customer);
             order.setPrescription(prescription);
-            Connection con = null;
+
             try {
-
-                con.setAutoCommit(false);
-
                 double point = 0;
                 //Update Customer Point nếu có check ckbTransPoint
                 if (ckbTransPoint.isSelected()) {
@@ -931,13 +928,13 @@ public class TempOrderForm extends TabbedForm {
 
                     if (customer != null) {
                         if (!customerService.updateCustPoint_Decrease(customer.getPhoneNumber(), point)) {
-                            con.rollback();
                             new Message(homePage, true, "Thông báo", "Cập nhật giảm điểm tích lũy của khách hàng thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
                             return;
                         }
                     }
                 } else {
                     try {
+
                         point = nf.parse(txtPointOrder.getText().trim()).doubleValue();
                     } catch (ParseException e) {
                         throw new RuntimeException(e);
@@ -946,7 +943,6 @@ public class TempOrderForm extends TabbedForm {
 
                 //Add Orders
                 if (!orderService.create(order)) {
-                    con.rollback();
                     new Message(homePage, true, "Thông báo", "Thêm đơn hàng thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
                     return;
                 }
@@ -957,61 +953,43 @@ public class TempOrderForm extends TabbedForm {
 
                     int quantity = quantityList.get(i);
                     String unitName = unitNameList.get(i);
-//                PackagingUnit unit = PackagingUnit.fromString(new Unit_DAO().convertDes_ToUnit(unitName));
+                    PackagingUnit unit = PackagingUnit.convertToEnum(unitName);
+
+                    Product afterProduct = productService.getProductAfterUpdateUnits(product, unit, false, quantity);
 
                     OrderDetail od = new OrderDetail();
                     od.setOrderQuantity(quantity);
                     od.setOrder(order);
                     od.setProduct(product);
-//                od.setUnit(unit);
+                    od.setUnit(unit);
                     if (!orderDetailService.create(od)) {
-                        con.rollback();
                         new Message(homePage, true, "Thông báo", "Thêm chi tiết đơn hàng thất bại " + i + " !", "src/main/java/ui/dialog/warning.png").showAlert();
                         return;
                     }
-//                if (!new ProductDAO(Product.class).updateProductInStock_WithTransaction(product.getProductID(), quantity, unit, false, con)) {
-//                    con.rollback();
-//                    new Message(homePage, true, "Thông báo", "Cập nhật số lượng tồn kho thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
-//                    return;
-//                }
+                if (!productService.update(afterProduct)) {
+                    new Message(homePage, true, "Thông báo", "Cập nhật số lượng tồn kho thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
+                    return;
+                }
                 }
 
                 if (customer != null) {
                     if (!customerService.updateCustPoint_Increase(customer.getPhoneNumber(), point)) {
                         new Message(homePage, true, "Thông báo", "Cập nhật tăng điểm tích lũy của khách hàng thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
-                        con.rollback();
                         return;
                     }
                 }
 
-                con.commit();
                 new Message(homePage, true, "Xác nhận", "Thêm đơn hàng thành công!", "src/main/java/ui/dialog/checked.png").showAlert();
-                try {
+                /*try {
                     invoiceOrder(order);
                 } catch (IOException | NotBoundException e) {
                     throw new RuntimeException(e);
-                }
+                }*/
                 clearAll();
-            } catch (SQLException e) {
-                if (con != null) {
-                    try {
-                        con.rollback();
-                    } catch (SQLException rollbackEx) {
-                        rollbackEx.printStackTrace();
-                    }
-                }
+            } catch (Exception e) {
+               e.printStackTrace();
             }
-        }
-//        finally {
-//            if (con != null) {
-//                try {
-//                    con.close();
-//                } catch (SQLException closeEx) {
-//                    closeEx.printStackTrace();
-//                }
-//            }
-//        }
-//        }//GEN-LAST:event_btnCheckOutActionPerformed
+        }//GEN-LAST:event_btnCheckOutActionPerformed
 
         private void txtNoteFocusGained (FocusEvent evt){//GEN-FIRST:event_txtNoteFocusGained
             if (txtNote.getText().equals("Ghi chú đơn hàng ...")) {

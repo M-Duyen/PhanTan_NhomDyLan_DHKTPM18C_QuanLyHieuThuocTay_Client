@@ -225,7 +225,7 @@ public class CreateOrder extends JPanel {
         if (!searchText.isEmpty()) {
             if (tabbedPane.getSelectedComponent() instanceof TempOrderForm) {
                 TempOrderForm currentTab = (TempOrderForm) tabbedPane.getSelectedComponent();
-                Product product =productService.getProduct_ByBarcode(searchText);
+                Product product = productService.getProduct_ByBarcode(searchText);
                 if (product != null) {
                     ProductConfirm productConfirm = new ProductConfirm(homePage, product, true);
                     openProductConfirm(productConfirm, product, currentTab, false);
