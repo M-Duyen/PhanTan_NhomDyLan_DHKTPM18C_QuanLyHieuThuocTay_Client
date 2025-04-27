@@ -2,6 +2,7 @@ package ui.main;
 
 import model.Employee;
 import model.Manager;
+import service.AccountService;
 import service.EmployeeService;
 import service.ManagerService;
 import staticProcess.StaticProcess;
@@ -36,6 +37,8 @@ import static staticProcess.StaticProcess.userlogin;
 public class HomePage extends JFrame implements ActionListener{
     EmployeeService employeeService = (EmployeeService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/employeeService");
     ManagerService managerService = (ManagerService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/managerService");
+    AccountService accountService = (AccountService) Naming.lookup("rmi://"+ StaticProcess.properties.get("ServerName") +":" + StaticProcess.properties.get("Port") + "/accountService");
+
     private JPanel currentPanel;
 
     private final HomeSlide homeSlide = new HomeSlide();
@@ -112,8 +115,8 @@ public class HomePage extends JFrame implements ActionListener{
                     } catch (RemoteException ex) {
                         throw new RuntimeException(ex);
                     }
-                    message.lblEmpID_show.setText(emp.getEmployeeName());
-                    message.lblEmpName_show.setText(emp.getEmployeeID());
+                    message.lblEmpID_show.setText(emp.getEmployeeID());
+                    message.lblEmpName_show.setText(emp.getEmployeeName());
                     message.lblPhoneNumber_show.setText(emp.getPhoneNumber());
                     message.lblDOB_show.setText(emp.getBirthDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
                     message.lblGender_show.setText((emp.isGender()) ? "Nữ" : "Nam");
@@ -470,6 +473,11 @@ public class HomePage extends JFrame implements ActionListener{
                     int response = dialog.getResponse();
                     if(response == 1) {
                         StaticProcess.loginSuccess = false;
+                        try {
+                            accountService.logout(userlogin);
+                        } catch (RemoteException ex) {
+                            throw new RuntimeException(ex);
+                        }
                         try {
                             WelcomeMyApp.main(null);
                         } catch (MalformedURLException ex) {

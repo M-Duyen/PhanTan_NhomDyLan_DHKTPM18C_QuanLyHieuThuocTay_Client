@@ -69,10 +69,10 @@ import java.util.Locale;
 import java.util.Map;
 
 public class TempOrderForm extends TabbedForm {
-    OrderService orderService = (OrderService) Naming.lookup("rmi://localhost:7281/orderService");
-    OrderDetailService orderDetailService = (OrderDetailService) Naming.lookup("rmi://localhost:7281/orderDetailService");
-    ProductService productService = (ProductService) Naming.lookup("rmi://localhost:7281/productService");
-    CustomerService customerService = (CustomerService) Naming.lookup("rmi://localhost:7281/customerService");
+    OrderService orderService  = (OrderService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/orderService");
+    OrderDetailService orderDetailService  = (OrderDetailService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/orderDetailService");
+    ProductService productService  = (ProductService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/productService");
+    CustomerService customerService = (CustomerService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/customerService");
 
     private HomePage homePage;
     private DefaultTableModel model;
@@ -1135,7 +1135,7 @@ public class TempOrderForm extends TabbedForm {
         float[] footer = {270f, 50f};
 
 
-//        Paragraph onesp = new Paragraph("\n");
+//        Paragraph onesp = new Paragraph("n");
 
         Table table = new Table(fullWidth);
         table.addCell(getCell10Center("NHÀ THUỐC DNGH", true).setFont(font).setFontSize(10f));
@@ -1376,47 +1376,47 @@ public class TempOrderForm extends TabbedForm {
         ckbPres.setSelected(prescription != null);
     }
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private Button btnCheckOut;
-    private ButtonGroup btnGroup_PaymentMethod;
-    private JCheckBoxCustom ckbPres;
-    private JCheckBoxCustom ckbTransPoint;
-    private JLabel lbCustName;
-    private JLabel lbCustNeededPay;
-    private JLabel lbCustPay;
-    private JLabel lbCustPhone;
-    private JLabel lbCustPoint;
-    private JLabel lbDiscountAmount;
-    private JLabel lbEmployeeName;
-    private JLabel lbOrderPoint;
-    private JLabel lbTotalDue;
-    private JLabel lbTotalDue_Left;
-    private JLabel lblChange;
-    private JLabel lblPaymentMethod;
-    private PanelRound panelRound2;
-    private PanelRound pnNotes;
-    private PanelRound pnOrderInfor;
-    private PanelRound pnProductOrder;
-    private RadioButtonCustom rbCash;
-    private RadioButtonCustom rbCreditCard;
-    private RadioButtonCustom rbTransfer;
-    private JScrollPane scrollPane;
-    private JTable tableProduct;
-    private TableScrollButton tableScrollButton_Product;
-    private TextField_Behind txtChange;
-    private TextField_Behind txtCustName;
-    private TextField_Behind txtCustPay;
-    private TextField_Behind txtCustPhone;
-    private TextField_Behind txtDiscount;
-    private TextField_Behind txtEmployeeName;
-    private TextField_Behind txtNeededPay;
-    private TextField_Behind txtNote;
-    private TextField_Behind txtPoint;
-    private TextField_Behind txtPointOrder;
-    private TextField_Behind txtTotalDue;
-    private TextField_Behind txtTotalDue_Left;
-    private TextField_Behind txtTotalQuantity;
-    // End of variables declaration//GEN-END:variables
+        // Variables declaration - do not modify//GEN-BEGIN:variables
+        private Button btnCheckOut;
+        private ButtonGroup btnGroup_PaymentMethod;
+        private JCheckBoxCustom ckbPres;
+        private JCheckBoxCustom ckbTransPoint;
+        private JLabel lbCustName;
+        private JLabel lbCustNeededPay;
+        private JLabel lbCustPay;
+        private JLabel lbCustPhone;
+        private JLabel lbCustPoint;
+        private JLabel lbDiscountAmount;
+        private JLabel lbEmployeeName;
+        private JLabel lbOrderPoint;
+        private JLabel lbTotalDue;
+        private JLabel lbTotalDue_Left;
+        private JLabel lblChange;
+        private JLabel lblPaymentMethod;
+        private PanelRound panelRound2;
+        private PanelRound pnNotes;
+        private PanelRound pnOrderInfor;
+        private PanelRound pnProductOrder;
+        private RadioButtonCustom rbCash;
+        private RadioButtonCustom rbCreditCard;
+        private RadioButtonCustom rbTransfer;
+        private JScrollPane scrollPane;
+        private JTable tableProduct;
+        private TableScrollButton tableScrollButton_Product;
+        private TextField_Behind txtChange;
+        private TextField_Behind txtCustName;
+        private TextField_Behind txtCustPay;
+        private TextField_Behind txtCustPhone;
+        private TextField_Behind txtDiscount;
+        private TextField_Behind txtEmployeeName;
+        private TextField_Behind txtNeededPay;
+        private TextField_Behind txtNote;
+        private TextField_Behind txtPoint;
+        private TextField_Behind txtPointOrder;
+        private TextField_Behind txtTotalDue;
+        private TextField_Behind txtTotalDue_Left;
+        private TextField_Behind txtTotalQuantity;
+        // End of variables declaration//GEN-END:variables
 //    public static void main(String[] args) throws IOException {
 //        ConnectDB.getInstance().connect();
 //        OrderDAO order_dao = new OrderDAO();

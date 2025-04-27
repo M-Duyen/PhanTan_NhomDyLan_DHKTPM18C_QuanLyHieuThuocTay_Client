@@ -251,21 +251,32 @@ public class Login extends JPanel implements ActionListener, KeyListener {
                             kqCheck = false;
                             JOptionPane.showMessageDialog(this, "Tài khoản không tồn tại");
                         }
-                        if (kqCheck) {
-                            currentAccount = txtUsername.getText().trim();
 
-                            lblErrorUser.setText("");
-                            lblErrorPass.setText("");
-                            StaticProcess.userlogin = txtUsername.getText();
-                            try {
-                                StaticProcess.empLogin = employeeService.findById(txtUsername.getText());
-                            } catch (RemoteException ex) {
-                                throw new RuntimeException(ex);
+                        try {
+                            if(!accountService.isAccountLoggedIn(tenDN)){
+                                if (kqCheck) {
+                                    currentAccount = txtUsername.getText().trim();
+                                    lblErrorUser.setText("");
+                                    lblErrorPass.setText("");
+                                    StaticProcess.userlogin = txtUsername.getText();
+                                    try {
+                                        StaticProcess.empLogin = employeeService.findById(txtUsername.getText());
+                                    } catch (RemoteException ex) {
+                                        throw new RuntimeException(ex);
+                                    }
+                                    accountService.loginCheck(tenDN, password);
+                                    StaticProcess.loginSuccess = true;
+                                    closeLoginWindow();
+
+                                }
+
+                            }else {
+                                JOptionPane.showMessageDialog(this, "Tài khoản đã đăng nhập trên thiết bị khác");
                             }
-                            StaticProcess.loginSuccess = true;
-                            closeLoginWindow();
-
+                        } catch (RemoteException ex) {
+                            throw new RuntimeException(ex);
                         }
+
                     } else {
                         JOptionPane.showMessageDialog(this, "Tài khoản không tồn tại");
                     }

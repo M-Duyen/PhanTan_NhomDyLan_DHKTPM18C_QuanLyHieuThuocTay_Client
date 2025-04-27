@@ -3,7 +3,7 @@ package staticProcess;//import ui.main.HomePage;
 
 import model.Employee;
 import ui.main.HomePage;
-import ui.main.Login_GUI;
+import ui.main.LoginGUI;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -14,7 +14,7 @@ public class StaticProcess {
     public static DecimalFormat df = new DecimalFormat("#,##0.00 VND");
     public static NumberFormat nf = NumberFormat.getInstance(Locale.getDefault());
     public static boolean loginSuccess = false;
-    public static Login_GUI login;
+    public static LoginGUI login;
     public static String userlogin = "";
     public static Employee empLogin;
     public static HomePage homePage;
