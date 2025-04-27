@@ -109,117 +109,58 @@ public class PromotionSearch extends JPanel{
     private void searchPromotion() throws RemoteException {
         // Xóa bảng hiện tại và thêm dữ liệu tìm kiếm
         DefaultTableModel model = (DefaultTableModel) tableKhuyenMai.getModel();
-        model.setRowCount(0); // Xóa các dòng hiện tại
+        model.setRowCount(0); // Xóa dữ liệu cũ
 
         String type = (String) cbbPromoType.getSelectedItem();
         String stt = (String) cbbStatus.getSelectedItem();
         String search = txtSearch.getText().trim();
-        ArrayList<Promotion> listPromotions = new ArrayList<>();
+        ArrayList<Promotion> listPromotions = (ArrayList<Promotion>) promotionService.getAll(); // Lấy tất cả khuyến mãi
 
-        // Nếu tất cả đều rỗng
-        if ((type == null || type.isEmpty()) && (stt == null || stt.isEmpty()) && search.isEmpty()) {
-            listPromotions = (ArrayList<Promotion>) promotionService.getAll(); // Lấy tất cả khuyến mãi
-        }
-        //  Nếu chỉ có `type` không rỗng
-        else if (type != null && !type.isEmpty() && (stt == null || stt.isEmpty()) && search.isEmpty()) {
-//            listPromotions = promotion_dao.getPromotionListByCriterous(type); // Lọc theo loại
-        }
-        // Nếu chỉ có `stt` không rỗng
-        else if ((type == null || type.isEmpty()) && stt != null && !stt.isEmpty() && search.isEmpty()) {
-            listPromotions = (ArrayList<Promotion>) promotionService.getAll(); // Lấy tất cả khuyến mãi, sau đó lọc theo trạng thái
-            boolean status = stt.equals("Đang áp dụng");
-            ArrayList<Promotion> listPromotionsByStatus = new ArrayList<>();
-            for (Promotion promotion : listPromotions) {
-                if (promotion.isStats() == status) {
-                    listPromotionsByStatus.add(promotion);
+        ArrayList<Promotion> filteredPromotions = new ArrayList<>(listPromotions);
+
+        // Lọc theo loại khuyến mãi nếu có
+        if (type != null && !type.isEmpty()) {
+            ArrayList<Promotion> temp = new ArrayList<>();
+            for (Promotion promotion : filteredPromotions) {
+                if (promotion.getPromotionType() != null && promotion.getPromotionType().getPromotionTypeName().equalsIgnoreCase(type)) {
+                    temp.add(promotion);
                 }
             }
-            listPromotions = listPromotionsByStatus;
-        }
-        // Nếu chỉ có `search` không rỗng
-        else if ((type == null || type.isEmpty()) && (stt == null || stt.isEmpty()) && !search.isEmpty()) {
-            listPromotions = (ArrayList<Promotion>) promotionService.getAll(); // Lấy tất cả khuyến mãi, sau đó lọc theo từ khóa
-            ArrayList<Promotion> listPromotionsBySearch = new ArrayList<>();
-            for (Promotion promotion : listPromotions) {
-                if (promotion.getPromotionId().toLowerCase().contains(search.toLowerCase()) ||
-                        promotion.getPromotionName().toLowerCase().contains(search.toLowerCase())) {
-                    listPromotionsBySearch.add(promotion);
-                }
-            }
-            listPromotions = listPromotionsBySearch;
-        }
-        // Nếu `type` và `stt` không rỗng, `search` rỗng
-        else if (type != null && !type.isEmpty() && stt != null && !stt.isEmpty() && search.isEmpty()) {
-//            listPromotions = promotion_dao.getPromotionListByCriterous(type); // Lọc theo loại
-            boolean status = stt.equals("Đang áp dụng");
-            ArrayList<Promotion> listPromotionsByStatus = new ArrayList<>();
-            for (Promotion promotion : listPromotions) {
-                if (promotion.isStats() == status) {
-                    listPromotionsByStatus.add(promotion);
-                }
-            }
-            listPromotions = listPromotionsByStatus;
-        }
-        // Nếu `type` và `search` không rỗng, `stt` rỗng
-        else if (type != null && !type.isEmpty() && (stt == null || stt.isEmpty()) && !search.isEmpty()) {
-//            listPromotions = promotion_dao.getPromotionListByCriterous(type); // Lọc theo loại
-            ArrayList<Promotion> listPromotionsBySearch = new ArrayList<>();
-            for (Promotion promotion : listPromotions) {
-                if (promotion.getPromotionId().toLowerCase().contains(search.toLowerCase()) ||
-                        promotion.getPromotionName().toLowerCase().contains(search.toLowerCase())) {
-                    listPromotionsBySearch.add(promotion);
-                }
-            }
-            listPromotions = listPromotionsBySearch;
-        }
-        // Nếu `stt` và `search` không rỗng, `type` rỗng
-        else if ((type == null || type.isEmpty()) && stt != null && !stt.isEmpty() && !search.isEmpty()) {
-            listPromotions = (ArrayList<Promotion>) promotionService.getAll(); // Lấy tất cả khuyến mãi
-            boolean status = stt.equals("Đang áp dụng");
-            ArrayList<Promotion> listPromotionsByStatus = new ArrayList<>();
-            for (Promotion promotion : listPromotions) {
-                if (promotion.isStats() == status) {
-                    listPromotionsByStatus.add(promotion);
-                }
-            }
-            // Tiếp tục lọc theo từ khóa
-            ArrayList<Promotion> listPromotionsBySearch = new ArrayList<>();
-            for (Promotion promotion : listPromotionsByStatus) {
-                if (promotion.getPromotionId().toLowerCase().contains(search.toLowerCase()) ||
-                        promotion.getPromotionName().toLowerCase().contains(search.toLowerCase())) {
-                    listPromotionsBySearch.add(promotion);
-                }
-            }
-            listPromotions = listPromotionsBySearch;
-        }
-        // Trường hợp 8: Nếu tất cả đều không rỗng
-        else {
-//            listPromotions = promotion_dao.getPromotionListByCriterous(type); // Lọc theo loại
-            boolean status = stt.equals("Đang áp dụng");
-            ArrayList<Promotion> listPromotionsByStatus = new ArrayList<>();
-            for (Promotion promotion : listPromotions) {
-                if (promotion.isStats() == status) {
-                    listPromotionsByStatus.add(promotion);
-                }
-            }
-            // Tiếp tục lọc theo từ khóa
-            ArrayList<Promotion> listPromotionsBySearch = new ArrayList<>();
-            for (Promotion promotion : listPromotionsByStatus) {
-                if (promotion.getPromotionId().toLowerCase().contains(search.toLowerCase()) ||
-                        promotion.getPromotionName().toLowerCase().contains(search.toLowerCase())) {
-                    listPromotionsBySearch.add(promotion);
-                }
-            }
-            listPromotions = listPromotionsBySearch;
+            filteredPromotions = temp;
         }
 
-        // Hiển thị kết quả hoặc thông báo nếu không tìm thấy
-        if (listPromotions.isEmpty()) {
+        // Lọc theo trạng thái nếu có
+        if (stt != null && !stt.isEmpty()) {
+            boolean status = stt.equals("Đang áp dụng");
+            ArrayList<Promotion> temp = new ArrayList<>();
+            for (Promotion promotion : filteredPromotions) {
+                if (promotion.isStats() == status) {
+                    temp.add(promotion);
+                }
+            }
+            filteredPromotions = temp;
+        }
+
+        // Lọc theo từ khóa nếu có
+        if (!search.isEmpty()) {
+            ArrayList<Promotion> temp = new ArrayList<>();
+            for (Promotion promotion : filteredPromotions) {
+                if (promotion.getPromotionId().toLowerCase().contains(search.toLowerCase()) ||
+                        promotion.getPromotionName().toLowerCase().contains(search.toLowerCase())) {
+                    temp.add(promotion);
+                }
+            }
+            filteredPromotions = temp;
+        }
+
+        // Hiển thị kết quả
+        if (filteredPromotions.isEmpty()) {
             model.addRow(new Object[]{"...", "...", "...", "...", "...", "...", "..."});
         } else {
-            loadTable(listPromotions);
+            loadTable(filteredPromotions);
         }
     }
+
 
 
     /**
@@ -373,4 +314,8 @@ public class PromotionSearch extends JPanel{
     private JTable tableKhuyenMai;
     private TextField txtSearch;
     // End of variables declaration//GEN-END:variables
+    public static void main(String[] args) throws MalformedURLException, NotBoundException, RemoteException {
+        PromotionService promotionService = (PromotionService) Naming.lookup("rmi://localhost:7281/promotionService");
+        promotionService.searchByMultipleCriteria("promotion","tháng").forEach(System.out::println);
+    }
 }
