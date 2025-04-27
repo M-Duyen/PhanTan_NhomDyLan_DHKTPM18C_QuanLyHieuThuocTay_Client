@@ -2,7 +2,9 @@ package ui.main;
 
 
 import model.Employee;
+import service.AccountService;
 import service.EmployeeService;
+import staticProcess.StaticProcess;
 
 
 import javax.swing.*;
@@ -19,12 +21,25 @@ import static staticProcess.StaticProcess.*;
 
 public class WelcomeMyApp {
     public static boolean doneLoading = false;
+
     public static void main(String[] args) throws IOException, NotBoundException {
+        AccountService accountService = (AccountService) Naming.lookup("rmi://localhost:7281/accountService");
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                accountService.logout(userlogin);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+
+        }));
+
+
         FileInputStream fin = new FileInputStream(new File("lib/config.properties"));
         properties.load(fin);
 
         Loading load = new Loading();
-        login = new Login_GUI();
+        login = new LoginGUI();
         SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() {
@@ -45,7 +60,7 @@ public class WelcomeMyApp {
                     @Override
                     protected Void doInBackground() {
 
-                        Login_GUI.main(login);
+                        LoginGUI.main(login);
                         while (!loginSuccess) {
                             try {
                                 Thread.sleep(1);

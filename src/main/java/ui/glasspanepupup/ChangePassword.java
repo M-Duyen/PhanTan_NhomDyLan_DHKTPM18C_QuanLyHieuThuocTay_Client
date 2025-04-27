@@ -4,6 +4,7 @@ package ui.glasspanepupup;
 import model.Account;
 import service.AccountService;
 import service.CustomerService;
+import staticProcess.StaticProcess;
 import ui.login.Login;
 
 import java.awt.*;
@@ -160,7 +161,7 @@ public class ChangePassword extends javax.swing.JPanel {
 
         if (!txtNew.getText().isEmpty() && !txtConfirm.getText().isEmpty() && !txtCurrent.getText().isEmpty()) {
             if (txtNew.getText().equals(txtConfirm.getText())) {
-                ArrayList<String> account = (ArrayList<String>) accountService.login(login.getTxtUsername().getText(), txtCurrent.getText());
+                ArrayList<String> account = (ArrayList<String>) accountService.login(StaticProcess.userlogin, txtCurrent.getText());
                 if (account.get(0) != null) {
                     accountService.updatePasswordByAccountID(account.get(0), txtNew.getText());
                     lblError.setForeground(Color.green);

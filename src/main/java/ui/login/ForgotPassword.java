@@ -131,8 +131,7 @@ public class ForgotPassword extends JPanel implements ActionListener, KeyListene
 
                     try {
                         if (accountService.updatePasswordByAccountID(username, username)) {
-    //                        Email_DAO email_dao = new Email_DAO();
-    //                        email_dao.sendEmail(email, "Khôi phục mật khẩu", "Mật khẩu mới của bạn là " + username);
+                            accountService.sendEmail(email, "Khôi phục mật khẩu", "Mật khẩu mới của bạn là " + username);
                         } else {
                             System.out.println("Cập nhật mật khẩu thất bại");
                         }

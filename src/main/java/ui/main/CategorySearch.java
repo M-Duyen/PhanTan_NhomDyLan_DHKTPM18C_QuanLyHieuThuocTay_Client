@@ -631,27 +631,40 @@ public class CategorySearch extends JPanel {
 
     public void searchByOtherCriterious() throws RemoteException {
         String searchByOther = (String) cbbMethod.getSelectedItem();
+
         if (searchByOther != null) {
+            DefaultTableModel model = (DefaultTableModel) tableProduct.getModel();
+
             if (searchByOther.equals("Sản phẩm sắp hết hạn")) {
+                // Lấy danh sách sản phẩm gần hết hạn
                 List<model.Product> proNearExpire = productService.getProductListNearExpire();
-                showTable(proNearExpire);
+                if (proNearExpire.isEmpty()) {
+                    model.setRowCount(0);  // Clear existing rows
+                    model.addRow(new Object[]{"...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "..."});
+                } else {
+                    showTable(proNearExpire);
+                }
 
             } else if (searchByOther.equals("Sản phẩm tồn kho thấp")) {
-                DefaultTableModel model = (DefaultTableModel) tableProduct.getModel();
-                ArrayList<model.Product> lowStockProductsList = (ArrayList<model.Product>) productService.getLowStockProducts(25);
+                // Lấy danh sách sản phẩm tồn kho thấp
+                List<model.Product> lowStockProductsList = productService.getLowStockProducts(300);
                 if (lowStockProductsList.isEmpty()) {
+                    model.setRowCount(0);  // Clear existing rows
                     model.addRow(new Object[]{"...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "..."});
                 } else {
                     showTable(lowStockProductsList);
                 }
+
             } else if (searchByOther.equals("Tất cả")) {
+                // Lấy tất cả sản phẩm
                 List<model.Product> productArrayList = productService.fetchProducts();
                 showTable(productArrayList);
             }
         } else {
-            System.out.println("Bị null");
+            System.out.println("Giá trị tìm kiếm không hợp lệ (null).");
         }
     }
+
 
     public List<model.Product> searchProducts(Object selectedCategory, Object selectedVendor, Object selectedAdmin, String searchText) throws RemoteException {
         List<model.Product> allProducts = productService.getAll();
