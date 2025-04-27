@@ -115,7 +115,7 @@ public class Menu extends JComponent{
                         throw new RuntimeException(ex);
                     } catch (NotBoundException ex) {
                         throw new RuntimeException(ex);
-                    } catch (RemoteException ex) {
+                    } catch (Exception ex) {
                         throw new RuntimeException(ex);
                     }
                 }
@@ -140,7 +140,7 @@ public class Menu extends JComponent{
                         throw new RuntimeException(ex);
                     } catch (NotBoundException ex) {
                         throw new RuntimeException(ex);
-                    } catch (RemoteException ex) {
+                    } catch (Exception ex) {
                         throw new RuntimeException(ex);
                     }
                 }

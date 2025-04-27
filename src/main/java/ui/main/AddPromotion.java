@@ -348,7 +348,7 @@ public class AddPromotion extends JPanel {
             String endDate = txtNgayKetThuc.getText();
             double per = Double.parseDouble(txtPer.getText());
 
-            ArrayList<PromotionType> promotionTypeList = (ArrayList<PromotionType>) promotionTypeService.searchByMultipleCriteria("PromotionType",cboProType_Left.getSelectedItem().toString());
+            ArrayList<PromotionType> promotionTypeList = (ArrayList<PromotionType>) promotionTypeService.searchByMultipleCriteria("promotionType",cboProType_Left.getSelectedItem().toString());
 
             PromotionType promotionType = promotionTypeList.getFirst();
 
