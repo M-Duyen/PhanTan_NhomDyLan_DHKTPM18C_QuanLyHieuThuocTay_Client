@@ -22,7 +22,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-
+@SuppressWarnings("all")
 
 public class AddEmployee extends JPanel implements ActionListener, MouseListener {
     EmployeeService employeeService = (EmployeeService) Naming.lookup("rmi://" + properties.get("ServerName") + ":" + properties.get("Port") + "/employeeService");

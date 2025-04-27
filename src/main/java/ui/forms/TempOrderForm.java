@@ -67,6 +67,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+@SuppressWarnings("all")
 
 public class TempOrderForm extends TabbedForm {
     OrderService orderService  = (OrderService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/orderService");
@@ -941,33 +942,33 @@ public class TempOrderForm extends TabbedForm {
                     }
                 }
 
+                List<OrderDetail> orderDetails = new ArrayList<>();
+                for (int i = 0; i < productIDList.size(); i++) {
+                    Product product = productService.findById(productIDList.get(i));
+                    int quantity = quantityList.get(i);
+                    String unitName = unitNameList.get(i);
+                    PackagingUnit unit = PackagingUnit.convertToEnum(unitName);
+
+                    Product afterProduct = productService.getProductAfterUpdateUnits(product, unit, false, quantity);
+                    orderDetails.add(new OrderDetail(order, afterProduct, unit, quantity));
+
+                    if (!productService.update(afterProduct)) {
+                        new Message(homePage, true, "Thông báo", "Cập nhật số lượng tồn kho thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
+                        return;
+                    }
+                }
+
                 //Add Orders
+                order.setListOrderDetail(orderDetails);
                 if (!orderService.create(order)) {
                     new Message(homePage, true, "Thông báo", "Thêm đơn hàng thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
                     return;
                 }
 
                 //Add OrderDetails
-                for (int i = 0; i < productIDList.size(); i++) {
-                    Product product = productService.findById(productIDList.get(i));
-
-                    int quantity = quantityList.get(i);
-                    String unitName = unitNameList.get(i);
-                    PackagingUnit unit = PackagingUnit.convertToEnum(unitName);
-
-                    Product afterProduct = productService.getProductAfterUpdateUnits(product, unit, false, quantity);
-
-                    OrderDetail od = new OrderDetail();
-                    od.setOrderQuantity(quantity);
-                    od.setOrder(order);
-                    od.setProduct(product);
-                    od.setUnit(unit);
-                    if (!orderDetailService.create(od)) {
-                        new Message(homePage, true, "Thông báo", "Thêm chi tiết đơn hàng thất bại " + i + " !", "src/main/java/ui/dialog/warning.png").showAlert();
-                        return;
-                    }
-                    if (!productService.update(afterProduct)) {
-                        new Message(homePage, true, "Thông báo", "Cập nhật số lượng tồn kho thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
+                for (OrderDetail orderDetail : orderDetails) {
+                    if (!orderDetailService.create(orderDetail)) {
+                        new Message(homePage, true, "Thông báo", "Thêm đơn hàng thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
                         return;
                     }
                 }

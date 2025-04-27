@@ -32,7 +32,7 @@ import java.util.Date;
 import static staticProcess.StaticProcess.homePage;
 import static staticProcess.StaticProcess.userlogin;
 import static staticProcess.StaticProcess.userlogin;
-
+@SuppressWarnings("all")
 
 public class HomePage extends JFrame implements ActionListener{
     EmployeeService employeeService = (EmployeeService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/employeeService");
@@ -44,7 +44,7 @@ public class HomePage extends JFrame implements ActionListener{
     private final HomeSlide homeSlide = new HomeSlide();
     private final CreateOrder createOrder = new CreateOrder(this);
     private final OrderHistory orderHistory = new OrderHistory(this);
-    //private final RevenueStatistic revenueStatistic = new RevenueStatistic();
+    private final RevenueStatistic revenueStatistic = new RevenueStatistic();
     private CategorySearch category = new CategorySearch(this);
     private final AddProduct addProduct = new AddProduct();
     private final UpdateProduct updateProduct = new UpdateProduct();
@@ -60,6 +60,7 @@ public class HomePage extends JFrame implements ActionListener{
     private final TodayRevenueStatistic todayRevenueStatistic = new TodayRevenueStatistic();
     private final ProcessOrder processOrder = new ProcessOrder();
     private static String accLoginID;
+
 
     public HomePage() throws Exception {
         initComponents();
@@ -153,7 +154,7 @@ public class HomePage extends JFrame implements ActionListener{
         } else if(index == 1 && subIndex == 3){
             replacePanel(processOrder.getPnlProcessPanel());
         } else if(index == 1 && subIndex == 4){
-            //replacePanel(revenueStatistic);
+            replacePanel(revenueStatistic);
         } else if(index == 1 && subIndex == 5){
             replacePanel(new TodayRevenueStatistic());
         }

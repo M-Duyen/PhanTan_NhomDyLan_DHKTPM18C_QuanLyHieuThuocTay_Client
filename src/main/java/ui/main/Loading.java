@@ -1,6 +1,7 @@
 package ui.main;
 
 import javax.swing.JOptionPane;
+@SuppressWarnings("all")
 
 public class Loading extends javax.swing.JFrame {
 

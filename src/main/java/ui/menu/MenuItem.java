@@ -14,6 +14,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import ui.effect.RippleEffect;
 import ui.swing.shadow.ShadowRenderer;
+@SuppressWarnings("all")
 
 public class MenuItem extends JButton{
     private int index;

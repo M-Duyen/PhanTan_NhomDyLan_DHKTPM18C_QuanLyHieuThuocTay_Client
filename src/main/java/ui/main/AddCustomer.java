@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+@SuppressWarnings("all")
 
 public class AddCustomer extends JPanel implements ActionListener, MouseListener {
     CustomerService customerService = (CustomerService) Naming.lookup("rmi://" + properties.get("ServerName") + ":" + properties.get("Port") + "/customerService");

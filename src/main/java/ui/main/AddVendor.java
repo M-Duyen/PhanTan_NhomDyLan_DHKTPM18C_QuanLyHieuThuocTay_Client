@@ -16,6 +16,7 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.List;
+@SuppressWarnings("all")
 
 public class AddVendor extends JPanel implements ActionListener {
     VendorService vendorService = (VendorService)  Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/vendorService");

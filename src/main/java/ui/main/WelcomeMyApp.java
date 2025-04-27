@@ -18,6 +18,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
 import static staticProcess.StaticProcess.*;
+@SuppressWarnings("all")
 
 public class WelcomeMyApp {
     public static boolean doneLoading = false;
