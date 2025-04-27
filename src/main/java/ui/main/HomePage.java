@@ -44,7 +44,7 @@ public class HomePage extends JFrame implements ActionListener{
     private final HomeSlide homeSlide = new HomeSlide();
     private final CreateOrder createOrder = new CreateOrder(this);
     private final OrderHistory orderHistory = new OrderHistory(this);
-//    private final RevenueStatistic revenueStatistic = new RevenueStatistic();
+    private final RevenueStatistic revenueStatistic = new RevenueStatistic();
     private CategorySearch category = new CategorySearch(this);
     private final AddProduct addProduct = new AddProduct();
     private final UpdateProduct updateProduct = new UpdateProduct();
@@ -105,7 +105,6 @@ public class HomePage extends JFrame implements ActionListener{
                     message.lblEmpName_show.setText(emp.getManagerName());
                     message.lblPhoneNumber_show.setText(emp.getPhoneNumber());
                     message.lblDOB_show.setText(emp.getBirthDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-                    //TODO: Trong bảng manager thiếu mấy thông tin này
                     message.lblGender_show.setText((""));
                     message.lblDegree_show.setText("");
                     message.lblEmail_show.setText("");
@@ -154,7 +153,7 @@ public class HomePage extends JFrame implements ActionListener{
         } else if(index == 1 && subIndex == 3){
             replacePanel(processOrder.getPnlProcessPanel());
         } else if(index == 1 && subIndex == 4){
-//            replacePanel(revenueStatistic);
+            replacePanel(revenueStatistic);
         } else if(index == 1 && subIndex == 5){
             replacePanel(new TodayRevenueStatistic());
         }

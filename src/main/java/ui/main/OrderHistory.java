@@ -288,15 +288,14 @@ public class OrderHistory extends javax.swing.JPanel {
                 }
                 int row = tableOrder.getSelectedRow();
                 if (row >= 0) {
-                    ArrayList<Order> list = null;
+                    Order order = null;
                     try {
-                        list = (ArrayList<Order>) orderService.searchByMultipleCriteria("Order",tableOrder.getValueAt(row, 0).toString());
+                        order = orderService.findById(tableOrder.getValueAt(row, 0).toString());
                     } catch (RemoteException e) {
                         throw new RuntimeException(e);
                     }
-                    System.out.println(list.get(0).toString());
                     try {
-                        tempOrderForm.invoiceOrder(list.get(0));
+                        tempOrderForm.invoiceOrder(order);
                     } catch (IOException | NotBoundException e) {
                         throw new RuntimeException(e);
                     }
