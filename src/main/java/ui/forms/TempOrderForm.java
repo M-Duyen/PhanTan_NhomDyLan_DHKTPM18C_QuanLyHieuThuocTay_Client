@@ -851,124 +851,125 @@ public class TempOrderForm extends TabbedForm {
     }
 
     private void btnCheckOutActionPerformed(ActionEvent evt) throws RemoteException, MalformedURLException, NotBoundException {//GEN-FIRST:event_btnCheckOutActionPerformed
-        ArrayList<String> productIDList = getProductIDList();
-        ArrayList<Integer> quantityList = getQuantityList();
-        ArrayList<String> unitNameList = getUnitList();
+            ArrayList<String> productIDList = getProductIDList();
+            ArrayList<Integer> quantityList = getQuantityList();
+            ArrayList<String> unitNameList = getUnitList();
 
-        if (productIDList.isEmpty()) {
-            new Message(homePage, true, "Thông báo", "Chưa thêm sản phẩm vào hóa đơn!", "src/main/java/ui/dialog/warning.png").showAlert();
-            return;
-        }
-
-        if (txtCustPay.getText().trim().isEmpty() && rbCash.isSelected()) {
-            new Message(homePage, true, "Thông báo", "Chưa nhập tiền khách trả!", "src/main/java/ui/dialog/warning.png").showAlert();
-            return;
-        }
-
-        String orderID = orderService.createOrderID(Login.getEmployeeLogin().getEmployeeID());
-        LocalDateTime orderDate = LocalDateTime.now();
-        String shipToAddress = null;
-
-        PaymentMethod pm = null;
-        if (rbCash.isSelected()) {
-            pm = PaymentMethod.CASH;
-        } else if (rbTransfer.isSelected()) {
-            pm = PaymentMethod.BANK_TRANSFER;
-        } else if (rbCreditCard.isSelected()) {
-            pm = PaymentMethod.CREDIT_CARD;
-        } else {
-            new Message(homePage, true, "Thông báo", "Chưa chọn phương thức thanh toán!", "src/main/java/ui/dialog/warning.png").showAlert();
-        }
-
-        double discount = 0;
-        try {
-            if (!txtDiscount.getText().trim().isEmpty()) {
-                discount = nf.parse(txtDiscount.getText().trim()).intValue();
-            }
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
-
-        Customer customer = null;
-        if (!txtCustPhone.getText().trim().isEmpty()) {
-            customer = customerService.getCustomerByPhone(txtCustPhone.getText().trim());
-        }
-
-        Employee employee = new Login().getEmployeeLogin();
-
-        Prescription prescription = this.prescription;
-
-        Order order = new Order();
-        order.setOrderID(orderID);
-        order.setOrderDate(orderDate);
-        order.setShipToAddress(shipToAddress);
-        order.setPaymentMethod(pm);
-        order.setDiscount(discount);
-        order.setEmployee(employee);
-        order.setCustomer(customer);
-        order.setPrescription(prescription);
-        Connection con = null;
-        try {
-
-            con.setAutoCommit(false);
-
-            double point = 0;
-            //Update Customer Point nếu có check ckbTransPoint
-            if (ckbTransPoint.isSelected()) {
-                String pointText = txtPoint.getText().trim();
-                String totalDueText = txtTotalDue.getText().trim();
-                try {
-                    double discount2 = nf.parse(pointText).doubleValue() * 10;
-                    double totalDue = nf.parse(totalDueText).doubleValue();
-                    if (totalDue < discount2) {
-                        point = (discount2 - totalDue) / 10;
-                    } else {
-                        point = nf.parse(pointText).doubleValue();
-                    }
-                } catch (ParseException e) {
-                    throw new RuntimeException(e);
-                }
-
-                if (customer != null) {
-                    if (!customerService.updateCustPoint_Decrease(customer.getPhoneNumber(), point)) {
-                        con.rollback();
-                        new Message(homePage, true, "Thông báo", "Cập nhật giảm điểm tích lũy của khách hàng thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
-                        return;
-                    }
-                }
-            } else {
-                try {
-                    point = nf.parse(txtPointOrder.getText().trim()).doubleValue();
-                } catch (ParseException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            //Add Orders
-            if (!orderService.create(order)) {
-                con.rollback();
-                new Message(homePage, true, "Thông báo", "Thêm đơn hàng thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
+            if (productIDList.isEmpty()) {
+                new Message(homePage, true, "Thông báo", "Chưa thêm sản phẩm vào hóa đơn!", "src/main/java/ui/dialog/warning.png").showAlert();
                 return;
             }
 
-            //Add OrderDetails
-            for (int i = 0; i < productIDList.size(); i++) {
-                Product product = productService.findById(productIDList.get(i));
+            if (txtCustPay.getText().trim().isEmpty() && rbCash.isSelected()) {
+                new Message(homePage, true, "Thông báo", "Chưa nhập tiền khách trả!", "src/main/java/ui/dialog/warning.png").showAlert();
+                return;
+            }
 
-                int quantity = quantityList.get(i);
-                String unitName = unitNameList.get(i);
-//                PackagingUnit unit = PackagingUnit.fromString(new Unit_DAO().convertDes_ToUnit(unitName));
+            String orderID = orderService.createOrderID(Login.getEmployeeLogin().getEmployeeID());
+            LocalDateTime orderDate = LocalDateTime.now();
+            String shipToAddress = null;
 
-                OrderDetail od = new OrderDetail();
-                od.setOrderQuantity(quantity);
-                od.setOrder(order);
-                od.setProduct(product);
-//                od.setUnit(unit);
-                if (!orderDetailService.create(od)) {
-                    con.rollback();
-                    new Message(homePage, true, "Thông báo", "Thêm chi tiết đơn hàng thất bại " + i + " !", "src/main/java/ui/dialog/warning.png").showAlert();
+            PaymentMethod pm = null;
+            if (rbCash.isSelected()) {
+                pm = PaymentMethod.CASH;
+            } else if (rbTransfer.isSelected()) {
+                pm = PaymentMethod.BANK_TRANSFER;
+            } else if (rbCreditCard.isSelected()) {
+                pm = PaymentMethod.CREDIT_CARD;
+            } else {
+                new Message(homePage, true, "Thông báo", "Chưa chọn phương thức thanh toán!", "src/main/java/ui/dialog/warning.png").showAlert();
+            }
+
+            double discount = 0;
+            try {
+                if (!txtDiscount.getText().trim().isEmpty()) {
+                    discount = nf.parse(txtDiscount.getText().trim()).intValue();
+                }
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+
+            Customer customer = null;
+            if (!txtCustPhone.getText().trim().isEmpty()) {
+                customer = customerService.getCustomerByPhone(txtCustPhone.getText().trim());
+            }
+
+            Employee employee = Login.getEmployeeLogin();
+
+            Prescription prescription = this.prescription;
+
+            Order order = new Order();
+            order.setOrderID(orderID);
+            order.setOrderDate(orderDate);
+            order.setShipToAddress(shipToAddress);
+            order.setPaymentMethod(pm);
+            order.setDiscount(discount);
+            order.setEmployee(employee);
+            order.setCustomer(customer);
+            order.setPrescription(prescription);
+
+            try {
+                double point = 0;
+                //Update Customer Point nếu có check ckbTransPoint
+                if (ckbTransPoint.isSelected()) {
+                    String pointText = txtPoint.getText().trim();
+                    String totalDueText = txtTotalDue.getText().trim();
+                    try {
+                        double discount2 = nf.parse(pointText).doubleValue() * 10;
+                        double totalDue = nf.parse(totalDueText).doubleValue();
+                        if (totalDue < discount2) {
+                            point = (discount2 - totalDue) / 10;
+                        } else {
+                            point = nf.parse(pointText).doubleValue();
+                        }
+                    } catch (ParseException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    if (customer != null) {
+                        if (!customerService.updateCustPoint_Decrease(customer.getPhoneNumber(), point)) {
+                            new Message(homePage, true, "Thông báo", "Cập nhật giảm điểm tích lũy của khách hàng thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
+                            return;
+                        }
+                    }
+                } else {
+                    try {
+
+                        point = nf.parse(txtPointOrder.getText().trim()).doubleValue();
+                    } catch (ParseException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+                //Add Orders
+                if (!orderService.create(order)) {
+                    new Message(homePage, true, "Thông báo", "Thêm đơn hàng thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
                     return;
                 }
+
+                //Add OrderDetails
+                for (int i = 0; i < productIDList.size(); i++) {
+                    Product product = productService.findById(productIDList.get(i));
+
+                    int quantity = quantityList.get(i);
+                    String unitName = unitNameList.get(i);
+                    PackagingUnit unit = PackagingUnit.convertToEnum(unitName);
+
+                    Product afterProduct = productService.getProductAfterUpdateUnits(product, unit, false, quantity);
+
+                    OrderDetail od = new OrderDetail();
+                    od.setOrderQuantity(quantity);
+                    od.setOrder(order);
+                    od.setProduct(product);
+                    od.setUnit(unit);
+                    if (!orderDetailService.create(od)) {
+                        new Message(homePage, true, "Thông báo", "Thêm chi tiết đơn hàng thất bại " + i + " !", "src/main/java/ui/dialog/warning.png").showAlert();
+                        return;
+                    }
+                    if (!productService.update(afterProduct)) {
+                        new Message(homePage, true, "Thông báo", "Cập nhật số lượng tồn kho thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
+                        return;
+                    }
                 }
 
                 if (customer != null) {
@@ -979,127 +980,126 @@ public class TempOrderForm extends TabbedForm {
                 }
 
                 new Message(homePage, true, "Xác nhận", "Thêm đơn hàng thành công!", "src/main/java/ui/dialog/checked.png").showAlert();
-                /*try {
+                try {
                     invoiceOrder(order);
                 } catch (IOException | NotBoundException e) {
                     throw new RuntimeException(e);
-                }*/
+                }
                 clearAll();
             } catch (Exception e) {
                e.printStackTrace();
             }
         }//GEN-LAST:event_btnCheckOutActionPerformed
 
-    private void txtNoteFocusGained(FocusEvent evt) {//GEN-FIRST:event_txtNoteFocusGained
-        if (txtNote.getText().equals("Ghi chú đơn hàng ...")) {
-            txtNote.setText("");
-        }
-    }//GEN-LAST:event_txtNoteFocusGained
+        private void txtNoteFocusGained (FocusEvent evt){//GEN-FIRST:event_txtNoteFocusGained
+            if (txtNote.getText().equals("Ghi chú đơn hàng ...")) {
+                txtNote.setText("");
+            }
+        }//GEN-LAST:event_txtNoteFocusGained
 
-    private void txtNoteFocusLost(FocusEvent evt) {//GEN-FIRST:event_txtNoteFocusLost
-        if (txtNote.getText().equals("")) {
+        private void txtNoteFocusLost (FocusEvent evt){//GEN-FIRST:event_txtNoteFocusLost
+            if (txtNote.getText().equals("")) {
+                txtNote.setText("Ghi chú đơn hàng ...");
+            }
+        }//GEN-LAST:event_txtNoteFocusLost
+
+        public void addProductRow (Object[]rowData){
+            model.addRow(rowData);
+        }
+
+        public void clearAll () {
+            model.setRowCount(0);
+            txtCustPhone.setText("");
+            txtCustName.setText("");
+            txtPoint.setText("");
+            txtTotalDue.setText("");
+            txtPointOrder.setText("");
+            txtDiscount.setText("");
+            txtNeededPay.setText("");
+            txtCustPay.setText("");
+            rbCash.setSelected(false);
+            rbTransfer.setSelected(false);
+            rbCreditCard.setSelected(false);
+            lblChange.setVisible(false);
+            txtChange.setText("");
+            txtChange.setVisible(false);
+            ckbTransPoint.setSelected(false);
+            txtTotalQuantity.setText("");
+            txtTotalDue_Left.setText("");
             txtNote.setText("Ghi chú đơn hàng ...");
         }
-    }//GEN-LAST:event_txtNoteFocusLost
 
-    public void addProductRow(Object[] rowData) {
-        model.addRow(rowData);
-    }
+        public int findRowByProductID (String productID, PackagingUnit unitEnum){
+            for (int i = 0; i < model.getRowCount(); i++) {
+                String id = (String) model.getValueAt(i, 0);
+                String unit = (String) model.getValueAt(i, 2);
+                PackagingUnit unitE = PackagingUnit.convertToEnum(unit);
 
-    public void clearAll() {
-        model.setRowCount(0);
-        txtCustPhone.setText("");
-        txtCustName.setText("");
-        txtPoint.setText("");
-        txtTotalDue.setText("");
-        txtPointOrder.setText("");
-        txtDiscount.setText("");
-        txtNeededPay.setText("");
-        txtCustPay.setText("");
-        rbCash.setSelected(false);
-        rbTransfer.setSelected(false);
-        rbCreditCard.setSelected(false);
-        lblChange.setVisible(false);
-        txtChange.setText("");
-        txtChange.setVisible(false);
-        ckbTransPoint.setSelected(false);
-        txtTotalQuantity.setText("");
-        txtTotalDue_Left.setText("");
-        txtNote.setText("Ghi chú đơn hàng ...");
-    }
-
-    public int findRowByProductID(String productID, PackagingUnit unitEnum) {
-        for (int i = 0; i < model.getRowCount(); i++) {
-            String id = (String) model.getValueAt(i, 0);
-            String unit = (String) model.getValueAt(i, 2);
-            PackagingUnit unitE = PackagingUnit.convertToEnum(unit);
-
-            if (id.equals(productID) && unitE.equals(unitEnum)) {
-                return i;
+                if (id.equals(productID) && unitE.equals(unitEnum)) {
+                    return i;
+                }
             }
+            return -1;
         }
-        return -1;
-    }
 
-    public int getQuantityProductInTable(String productID) {
-        for (int i = 0; i < model.getRowCount(); i++) {
-            String id = (String) model.getValueAt(i, 0);
+        public int getQuantityProductInTable (String productID){
+            for (int i = 0; i < model.getRowCount(); i++) {
+                String id = (String) model.getValueAt(i, 0);
 
-            if (id.equals(productID)) {
-                return (Integer) model.getValueAt(i, 3);
+                if (id.equals(productID)) {
+                    return (Integer) model.getValueAt(i, 3);
+                }
             }
+            return -1;
         }
-        return -1;
-    }
 
-    DecimalFormat df = new DecimalFormat("#,##0.00 VND");
-    DecimalFormat df_point = new DecimalFormat("#,##0.00");
+        DecimalFormat df = new DecimalFormat("#,##0.00 VND");
+        DecimalFormat df_point = new DecimalFormat("#,##0.00");
 
-    public void updateProductRow(int row, int column, int quantity, double sellPrice) {
-        model.setValueAt(quantity, row, column);
-        model.setValueAt(df.format(quantity * sellPrice), row, column + 2);
-    }
+        public void updateProductRow ( int row, int column, int quantity, double sellPrice){
+            model.setValueAt(quantity, row, column);
+            model.setValueAt(df.format(quantity * sellPrice), row, column + 2);
+        }
 
-    NumberFormat nf = NumberFormat.getInstance(Locale.getDefault());
+        NumberFormat nf = NumberFormat.getInstance(Locale.getDefault());
 
-    public void updatePanelNotice() {
-        int totalQuantity = 0;
-        double totalDue = 0;
-        double point = 0;
-        for (int i = 0; i < model.getRowCount(); i++) {
-            totalQuantity += (int) model.getValueAt(i, 3);
+        public void updatePanelNotice () {
+            int totalQuantity = 0;
+            double totalDue = 0;
+            double point = 0;
+            for (int i = 0; i < model.getRowCount(); i++) {
+                totalQuantity += (int) model.getValueAt(i, 3);
+                try {
+                    totalDue += nf.parse((String) model.getValueAt(i, 5)).doubleValue();
+                    point += totalDue / 1000;
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            txtTotalQuantity.setText(String.valueOf(totalQuantity));
+            txtTotalDue_Left.setText(df.format(totalDue));
+            txtTotalDue.setText(df.format(totalDue));
+        }
+
+        public void updatePointOrder () {
+            double totalDue = 0;
             try {
-                totalDue += nf.parse((String) model.getValueAt(i, 5)).doubleValue();
-                point += totalDue / 1000;
+                totalDue = nf.parse(txtNeededPay.getText().trim()).doubleValue();
+                txtPointOrder.setText(df_point.format(totalDue / 1000));
             } catch (ParseException e) {
                 throw new RuntimeException(e);
             }
         }
-        txtTotalQuantity.setText(String.valueOf(totalQuantity));
-        txtTotalDue_Left.setText(df.format(totalDue));
-        txtTotalDue.setText(df.format(totalDue));
-    }
 
-    public void updatePointOrder() {
-        double totalDue = 0;
-        try {
-            totalDue = nf.parse(txtNeededPay.getText().trim()).doubleValue();
-            txtPointOrder.setText(df_point.format(totalDue / 1000));
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static void invoiceOrder(Order order) throws IOException, NotBoundException {
-        OrderService orderService = (OrderService) Naming.lookup("rmi://localhost:7281/orderService");
-        OrderDetailService orderDetailService = (OrderDetailService) Naming.lookup("rmi://localhost:7281/orderDetailService");
-
-        String path = "invoice.pdf";
-        PdfWriter pdfWriter = new PdfWriter(path);
-        PdfDocument pdfDocument = new PdfDocument(pdfWriter);
-        pdfDocument.setDefaultPageSize(PageSize.A6);
-        Document document = new Document(pdfDocument);
-        PdfFont font = PdfFontFactory.createFont("src/main/font/arial.ttf", "Identity-H");
+        public static void invoiceOrder (Order order) throws IOException, NotBoundException {
+            OrderService orderService  = (OrderService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/orderService");
+            OrderDetailService orderDetailService  = (OrderDetailService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/orderDetailService");
+            String path = "invoice.pdf";
+            PdfWriter pdfWriter = new PdfWriter(path);
+            PdfDocument pdfDocument = new PdfDocument(pdfWriter);
+            pdfDocument.setDefaultPageSize(PageSize.A6);
+            Document document = new Document(pdfDocument);
+            PdfFont font = PdfFontFactory.createFont("src/main/font/arial.ttf", "Identity-H");
 
         float fullWidth[] = {300f};
         float[] columnWidths = {35f, 10f, 200f};

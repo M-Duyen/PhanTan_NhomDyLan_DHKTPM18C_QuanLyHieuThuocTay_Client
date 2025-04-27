@@ -4,6 +4,7 @@ package ui.main;
 import model.PackagingUnit;
 import model.Product;
 import service.ProductService;
+import staticProcess.StaticProcess;
 import ui.button.Button;
 import ui.dialog.Message;
 import ui.dialog.ProductConfirm;
@@ -26,7 +27,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class CreateOrder extends JPanel {
-    ProductService productService = (ProductService) Naming.lookup("rmi://localhost:7281/productService");
+    ProductService productService = (ProductService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/productService");
     private HomePage homePage;
 
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
