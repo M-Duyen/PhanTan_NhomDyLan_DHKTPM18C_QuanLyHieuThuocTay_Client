@@ -1,8 +1,4 @@
 package ui.main;
-
-
-
-import dao.ProductDAO;
 import model.*;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -326,7 +322,7 @@ public class AddProduct extends JPanel {
                         String administrationName = row.getCell(16).getStringCellValue();
 
                         Map<PackagingUnit, ProductUnit> unitMap = new HashMap<>();
-                        Medicine medicine = new Medicine(new ProductDAO(Product.class).getIDProduct("PM", xM), productName, registrationNumber, purchasePrice, taxPercentage, new Vendor(vendorID, vendorName, vendorCountry), new Category(categoryID, categoryName, null), endDate, activeIngredient, conversionUnit, new AdministrationRoute(administrationID, administrationName), noteUnit);
+                        Medicine medicine = new Medicine(productService.getIDProduct("PM", xM), productName, registrationNumber, purchasePrice, taxPercentage, new Vendor(vendorID, vendorName, vendorCountry), new Category(categoryID, categoryName, null), endDate, activeIngredient, conversionUnit, new AdministrationRoute(administrationID, administrationName), noteUnit);
                         medicine.addUnit(PackagingUnit.fromString(conversionUnit), new ProductUnit(calSellPrice(purchasePrice , medicine), quantityInStock));
                         //Các đơn vị còn lại
                         addUnitByString(row.getCell(20).getStringCellValue(), purchasePrice, medicine);
@@ -337,7 +333,7 @@ public class AddProduct extends JPanel {
                     case "FF": {
                         String mainNutrients = row.getCell(17).getStringCellValue();
                         String supplementaryIngredients = row.getCell(18).getStringCellValue();
-                        FunctionalFood ff = new FunctionalFood(new ProductDAO(Product.class).getIDProduct("PF", xFF), productName, registrationNumber, purchasePrice, taxPercentage, new Vendor(vendorID, vendorName, vendorCountry), new Category(categoryID, categoryName, null), endDate, mainNutrients, supplementaryIngredients, noteUnit);
+                        FunctionalFood ff = new FunctionalFood(productService.getIDProduct("PF", xFF), productName, registrationNumber, purchasePrice, taxPercentage, new Vendor(vendorID, vendorName, vendorCountry), new Category(categoryID, categoryName, null), endDate, mainNutrients, supplementaryIngredients, noteUnit);
                         xFF++;
 
                         ff.addUnit(PackagingUnit.fromString(conversionUnit), new ProductUnit(calSellPrice(purchasePrice , ff), quantityInStock));
@@ -348,7 +344,7 @@ public class AddProduct extends JPanel {
                     }
                     case "MS": {
                         String medicalSupplyType = row.getCell(19).getStringCellValue();
-                        MedicalSupply ms = new MedicalSupply(new ProductDAO(Product.class).getIDProduct("PS", xMS), productName, registrationNumber, purchasePrice, taxPercentage, new Vendor(vendorID, vendorName, vendorCountry), new Category(categoryID, categoryName, null), endDate, medicalSupplyType, noteUnit);
+                        MedicalSupply ms = new MedicalSupply(productService.getIDProduct("PS", xMS), productName, registrationNumber, purchasePrice, taxPercentage, new Vendor(vendorID, vendorName, vendorCountry), new Category(categoryID, categoryName, null), endDate, medicalSupplyType, noteUnit);
                         xMS++;
                         ms.addUnit(PackagingUnit.fromString(conversionUnit), new ProductUnit(calSellPrice(purchasePrice , ms), quantityInStock));
                         //Các đơn vị còn lại
@@ -373,14 +369,8 @@ public class AddProduct extends JPanel {
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         model.setRowCount(0);
         for (Product product : listProduct) {
-//            System.out.println(product);
-//            for (Map.Entry<Enum_PackagingUnit, Double> entry : product.getUnitPrice().entrySet()) {
-//                String packagingUnitStr = entry.getKey().name();
-//                System.out.println(product.getProductID() + "//" + entry.getKey().name() + "//" + entry.getValue());
-//            }
             String unitTemp = "";
             int multiplier = 0;
-//            System.out.println("unitNote: " + product.getUnitNote());
             String[] parts = product.getUnitNote().split(",\\s*");
             for (String part : parts) {
                 Pattern pattern = Pattern.compile("([A-Z ]+)(?:\\((\\d+)\\))?");

@@ -8,15 +8,12 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
-import dao.GenericDAO;
-import dao.OrderDAO;
+
 import lombok.SneakyThrows;
 import model.Order;
 import service.OrderService;
-import service.impl.OrderServiceImpl;
 import staticProcess.StaticProcess;
 import ui.table.TableCustom;
-import utils.JPAUtil;
 
 import java.net.MalformedURLException;
 import java.rmi.Naming;
