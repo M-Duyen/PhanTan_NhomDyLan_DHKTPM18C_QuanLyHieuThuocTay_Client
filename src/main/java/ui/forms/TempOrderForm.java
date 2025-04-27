@@ -851,147 +851,147 @@ public class TempOrderForm extends TabbedForm {
     }
 
     private void btnCheckOutActionPerformed(ActionEvent evt) throws RemoteException, MalformedURLException, NotBoundException {//GEN-FIRST:event_btnCheckOutActionPerformed
-            ArrayList<String> productIDList = getProductIDList();
-            ArrayList<Integer> quantityList = getQuantityList();
-            ArrayList<String> unitNameList = getUnitList();
+        ArrayList<String> productIDList = getProductIDList();
+        ArrayList<Integer> quantityList = getQuantityList();
+        ArrayList<String> unitNameList = getUnitList();
 
-            if (productIDList.isEmpty()) {
-                new Message(homePage, true, "Thông báo", "Chưa thêm sản phẩm vào hóa đơn!", "src/main/java/ui/dialog/warning.png").showAlert();
-                return;
+        if (productIDList.isEmpty()) {
+            new Message(homePage, true, "Thông báo", "Chưa thêm sản phẩm vào hóa đơn!", "src/main/java/ui/dialog/warning.png").showAlert();
+            return;
+        }
+
+        if (txtCustPay.getText().trim().isEmpty() && rbCash.isSelected()) {
+            new Message(homePage, true, "Thông báo", "Chưa nhập tiền khách trả!", "src/main/java/ui/dialog/warning.png").showAlert();
+            return;
+        }
+
+        String orderID = orderService.createOrderID(Login.getEmployeeLogin().getEmployeeID());
+        LocalDateTime orderDate = LocalDateTime.now();
+        String shipToAddress = null;
+
+        PaymentMethod pm = null;
+        if (rbCash.isSelected()) {
+            pm = PaymentMethod.CASH;
+        } else if (rbTransfer.isSelected()) {
+            pm = PaymentMethod.BANK_TRANSFER;
+        } else if (rbCreditCard.isSelected()) {
+            pm = PaymentMethod.CREDIT_CARD;
+        } else {
+            new Message(homePage, true, "Thông báo", "Chưa chọn phương thức thanh toán!", "src/main/java/ui/dialog/warning.png").showAlert();
+        }
+
+        double discount = 0;
+        try {
+            if (!txtDiscount.getText().trim().isEmpty()) {
+                discount = nf.parse(txtDiscount.getText().trim()).intValue();
             }
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
 
-            if (txtCustPay.getText().trim().isEmpty() && rbCash.isSelected()) {
-                new Message(homePage, true, "Thông báo", "Chưa nhập tiền khách trả!", "src/main/java/ui/dialog/warning.png").showAlert();
-                return;
-            }
+        Customer customer = null;
+        if (!txtCustPhone.getText().trim().isEmpty()) {
+            customer = customerService.getCustomerByPhone(txtCustPhone.getText().trim());
+        }
 
-            String orderID = orderService.createOrderID(Login.getEmployeeLogin().getEmployeeID());
-            LocalDateTime orderDate = LocalDateTime.now();
-            String shipToAddress = null;
+        Employee employee = Login.getEmployeeLogin();
 
-            PaymentMethod pm = null;
-            if (rbCash.isSelected()) {
-                pm = PaymentMethod.CASH;
-            } else if (rbTransfer.isSelected()) {
-                pm = PaymentMethod.BANK_TRANSFER;
-            } else if (rbCreditCard.isSelected()) {
-                pm = PaymentMethod.CREDIT_CARD;
-            } else {
-                new Message(homePage, true, "Thông báo", "Chưa chọn phương thức thanh toán!", "src/main/java/ui/dialog/warning.png").showAlert();
-            }
+        Prescription prescription = this.prescription;
 
-            double discount = 0;
-            try {
-                if (!txtDiscount.getText().trim().isEmpty()) {
-                    discount = nf.parse(txtDiscount.getText().trim()).intValue();
-                }
-            } catch (ParseException e) {
-                throw new RuntimeException(e);
-            }
+        Order order = new Order();
+        order.setOrderID(orderID);
+        order.setOrderDate(orderDate);
+        order.setShipToAddress(shipToAddress);
+        order.setPaymentMethod(pm);
+        order.setDiscount(discount);
+        order.setEmployee(employee);
+        order.setCustomer(customer);
+        order.setPrescription(prescription);
 
-            Customer customer = null;
-            if (!txtCustPhone.getText().trim().isEmpty()) {
-                customer = customerService.getCustomerByPhone(txtCustPhone.getText().trim());
-            }
-
-            Employee employee = Login.getEmployeeLogin();
-
-            Prescription prescription = this.prescription;
-
-            Order order = new Order();
-            order.setOrderID(orderID);
-            order.setOrderDate(orderDate);
-            order.setShipToAddress(shipToAddress);
-            order.setPaymentMethod(pm);
-            order.setDiscount(discount);
-            order.setEmployee(employee);
-            order.setCustomer(customer);
-            order.setPrescription(prescription);
-
-            try {
-                double point = 0;
-                //Update Customer Point nếu có check ckbTransPoint
-                if (ckbTransPoint.isSelected()) {
-                    String pointText = txtPoint.getText().trim();
-                    String totalDueText = txtTotalDue.getText().trim();
-                    try {
-                        double discount2 = nf.parse(pointText).doubleValue() * 10;
-                        double totalDue = nf.parse(totalDueText).doubleValue();
-                        if (totalDue < discount2) {
-                            point = (discount2 - totalDue) / 10;
-                        } else {
-                            point = nf.parse(pointText).doubleValue();
-                        }
-                    } catch (ParseException e) {
-                        throw new RuntimeException(e);
+        try {
+            double point = 0;
+            //Update Customer Point nếu có check ckbTransPoint
+            if (ckbTransPoint.isSelected()) {
+                String pointText = txtPoint.getText().trim();
+                String totalDueText = txtTotalDue.getText().trim();
+                try {
+                    double discount2 = nf.parse(pointText).doubleValue() * 10;
+                    double totalDue = nf.parse(totalDueText).doubleValue();
+                    if (totalDue < discount2) {
+                        point = (discount2 - totalDue) / 10;
+                    } else {
+                        point = nf.parse(pointText).doubleValue();
                     }
-
-                    if (customer != null) {
-                        if (!customerService.updateCustPoint_Decrease(customer.getPhoneNumber(), point)) {
-                            new Message(homePage, true, "Thông báo", "Cập nhật giảm điểm tích lũy của khách hàng thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
-                            return;
-                        }
-                    }
-                } else {
-                    try {
-
-                        point = nf.parse(txtPointOrder.getText().trim()).doubleValue();
-                    } catch (ParseException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-
-                //Add Orders
-                if (!orderService.create(order)) {
-                    new Message(homePage, true, "Thông báo", "Thêm đơn hàng thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
-                    return;
-                }
-
-                //Add OrderDetails
-                for (int i = 0; i < productIDList.size(); i++) {
-                    Product product = productService.findById(productIDList.get(i));
-
-                    int quantity = quantityList.get(i);
-                    String unitName = unitNameList.get(i);
-                    PackagingUnit unit = PackagingUnit.convertToEnum(unitName);
-
-                    Product afterProduct = productService.getProductAfterUpdateUnits(product, unit, false, quantity);
-
-                    OrderDetail od = new OrderDetail();
-                    od.setOrderQuantity(quantity);
-                    od.setOrder(order);
-                    od.setProduct(product);
-                    od.setUnit(unit);
-                    if (!orderDetailService.create(od)) {
-                        new Message(homePage, true, "Thông báo", "Thêm chi tiết đơn hàng thất bại " + i + " !", "src/main/java/ui/dialog/warning.png").showAlert();
-                        return;
-                    }
-                    if (!productService.update(afterProduct)) {
-                        new Message(homePage, true, "Thông báo", "Cập nhật số lượng tồn kho thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
-                        return;
-                    }
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
                 }
 
                 if (customer != null) {
-                    if (!customerService.updateCustPoint_Increase(customer.getPhoneNumber(), point)) {
-                        new Message(homePage, true, "Thông báo", "Cập nhật tăng điểm tích lũy của khách hàng thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
+                    if (!customerService.updateCustPoint_Decrease(customer.getPhoneNumber(), point)) {
+                        new Message(homePage, true, "Thông báo", "Cập nhật giảm điểm tích lũy của khách hàng thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
                         return;
                     }
                 }
-
-                new Message(homePage, true, "Xác nhận", "Thêm đơn hàng thành công!", "src/main/java/ui/dialog/checked.png").showAlert();
+            } else {
                 try {
-                    invoiceOrder(order);
-                } catch (IOException | NotBoundException e) {
+
+                    point = nf.parse(txtPointOrder.getText().trim()).doubleValue();
+                } catch (ParseException e) {
                     throw new RuntimeException(e);
                 }
-                clearAll();
-            } catch (Exception e) {
-               e.printStackTrace();
             }
-        }//GEN-LAST:event_btnCheckOutActionPerformed
 
-        private void txtNoteFocusGained (FocusEvent evt){//GEN-FIRST:event_txtNoteFocusGained
+            //Add Orders
+            if (!orderService.create(order)) {
+                new Message(homePage, true, "Thông báo", "Thêm đơn hàng thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
+                return;
+            }
+
+            //Add OrderDetails
+            for (int i = 0; i < productIDList.size(); i++) {
+                Product product = productService.findById(productIDList.get(i));
+
+                int quantity = quantityList.get(i);
+                String unitName = unitNameList.get(i);
+                PackagingUnit unit = PackagingUnit.convertToEnum(unitName);
+
+                Product afterProduct = productService.getProductAfterUpdateUnits(product, unit, false, quantity);
+
+                OrderDetail od = new OrderDetail();
+                od.setOrderQuantity(quantity);
+                od.setOrder(order);
+                od.setProduct(product);
+                od.setUnit(unit);
+                if (!orderDetailService.create(od)) {
+                    new Message(homePage, true, "Thông báo", "Thêm chi tiết đơn hàng thất bại " + i + " !", "src/main/java/ui/dialog/warning.png").showAlert();
+                    return;
+                }
+                if (!productService.update(afterProduct)) {
+                    new Message(homePage, true, "Thông báo", "Cập nhật số lượng tồn kho thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
+                    return;
+                }
+            }
+
+            if (customer != null) {
+                if (!customerService.updateCustPoint_Increase(customer.getPhoneNumber(), point)) {
+                    new Message(homePage, true, "Thông báo", "Cập nhật tăng điểm tích lũy của khách hàng thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
+                    return;
+                }
+            }
+
+            new Message(homePage, true, "Xác nhận", "Thêm đơn hàng thành công!", "src/main/java/ui/dialog/checked.png").showAlert();
+            try {
+                invoiceOrder(order);
+            } catch (IOException | NotBoundException e) {
+                throw new RuntimeException(e);
+            }
+            clearAll();
+        } catch (Exception e) {
+           e.printStackTrace();
+        }
+    }//GEN-LAST:event_btnCheckOutActionPerformed
+
+        private void txtNoteFocusGained(FocusEvent evt) {//GEN-FIRST:event_txtNoteFocusGained
             if (txtNote.getText().equals("Ghi chú đơn hàng ...")) {
                 txtNote.setText("");
             }
@@ -1092,8 +1092,9 @@ public class TempOrderForm extends TabbedForm {
         }
 
         public static void invoiceOrder (Order order) throws IOException, NotBoundException {
-            OrderService orderService  = (OrderService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/orderService");
-            OrderDetailService orderDetailService  = (OrderDetailService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/orderDetailService");
+            OrderService orderService = (OrderService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/orderService");
+            OrderDetailService orderDetailService = (OrderDetailService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/orderDetailService");
+
             String path = "invoice.pdf";
             PdfWriter pdfWriter = new PdfWriter(path);
             PdfDocument pdfDocument = new PdfDocument(pdfWriter);
@@ -1119,216 +1120,216 @@ public class TempOrderForm extends TabbedForm {
             Table divider = new Table(fullWidth);
             divider.setBorder(gb);
 
-            ArrayList<Order> list = (ArrayList<Order>) orderService.searchByMultipleCriteria("Order", order.getOrderID());
+        ArrayList<Order> list = (ArrayList<Order>) orderService.searchByMultipleCriteria("Order", order.getOrderID());
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            // Chuyển đổi LocalDateTime thành String
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        // Chuyển đổi LocalDateTime thành String
 
-            String formattedDateTime = order.getOrderDate().format(formatter);
+        String formattedDateTime = order.getOrderDate().format(formatter);
 
 
-            Table tableInformation = new Table(columnWidths);
-            tableInformation.addCell(getCell10Left("Thời gian", false).setFont(font));
-            tableInformation.addCell(getCell10Center(":", false));
-            tableInformation.addCell(getCell10Left(formattedDateTime, false));
+        Table tableInformation = new Table(columnWidths);
+        tableInformation.addCell(getCell10Left("Thời gian", false).setFont(font));
+        tableInformation.addCell(getCell10Center(":", false));
+        tableInformation.addCell(getCell10Left(formattedDateTime, false));
 
-            tableInformation.addCell(getCell10Left("Mã HD", false).setFont(font));
-            tableInformation.addCell(getCell10Center(":", false));
-            tableInformation.addCell(getCell10Left(order.getOrderID(), false).setFont(font));
+        tableInformation.addCell(getCell10Left("Mã HD", false).setFont(font));
+        tableInformation.addCell(getCell10Center(":", false));
+        tableInformation.addCell(getCell10Left(order.getOrderID(), false).setFont(font));
 
-            tableInformation.addCell(getCell10Left("Nhân viên", false).setFont(font));
-            tableInformation.addCell(getCell10Center(":", false));
-            tableInformation.addCell(getCell10Left(order.getEmployee().getEmployeeName(), false).setFont(font));
+        tableInformation.addCell(getCell10Left("Nhân viên", false).setFont(font));
+        tableInformation.addCell(getCell10Center(":", false));
+        tableInformation.addCell(getCell10Left(order.getEmployee().getEmployeeName(), false).setFont(font));
 
-            String cusName = " ";
-            if (order.getCustomer() == null) {
+        String cusName = " ";
+        if (order.getCustomer() == null) {
+            cusName = "Khách vãng lai";
+        } else {
+            if (order.getCustomer().getCustomerName() == null) {
                 cusName = "Khách vãng lai";
             } else {
-                if (order.getCustomer().getCustomerName() == null) {
-                    cusName = "Khách vãng lai";
-                } else {
-                    cusName = order.getCustomer().getCustomerName();
-                }
+                cusName = order.getCustomer().getCustomerName();
             }
+        }
 
-            tableInformation.addCell(getCell10Left("Khách hàng", false).setFont(font));
-            tableInformation.addCell(getCell10Center(":", false));
-            tableInformation.addCell(getCell10Left(cusName, false).setFont(font));
+        tableInformation.addCell(getCell10Left("Khách hàng", false).setFont(font));
+        tableInformation.addCell(getCell10Center(":", false));
+        tableInformation.addCell(getCell10Left(cusName, false).setFont(font));
 
-            Table tableHeader = new Table(header);
-            tableHeader.addCell(getCell10Center("STT", true).setFont(font).setBorderBottom(new SolidBorder(0)).setBorderTop(new SolidBorder(0)));
-            tableHeader.addCell(getCell10Left("Tên sản phẩm", true).setFont(font).setBorderBottom(new SolidBorder(0)).setBorderTop(new SolidBorder(0)));
-            tableHeader.addCell(getCell10Right("Đơn vị", true).setFont(font).setBorderBottom(new SolidBorder(0)).setBorderTop(new SolidBorder(0)));
-            tableHeader.addCell(getCell10Center("SL", true).setFont(font).setBorderBottom(new SolidBorder(0)).setBorderTop(new SolidBorder(0)));
-            tableHeader.addCell(getCell10Right("Giá bán", true).setFont(font).setBorderBottom(new SolidBorder(0)).setBorderTop(new SolidBorder(0)));
-            tableHeader.addCell(getCell10Right("Thành tiền", true).setFont(font).setBorderBottom(new SolidBorder(0)).setBorderTop(new SolidBorder(0)));
+        Table tableHeader = new Table(header);
+        tableHeader.addCell(getCell10Center("STT", true).setFont(font).setBorderBottom(new SolidBorder(0)).setBorderTop(new SolidBorder(0)));
+        tableHeader.addCell(getCell10Left("Tên sản phẩm", true).setFont(font).setBorderBottom(new SolidBorder(0)).setBorderTop(new SolidBorder(0)));
+        tableHeader.addCell(getCell10Right("Đơn vị", true).setFont(font).setBorderBottom(new SolidBorder(0)).setBorderTop(new SolidBorder(0)));
+        tableHeader.addCell(getCell10Center("SL", true).setFont(font).setBorderBottom(new SolidBorder(0)).setBorderTop(new SolidBorder(0)));
+        tableHeader.addCell(getCell10Right("Giá bán", true).setFont(font).setBorderBottom(new SolidBorder(0)).setBorderTop(new SolidBorder(0)));
+        tableHeader.addCell(getCell10Right("Thành tiền", true).setFont(font).setBorderBottom(new SolidBorder(0)).setBorderTop(new SolidBorder(0)));
 
-            ArrayList<OrderDetail> listOD = (ArrayList<OrderDetail>) orderDetailService.searchByMultipleCriteria("Order", order.getOrderID());
-            Map<String, Double> productPrices = orderDetailService.getUnitPricesByOrderID(order.getOrderID());
-            List<String> keys = new ArrayList<>(productPrices.keySet());
+        ArrayList<OrderDetail> listOD = (ArrayList<OrderDetail>) orderDetailService.searchByMultipleCriteria("OrderDetail", order.getOrderID());
+        Map<String, Double> productPrices = orderDetailService.getUnitPricesByOrderID(order.getOrderID());
+        List<String> keys = new ArrayList<>(productPrices.keySet());
 
-            for (int i = 0; i <= listOD.size() - 1; i++) {
-                OrderDetail detail = listOD.get(i);
-
-                tableHeader.addCell(getCell10Center(String.valueOf(i + 1), false).setFont(font)); // In ra số thứ tự, bắt đầu từ 1
-                tableHeader.addCell(getCell10Left(detail.getProduct().getProductName(), false).setFont(font));
-                // Lấy phần tử đầu tiên trong Map
+        int stt = 1;
+        for (OrderDetail detail : listOD) {
+            tableHeader.addCell(getCell10Center(String.valueOf(stt), false).setFont(font)); // In ra số thứ tự, bắt đầu từ 1
+            tableHeader.addCell(getCell10Left(detail.getProduct().getProductName(), false).setFont(font));
+            // Lấy phần tử đầu tiên trong Map
 //            String unit = productPrices.keySet().iterator().next();
 //            Double unitPrice = productPrices.get(unit);
-                String unit = keys.get(i);
-                Double unitPrice = productPrices.get(unit);
-//            tableHeader.addCell(getCell10Center(orderDetails_dao.createUnit(unit).getDescription(), false).setFont(font));
+            String unit = detail.getUnit().convertUnit(detail.getUnit());
+            Double unitPrice = detail.getProduct().getSellPrice(detail.getUnit());
+            tableHeader.addCell(getCell10Center(unit, false).setFont(font));
 
-                tableHeader.addCell(getCell10Center(String.valueOf(detail.getOrderQuantity()), false).setFont(font));
-                tableHeader.addCell(getCell10Right(String.valueOf(unitPrice), false).setFont(font));
-                tableHeader.addCell(getCell10Right(String.valueOf(detail.getOrderQuantity() * unitPrice), false).setFont(font));
+            tableHeader.addCell(getCell10Center(String.valueOf(detail.getOrderQuantity()), false).setFont(font));
+            tableHeader.addCell(getCell10Right(String.valueOf(unitPrice), false).setFont(font));
+            tableHeader.addCell(getCell10Right(String.valueOf(detail.getLineTotal()), false).setFont(font));
+            stt++;
+        }
+
+        Table tableFooter = new Table(footer);
+        tableFooter.addCell(getCell10Left("Tổng tiền (Đã bao gồm thuế)", false).setFont(font).setBorderTop(new SolidBorder(0)));
+        tableFooter.addCell(getCell10Right(StaticProcess.df.format(order.getTotalDue()), false).setFont(font).setBorderTop(new SolidBorder(0)));
+
+        tableFooter.addCell(getCell10Left("Giảm giá", false).setFont(font));
+        tableFooter.addCell(getCell10Right(StaticProcess.df.format(order.getDiscount()), false).setFont(font));
+
+        tableFooter.addCell(getCell10Left("Tổng thanh toán", true).setFont(font).setBorderTop(new SolidBorder(0)));
+        tableFooter.addCell(getCell10Right(StaticProcess.df.format(order.getTotalDue() - order.getDiscount()), false).setFont(font).setBorderTop(new SolidBorder(0)));
+
+        tableFooter.addCell(getCell10Left("Phương thức thanh toán ", false).setFont(font));
+        tableFooter.addCell(getCell10Right(String.valueOf(order.getPaymentMethod()), false));
+
+        Table tableEnd = new Table(fullWidth);
+        tableEnd.addCell(getCell10Center("*Lưu ý: Sản phẩm có thể đổi trả trong 30 ngày !!!", true).setFont(font));
+        tableEnd.addCell(getCell10Center("Cảm ơn quý khách", true).setFont(font));
+
+        document.add(table);
+        document.add(tableInformation);
+
+        document.add(tableHeader);
+        document.add(tableFooter);
+        document.add(tableEnd);
+
+        String barcodePath = "src/main/java/ui/barcodeprocess/temp.png";
+
+        try {
+            BarcodeGenerator.generateBarcode(order.getOrderID());
+        } catch (WriterException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            ImageData barcodeData = ImageDataFactory.create(barcodePath);
+            com.itextpdf.layout.element.Image barcodeImage = new com.itextpdf.layout.element.Image(barcodeData);
+            barcodeImage.setHorizontalAlignment(HorizontalAlignment.CENTER);
+            barcodeImage.setAutoScale(true);
+            document.add(barcodeImage);
+        } catch (IOException e) {
+            throw new RuntimeException("Không thể chèn mã vạch: " + e.getMessage());
+        }
+        document.close();
+        printPDF(path);
+    }
+
+    static Cell getHeaderTextCell(String textValue) {
+        return new Cell().add(textValue).setBorder(Border.NO_BORDER).setTextAlignment(TextAlignment.RIGHT);
+    }
+
+    static Cell getHeaderTextCellValue(String textValue) {
+        return new Cell().add(textValue).setBorder(Border.NO_BORDER).setTextAlignment(TextAlignment.LEFT);
+    }
+
+    static Cell getBillingandShippingCell(String textValue) {
+        return new Cell().add(textValue).setFontSize(5f).setBold().setBorder(Border.NO_BORDER).setTextAlignment(TextAlignment.LEFT);
+    }
+
+    static Cell getCell10Left(String textValue, Boolean isBold) {
+        Cell myCell = new Cell().add(textValue).setFontSize(5f).setBorder(Border.NO_BORDER).setTextAlignment(TextAlignment.LEFT);
+        return isBold ? myCell.setBold() : myCell;
+    }
+
+    static Cell getCell10Right(String textValue, Boolean isBold) {
+        Cell myCell = new Cell().add(textValue).setFontSize(5f).setBorder(Border.NO_BORDER).setTextAlignment(TextAlignment.RIGHT);
+        return isBold ? myCell.setBold() : myCell;
+    }
+
+    static Cell getCell10Center(String textValue, Boolean isBold) {
+        Cell myCell = new Cell().add(textValue)
+                .setFontSize(5f)
+                .setBorder(Border.NO_BORDER)
+                .setTextAlignment(TextAlignment.CENTER); // Căn giữa
+        return isBold ? myCell.setBold() : myCell;
+    }
+
+
+    /**
+     * Hiển thị hộp thoại trước khi in
+     *
+     * @param path
+     */
+    public static void printPDF(String path) {
+        try {
+            // Đường dẫn đến file PDF
+            File pdfFile = new File(path);
+
+            // Mở tài liệu PDF
+            PDDocument document = PDDocument.load(pdfFile);
+
+            // Tìm máy in mặc định
+            PrinterJob job = PrinterJob.getPrinterJob();
+            PrintService printService = PrintServiceLookup.lookupDefaultPrintService();
+
+            if (printService != null) {
+                job.setPrintService(printService);
+
+                // Gán nội dung PDF vào công việc in
+                job.setPageable(new PDFPageable(document));
+
+                // Hiển thị hộp thoại in
+                if (job.printDialog()) {
+                    job.print();
+                }
+            } else {
+                System.out.println("Không tìm thấy máy in mặc định.");
             }
 
-            Table tableFooter = new Table(footer);
-            tableFooter.addCell(getCell10Left("Tổng tiền (Đã bao gồm thuế)", false).setFont(font).setBorderTop(new SolidBorder(0)));
-            tableFooter.addCell(getCell10Right(StaticProcess.df.format(order.getTotalDue()), false).setFont(font).setBorderTop(new SolidBorder(0)));
-
-            tableFooter.addCell(getCell10Left("Giảm giá", false).setFont(font));
-            tableFooter.addCell(getCell10Right(StaticProcess.df.format(order.getDiscount()), false).setFont(font));
-
-            tableFooter.addCell(getCell10Left("Tổng thanh toán", true).setFont(font).setBorderTop(new SolidBorder(0)));
-            tableFooter.addCell(getCell10Right(StaticProcess.df.format(order.getTotalDue() - order.getDiscount()), false).setFont(font).setBorderTop(new SolidBorder(0)));
-
-            tableFooter.addCell(getCell10Left("Phương thức thanh toán ", false).setFont(font));
-            tableFooter.addCell(getCell10Right(String.valueOf(order.getPaymentMethod()), false));
-
-            Table tableEnd = new Table(fullWidth);
-            tableEnd.addCell(getCell10Center("*Lưu ý: Sản phẩm có thể đổi trả trong 30 ngày !!!", true).setFont(font));
-            tableEnd.addCell(getCell10Center("Cảm ơn quý khách", true).setFont(font));
-
-            document.add(table);
-            document.add(tableInformation);
-
-            document.add(tableHeader);
-            document.add(tableFooter);
-            document.add(tableEnd);
-
-            String barcodePath = "src/main/java/ui/barcodeprocess/temp.png";
-
-            try {
-                BarcodeGenerator.generateBarcode(order.getOrderID());
-            } catch (WriterException e) {
-                throw new RuntimeException(e);
-            }
-            try {
-                ImageData barcodeData = ImageDataFactory.create(barcodePath);
-                com.itextpdf.layout.element.Image barcodeImage = new com.itextpdf.layout.element.Image(barcodeData);
-                barcodeImage.setHorizontalAlignment(HorizontalAlignment.CENTER);
-                barcodeImage.setAutoScale(true);
-                document.add(barcodeImage);
-            } catch (IOException e) {
-                throw new RuntimeException("Không thể chèn mã vạch: " + e.getMessage());
-            }
+            // Đóng tài liệu PDF
             document.close();
-            printPDF(path);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+    }
 
-        static Cell getHeaderTextCell (String textValue){
-            return new Cell().add(textValue).setBorder(Border.NO_BORDER).setTextAlignment(TextAlignment.RIGHT);
-        }
+    public void updateTXTCustNeedPay() {
+        double discount = 0;
+        double totalDue = 0;
+        try {
+            String discountText = txtDiscount.getText().trim();
 
-        static Cell getHeaderTextCellValue (String textValue){
-            return new Cell().add(textValue).setBorder(Border.NO_BORDER).setTextAlignment(TextAlignment.LEFT);
-        }
+            if (!discountText.isEmpty()) {
+                discount = nf.parse(discountText).doubleValue();
+                totalDue = nf.parse(txtTotalDue.getText().trim()).doubleValue();
 
-        static Cell getBillingandShippingCell (String textValue){
-            return new Cell().add(textValue).setFontSize(5f).setBold().setBorder(Border.NO_BORDER).setTextAlignment(TextAlignment.LEFT);
-        }
-
-        static Cell getCell10Left (String textValue, Boolean isBold){
-            Cell myCell = new Cell().add(textValue).setFontSize(5f).setBorder(Border.NO_BORDER).setTextAlignment(TextAlignment.LEFT);
-            return isBold ? myCell.setBold() : myCell;
-        }
-
-        static Cell getCell10Right (String textValue, Boolean isBold){
-            Cell myCell = new Cell().add(textValue).setFontSize(5f).setBorder(Border.NO_BORDER).setTextAlignment(TextAlignment.RIGHT);
-            return isBold ? myCell.setBold() : myCell;
-        }
-
-        static Cell getCell10Center (String textValue, Boolean isBold){
-            Cell myCell = new Cell().add(textValue)
-                    .setFontSize(5f)
-                    .setBorder(Border.NO_BORDER)
-                    .setTextAlignment(TextAlignment.CENTER); // Căn giữa
-            return isBold ? myCell.setBold() : myCell;
-        }
-
-
-        /**
-         * Hiển thị hộp thoại trước khi in
-         *
-         * @param path
-         */
-        public static void printPDF (String path){
-            try {
-                // Đường dẫn đến file PDF
-                File pdfFile = new File(path);
-
-                // Mở tài liệu PDF
-                PDDocument document = PDDocument.load(pdfFile);
-
-                // Tìm máy in mặc định
-                PrinterJob job = PrinterJob.getPrinterJob();
-                PrintService printService = PrintServiceLookup.lookupDefaultPrintService();
-
-                if (printService != null) {
-                    job.setPrintService(printService);
-
-                    // Gán nội dung PDF vào công việc in
-                    job.setPageable(new PDFPageable(document));
-
-                    // Hiển thị hộp thoại in
-                    if (job.printDialog()) {
-                        job.print();
-                    }
+                if (discount != 0) {
+                    txtNeededPay.setText(df.format(totalDue - discount));
                 } else {
-                    System.out.println("Không tìm thấy máy in mặc định.");
+                    txtNeededPay.setText(df.format(totalDue));
                 }
-
-                // Đóng tài liệu PDF
-                document.close();
-            } catch (Exception e) {
-                e.printStackTrace();
+            } else {
+                txtNeededPay.setText(df.format(nf.parse(txtTotalDue.getText().trim()).doubleValue()));
             }
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
         }
+    }
 
-        public void updateTXTCustNeedPay () {
-            double discount = 0;
-            double totalDue = 0;
-            try {
-                String discountText = txtDiscount.getText().trim();
+    private Prescription prescription;
 
-                if (!discountText.isEmpty()) {
-                    discount = nf.parse(discountText).doubleValue();
-                    totalDue = nf.parse(txtTotalDue.getText().trim()).doubleValue();
+    public void setPrescription(Prescription prescription) {
+        this.prescription = prescription;
+    }
 
-                    if (discount != 0) {
-                        txtNeededPay.setText(df.format(totalDue - discount));
-                    } else {
-                        txtNeededPay.setText(df.format(totalDue));
-                    }
-                } else {
-                    txtNeededPay.setText(df.format(nf.parse(txtTotalDue.getText().trim()).doubleValue()));
-                }
-            } catch (ParseException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        private Prescription prescription;
-
-        public void setPrescription (Prescription prescription){
-            this.prescription = prescription;
-        }
-
-        public void setCkbPres () {
-            ckbPres.setSelected(prescription != null);
-        }
+    public void setCkbPres() {
+        ckbPres.setSelected(prescription != null);
+    }
 
         // Variables declaration - do not modify//GEN-BEGIN:variables
         private Button btnCheckOut;
