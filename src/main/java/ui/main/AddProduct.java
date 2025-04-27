@@ -24,6 +24,7 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
@@ -133,7 +134,11 @@ public class AddProduct extends JPanel {
         btnSave.setShadowColor(new java.awt.Color(0, 0, 0));
         btnSave.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                btnSaveActionPerformed(evt);
+                try {
+                    btnSaveActionPerformed(evt);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -254,13 +259,13 @@ public class AddProduct extends JPanel {
         }
     }//GEN-LAST:event_btnAddActionPerformed
 
-    private void btnSaveActionPerformed(ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
+    private void btnSaveActionPerformed(ActionEvent evt) throws RemoteException {//GEN-FIRST:event_btnSaveActionPerformed
         // TODO add your handling code here:
         if (flag == false) {
             new Message(StaticProcess.homePage, true, "Thông báo", "Đã lưu, không có gì thay đổi!", "src/main/java/ui/dialog/checked.png").showAlert();
 
         } else {
-//            new ProductDAO(Product.class).addManyProduct(temp);
+            productService.createMultiple(temp);
             temp = new ArrayList<>();
             setDataTable(tableProduct, temp);
             new Message(StaticProcess.homePage, true, "Thông báo", "Danh sách sản phẩm đã được thêm", "src/main/java/ui/dialog/checked.png").showAlert();
@@ -315,6 +320,9 @@ public class AddProduct extends JPanel {
                 String categoryName = row.getCell(12).getStringCellValue();
                 String conversionUnit = row.getCell(14).getStringCellValue();
                 String noteUnit = row.getCell(20).getStringCellValue();
+//                System.out.println("Result: ");
+//                System.out.println("20: " + row.getCell(20).getStringCellValue());
+//                System.out.println("11: " + row.getCell(11).getStringCellValue());
                 switch (row.getCell(11).getStringCellValue()) {
                     case "M": {
                         String activeIngredient = row.getCell(13).getStringCellValue();
@@ -362,6 +370,18 @@ public class AddProduct extends JPanel {
         }
 
         return listProduct;
+    }
+
+    String datePart = new SimpleDateFormat("ddMMyy").format(new Date());
+    private String generateProductID(String prefix , int current) {
+        if (prefix.equals("PM")) {
+            return "PM" + datePart + String.format("%05d", current++);
+        } else if (prefix.equals("PF")) {
+            return "PF" + datePart + String.format("%05d", current++);
+        } else if (prefix.equals("PS")) {
+            return "PS" + datePart + String.format("%05d", current++);
+        }
+        return "";
     }
 
     //Đẩy data lên table

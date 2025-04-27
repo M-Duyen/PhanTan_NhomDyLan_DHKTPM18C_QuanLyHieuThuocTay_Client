@@ -435,10 +435,10 @@ public class AddPromotion extends JPanel {
 
         if (cri_type == null && crt_sta != null) {
             if (crt_sta.equals("Đang áp dụng")) {
-                promotionList = promotionService.getPromotionListByStatus(true);
+                promotionList = (ArrayList<Promotion>) promotionService.getPromotionListByStatus(true);
 
             } else if (crt_sta.equals("Ngừng áp dụng")) {
-                promotionList = promotionService.getPromotionListByStatus(false);
+                promotionList = (ArrayList<Promotion>) promotionService.getPromotionListByStatus(false);
 
             } else if (crt_sta.equals("")) {
                 promotionList = (ArrayList<Promotion>) promotionService.searchByMultipleCriteria("Promotion","");

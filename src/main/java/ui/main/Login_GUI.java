@@ -74,6 +74,7 @@ public class Login_GUI extends JFrame implements ActionListener {
     public String getUserLogin(){
         return loginPanel.txtUsername.getText();
     }
+
     public static void main(Login_GUI login) {
         FlatRobotoFont.install();
         FlatLaf.registerCustomDefaultsSource("ui.themes");

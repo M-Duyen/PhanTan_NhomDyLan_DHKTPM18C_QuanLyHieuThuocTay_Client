@@ -29,8 +29,8 @@ public class Login extends JPanel implements ActionListener, KeyListener {
 
     static {
         try {
-            employeeService = (EmployeeService) Naming.lookup("rmi://"+ StaticProcess.properties.get("ServerName") +":" + StaticProcess.properties.get("Port") + "/employeeService");
-            managerService = (ManagerService) Naming.lookup("rmi://"+ StaticProcess.properties.get("ServerName") +":" + StaticProcess.properties.get("Port") + "/managerService");
+            employeeService = (EmployeeService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/employeeService");
+            managerService = (ManagerService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/managerService");
         } catch (NotBoundException e) {
             throw new RuntimeException(e);
         } catch (MalformedURLException e) {
@@ -39,7 +39,7 @@ public class Login extends JPanel implements ActionListener, KeyListener {
             throw new RuntimeException(e);
         }
     }
-    AccountService accountService = (AccountService) Naming.lookup("rmi://"+ StaticProcess.properties.get("ServerName") +":" + StaticProcess.properties.get("Port") + "/accountService");
+    AccountService accountService = (AccountService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/accountService");
     Font f = new Font("Times New Romam", Font.PLAIN, 20);
     Font f1 = new Font("Times New Romam", Font.ITALIC, 15);
     public JButton btnLogin;

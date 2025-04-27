@@ -2,6 +2,7 @@ package ui.dialog;
 
 
 import model.*;
+import service.ProductService;
 import staticProcess.StaticProcess;
 
 import javax.swing.*;
@@ -9,6 +10,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -21,8 +26,9 @@ public class ProductConfirm extends SweetAlert {
     public static DecimalFormat df = new DecimalFormat("#,##0.00 VND");
     public static NumberFormat nf = NumberFormat.getInstance(Locale.getDefault());
     public boolean flag = false;
+    ProductService productService = (ProductService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/productService");
 
-    public ProductConfirm(java.awt.Frame parent, Product product, boolean modal) {
+    public ProductConfirm(java.awt.Frame parent, Product product, boolean modal) throws MalformedURLException, NotBoundException, RemoteException {
         super(parent, modal);
         this.product = product;
         initComponents();
@@ -250,13 +256,12 @@ public class ProductConfirm extends SweetAlert {
         if(cbbUnit.getSelectedItem() != null) {
             try {
                 String description = String.valueOf(cbbUnit.getSelectedItem());
-//                String unitName = Unit_DAO.getInstance().getUnit_ByDes(description).getUnitName();
 
-//                PackagingUnit unitE = PackagingUnit.fromString(unitName);
+                PackagingUnit unit = PackagingUnit.convertToEnum(description);
 
-//                txtInStock.setText(String.valueOf(product.getInStockByUnit(unitE)));
+                txtInStock.setText(String.valueOf(product.getInstockQuantity(unit)));
                 txtQuantity.setText(String.valueOf(1));
-//                txtSellPrice.setText(df.format(product.getSellPrice(unitE)));
+                txtSellPrice.setText(df.format(product.getSellPrice(unit)));
 
                 double sellPrice = nf.parse(txtSellPrice.getText().trim()).doubleValue();
 
@@ -304,7 +309,16 @@ public class ProductConfirm extends SweetAlert {
 
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                ProductConfirm dialog = new ProductConfirm(new JFrame(), product, true);
+                ProductConfirm dialog = null;
+                try {
+                    dialog = new ProductConfirm(new JFrame(), product, true);
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException(e);
+                } catch (NotBoundException e) {
+                    throw new RuntimeException(e);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
@@ -320,22 +334,27 @@ public class ProductConfirm extends SweetAlert {
         txtProductID.setText(product.getProductID());
         txtProductName.setText(product.getProductName());
     }
-//String orderID, LocalDateTime orderDate, String shipToAddress, Enum_PaymentMethod paymentMethod, double discount, Employee employee, Customer customer, Prescription prescription
-    public OrderDetail getOrderDetails(Order or, String orderIDNew){
-//        return new OrderDetail(Integer.parseInt(txtQuantity.getText().trim()), new Order(orderIDNew, LocalDateTime.now(), or.getShipToAddress(), or.getPaymentMethod(), or.getDiscount(), StaticProcess.empLogin, or.getCustomer(), or.getPrescription()), Product_DAO.getInstance().getProduct_ByID(txtProductID.getText()), Enum_PackagingUnit.fromString(Unit_DAO.getInstance().getUnit_ByDes(cbbUnit.getSelectedItem().toString()).getUnitName()));
+
+//String orderID, LocalDateTime orderDate, String shipToAddress, PaymentMethod paymentMethod, double discount, Employee employee, Customer customer, Prescription prescription
+    public OrderDetail getOrderDetails(Order or, String orderIDNew) throws RemoteException {
+//        return new OrderDetail(Integer.parseInt(txtQuantity.getText().trim()), new Order(orderIDNew,
+//                LocalDateTime.now(), or.getShipToAddress(),
+//                or.getPaymentMethod(), or.getDiscount(), StaticProcess.empLogin,
+//                or.getCustomer(), or.getPrescription()), productService.findById(txtProductID.getText()),
+//                PackagingUnit.convertToEnum(cbbUnit.getSelectedItem().toString()));
     return null;
     }
 
     public void updateComboboxUnit(){
-//        ArrayList<Unit> unitList = Unit_DAO.getInstance().getUnit_ByProductID(product.getProductID());
-//        String[] items = new String[unitList.size() + 1];
-//        int i = 0;
-//
-//        for(Unit u : unitList) {
-//            i++;
-//            items[i] = u.getDescription();
-//        }
-//        cbbUnit.setModel(new DefaultComboBoxModel<String>(items));
+        ArrayList<PackagingUnit> unitList = new ArrayList<>(product.getUnitDetails().keySet());
+        String[] items = new String[unitList.size() + 1];
+        int i = 0;
+
+        for(PackagingUnit u : unitList) {
+            i++;
+            items[i] = u.convertUnit(u);
+        }
+        cbbUnit.setModel(new DefaultComboBoxModel<String>(items));
     }
 
     public String getProductID(){
@@ -355,8 +374,7 @@ public class ProductConfirm extends SweetAlert {
     }
 
     public PackagingUnit getEnumUnit(){
-//        return PackagingUnit.fromString(Unit_DAO.getInstance().getUnit_ByDes(cbbUnit.getSelectedItem().toString()).getUnitName());
-        return null;
+        return PackagingUnit.convertToEnum(cbbUnit.getSelectedItem().toString());
     }
 
     public void setSelectedComboboxUnit(String desUnit, int qty) {

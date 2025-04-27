@@ -795,9 +795,18 @@ public class ProcessOrder extends JFrame implements ActionListener {
                     throw new RuntimeException(ex);
                 }
                 if(prod != null){
-                    ProductConfirm pCf = new ProductConfirm(StaticProcess.homePage, prod, true);
+                    ProductConfirm pCf = null;
+                    try {
+                        pCf = new ProductConfirm(StaticProcess.homePage, prod, true);
+                    } catch (MalformedURLException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (NotBoundException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (RemoteException ex) {
+                        throw new RuntimeException(ex);
+                    }
                     pCf.showAlert();
-                    OrderDetail pSelect = pCf.getOrderDetails(orderTemp, convertOrderID(orderTemp.getOrderID()));
+                    //OrderDetail pSelect = pCf.getOrderDetails(orderTemp, convertOrderID(orderTemp.getOrderID()));
 //                    if(checkProductList(prod.getProductID(), listOrderDetailConver)){
 //                        listOrderDetailConver.add(pSelect);
 //                    }else{
