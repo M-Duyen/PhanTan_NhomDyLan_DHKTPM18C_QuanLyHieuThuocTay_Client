@@ -69,14 +69,19 @@ import java.util.Locale;
 import java.util.Map;
 
 public class TempOrderForm extends TabbedForm {
-    OrderService orderService  = (OrderService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/orderService");
-    OrderDetailService orderDetailService  = (OrderDetailService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/orderDetailService");
-    ProductService productService  = (ProductService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/productService");
+    OrderService orderService = (OrderService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/orderService");
+    OrderDetailService orderDetailService = (OrderDetailService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/orderDetailService");
+    ProductService productService = (ProductService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/productService");
     CustomerService customerService = (CustomerService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/customerService");
 
     private HomePage homePage;
     private DefaultTableModel model;
-    public TempOrderForm() throws MalformedURLException, NotBoundException, RemoteException {};
+
+    public TempOrderForm() throws MalformedURLException, NotBoundException, RemoteException {
+    }
+
+    ;
+
     public TempOrderForm(HomePage homePage) throws MalformedURLException, NotBoundException, RemoteException {
         this.homePage = homePage;
         initComponents();
@@ -816,13 +821,17 @@ public class TempOrderForm extends TabbedForm {
     private void txtCustPhoneActionPerformed(ActionEvent evt) throws RemoteException {//GEN-FIRST:event_txtCustPhoneActionPerformed
         String phone = txtCustPhone.getText().trim();
         if (!phone.isEmpty()) {
-            Customer customer = customerService.getCustomerByPhone(phone);
-            if (customer != null) {
-                txtCustName.setText(customer.getCustomerName());
-                txtPoint.setText(String.valueOf(df_point.format(customer.getPoint())));
-            } else {
+            try {
+                Customer customer = customerService.getCustomerByPhone(phone);
+                if (customer != null) {
+                    txtCustName.setText(customer.getCustomerName());
+                    txtPoint.setText(String.valueOf(df_point.format(customer.getPoint())));
+                }
+            } catch (Exception e) {
                 new Message(homePage, true, "Thông báo", "Không tìm thấy khách hàng", "src/main/java/ui/dialog/warning.png").showAlert();
+                throw new RuntimeException(e);
             }
+
         }
     }//GEN-LAST:event_txtCustPhoneActionPerformed
 
@@ -941,36 +950,38 @@ public class TempOrderForm extends TabbedForm {
                 }
             }
 
+            List<OrderDetail> orderDetails = new ArrayList<>();
+            for (int i = 0; i < productIDList.size(); i++) {
+                Product product = productService.findById(productIDList.get(i));
+                int quantity = quantityList.get(i);
+                String unitName = unitNameList.get(i);
+                PackagingUnit unit = PackagingUnit.convertToEnum(unitName);
+
+                Product afterProduct = productService.getProductAfterUpdateUnits(product, unit, false, quantity);
+                orderDetails.add(new OrderDetail(order, afterProduct, unit, quantity));
+
+                if (!productService.update(afterProduct)) {
+                    new Message(homePage, true, "Thông báo", "Cập nhật số lượng tồn kho thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
+                    return;
+                }
+            }
+
             //Add Orders
+            order.setListOrderDetail(orderDetails);
             if (!orderService.create(order)) {
                 new Message(homePage, true, "Thông báo", "Thêm đơn hàng thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
                 return;
             }
 
             //Add OrderDetails
-            for (int i = 0; i < productIDList.size(); i++) {
-                Product product = productService.findById(productIDList.get(i));
-
-                int quantity = quantityList.get(i);
-                String unitName = unitNameList.get(i);
-                PackagingUnit unit = PackagingUnit.convertToEnum(unitName);
-
-                Product afterProduct = productService.getProductAfterUpdateUnits(product, unit, false, quantity);
-
-                OrderDetail od = new OrderDetail();
-                od.setOrderQuantity(quantity);
-                od.setOrder(order);
-                od.setProduct(product);
-                od.setUnit(unit);
-                if (!orderDetailService.create(od)) {
-                    new Message(homePage, true, "Thông báo", "Thêm chi tiết đơn hàng thất bại " + i + " !", "src/main/java/ui/dialog/warning.png").showAlert();
-                    return;
-                }
-                if (!productService.update(afterProduct)) {
-                    new Message(homePage, true, "Thông báo", "Cập nhật số lượng tồn kho thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
+            for (OrderDetail orderDetail : orderDetails) {
+                System.out.println("LineTotal: " + orderDetail.getLineTotal());
+                if (!orderDetailService.create(orderDetail)) {
+                    new Message(homePage, true, "Thông báo", "Thêm đơn hàng thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
                     return;
                 }
             }
+            System.out.println("TotalDue: " + order.getTotalDue());
 
             if (customer != null) {
                 if (!customerService.updateCustPoint_Increase(customer.getPhoneNumber(), point)) {
@@ -987,138 +998,138 @@ public class TempOrderForm extends TabbedForm {
             }
             clearAll();
         } catch (Exception e) {
-           e.printStackTrace();
+            e.printStackTrace();
         }
     }//GEN-LAST:event_btnCheckOutActionPerformed
 
-        private void txtNoteFocusGained(FocusEvent evt) {//GEN-FIRST:event_txtNoteFocusGained
-            if (txtNote.getText().equals("Ghi chú đơn hàng ...")) {
-                txtNote.setText("");
-            }
-        }//GEN-LAST:event_txtNoteFocusGained
-
-        private void txtNoteFocusLost (FocusEvent evt){//GEN-FIRST:event_txtNoteFocusLost
-            if (txtNote.getText().equals("")) {
-                txtNote.setText("Ghi chú đơn hàng ...");
-            }
-        }//GEN-LAST:event_txtNoteFocusLost
-
-        public void addProductRow (Object[]rowData){
-            model.addRow(rowData);
+    private void txtNoteFocusGained(FocusEvent evt) {//GEN-FIRST:event_txtNoteFocusGained
+        if (txtNote.getText().equals("Ghi chú đơn hàng ...")) {
+            txtNote.setText("");
         }
+    }//GEN-LAST:event_txtNoteFocusGained
 
-        public void clearAll () {
-            model.setRowCount(0);
-            txtCustPhone.setText("");
-            txtCustName.setText("");
-            txtPoint.setText("");
-            txtTotalDue.setText("");
-            txtPointOrder.setText("");
-            txtDiscount.setText("");
-            txtNeededPay.setText("");
-            txtCustPay.setText("");
-            rbCash.setSelected(false);
-            rbTransfer.setSelected(false);
-            rbCreditCard.setSelected(false);
-            lblChange.setVisible(false);
-            txtChange.setText("");
-            txtChange.setVisible(false);
-            ckbTransPoint.setSelected(false);
-            txtTotalQuantity.setText("");
-            txtTotalDue_Left.setText("");
+    private void txtNoteFocusLost(FocusEvent evt) {//GEN-FIRST:event_txtNoteFocusLost
+        if (txtNote.getText().equals("")) {
             txtNote.setText("Ghi chú đơn hàng ...");
         }
+    }//GEN-LAST:event_txtNoteFocusLost
 
-        public int findRowByProductID (String productID, PackagingUnit unitEnum){
-            for (int i = 0; i < model.getRowCount(); i++) {
-                String id = (String) model.getValueAt(i, 0);
-                String unit = (String) model.getValueAt(i, 2);
-                PackagingUnit unitE = PackagingUnit.convertToEnum(unit);
+    public void addProductRow(Object[] rowData) {
+        model.addRow(rowData);
+    }
 
-                if (id.equals(productID) && unitE.equals(unitEnum)) {
-                    return i;
-                }
+    public void clearAll() {
+        model.setRowCount(0);
+        txtCustPhone.setText("");
+        txtCustName.setText("");
+        txtPoint.setText("");
+        txtTotalDue.setText("");
+        txtPointOrder.setText("");
+        txtDiscount.setText("");
+        txtNeededPay.setText("");
+        txtCustPay.setText("");
+        rbCash.setSelected(false);
+        rbTransfer.setSelected(false);
+        rbCreditCard.setSelected(false);
+        lblChange.setVisible(false);
+        txtChange.setText("");
+        txtChange.setVisible(false);
+        ckbTransPoint.setSelected(false);
+        txtTotalQuantity.setText("");
+        txtTotalDue_Left.setText("");
+        txtNote.setText("Ghi chú đơn hàng ...");
+    }
+
+    public int findRowByProductID(String productID, PackagingUnit unitEnum) {
+        for (int i = 0; i < model.getRowCount(); i++) {
+            String id = (String) model.getValueAt(i, 0);
+            String unit = (String) model.getValueAt(i, 2);
+            PackagingUnit unitE = PackagingUnit.convertToEnum(unit);
+
+            if (id.equals(productID) && unitE.equals(unitEnum)) {
+                return i;
             }
-            return -1;
         }
+        return -1;
+    }
 
-        public int getQuantityProductInTable (String productID){
-            for (int i = 0; i < model.getRowCount(); i++) {
-                String id = (String) model.getValueAt(i, 0);
+    public int getQuantityProductInTable(String productID) {
+        for (int i = 0; i < model.getRowCount(); i++) {
+            String id = (String) model.getValueAt(i, 0);
 
-                if (id.equals(productID)) {
-                    return (Integer) model.getValueAt(i, 3);
-                }
+            if (id.equals(productID)) {
+                return (Integer) model.getValueAt(i, 3);
             }
-            return -1;
         }
+        return -1;
+    }
 
-        DecimalFormat df = new DecimalFormat("#,##0.00 VND");
-        DecimalFormat df_point = new DecimalFormat("#,##0.00");
+    DecimalFormat df = new DecimalFormat("#,##0.00 VND");
+    DecimalFormat df_point = new DecimalFormat("#,##0.00");
 
-        public void updateProductRow ( int row, int column, int quantity, double sellPrice){
-            model.setValueAt(quantity, row, column);
-            model.setValueAt(df.format(quantity * sellPrice), row, column + 2);
-        }
+    public void updateProductRow(int row, int column, int quantity, double sellPrice) {
+        model.setValueAt(quantity, row, column);
+        model.setValueAt(df.format(quantity * sellPrice), row, column + 2);
+    }
 
-        NumberFormat nf = NumberFormat.getInstance(Locale.getDefault());
+    NumberFormat nf = NumberFormat.getInstance(Locale.getDefault());
 
-        public void updatePanelNotice () {
-            int totalQuantity = 0;
-            double totalDue = 0;
-            double point = 0;
-            for (int i = 0; i < model.getRowCount(); i++) {
-                totalQuantity += (int) model.getValueAt(i, 3);
-                try {
-                    totalDue += nf.parse((String) model.getValueAt(i, 5)).doubleValue();
-                    point += totalDue / 1000;
-                } catch (ParseException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            txtTotalQuantity.setText(String.valueOf(totalQuantity));
-            txtTotalDue_Left.setText(df.format(totalDue));
-            txtTotalDue.setText(df.format(totalDue));
-        }
-
-        public void updatePointOrder () {
-            double totalDue = 0;
+    public void updatePanelNotice() {
+        int totalQuantity = 0;
+        double totalDue = 0;
+        double point = 0;
+        for (int i = 0; i < model.getRowCount(); i++) {
+            totalQuantity += (int) model.getValueAt(i, 3);
             try {
-                totalDue = nf.parse(txtNeededPay.getText().trim()).doubleValue();
-                txtPointOrder.setText(df_point.format(totalDue / 1000));
+                totalDue += nf.parse((String) model.getValueAt(i, 5)).doubleValue();
+                point += totalDue / 1000;
             } catch (ParseException e) {
                 throw new RuntimeException(e);
             }
         }
+        txtTotalQuantity.setText(String.valueOf(totalQuantity));
+        txtTotalDue_Left.setText(df.format(totalDue));
+        txtTotalDue.setText(df.format(totalDue));
+    }
 
-        public static void invoiceOrder (Order order) throws IOException, NotBoundException {
-            OrderService orderService = (OrderService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/orderService");
-            OrderDetailService orderDetailService = (OrderDetailService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/orderDetailService");
+    public void updatePointOrder() {
+        double totalDue = 0;
+        try {
+            totalDue = nf.parse(txtNeededPay.getText().trim()).doubleValue();
+            txtPointOrder.setText(df_point.format(totalDue / 1000));
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-            String path = "invoice.pdf";
-            PdfWriter pdfWriter = new PdfWriter(path);
-            PdfDocument pdfDocument = new PdfDocument(pdfWriter);
-            pdfDocument.setDefaultPageSize(PageSize.A6);
-            Document document = new Document(pdfDocument);
-            PdfFont font = PdfFontFactory.createFont("src/main/font/arial.ttf", "Identity-H");
+    public static void invoiceOrder(Order order) throws IOException, NotBoundException {
+        OrderService orderService = (OrderService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/orderService");
+        OrderDetailService orderDetailService = (OrderDetailService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/orderDetailService");
 
-            float fullWidth[] = {300f};
-            float[] columnWidths = {35f, 10f, 200f};
-            float[] header = {20f, 150f, 30f, 20f, 50f, 50f};
-            float[] footer = {270f, 50f};
+        String path = "invoice.pdf";
+        PdfWriter pdfWriter = new PdfWriter(path);
+        PdfDocument pdfDocument = new PdfDocument(pdfWriter);
+        pdfDocument.setDefaultPageSize(PageSize.A6);
+        Document document = new Document(pdfDocument);
+        PdfFont font = PdfFontFactory.createFont("src/main/font/arial.ttf", "Identity-H");
+
+        float fullWidth[] = {300f};
+        float[] columnWidths = {35f, 10f, 200f};
+        float[] header = {20f, 150f, 30f, 20f, 50f, 50f};
+        float[] footer = {270f, 50f};
 
 
 //        Paragraph onesp = new Paragraph("\n");
 
-            Table table = new Table(fullWidth);
-            table.addCell(getCell10Center("NHÀ THUỐC DNGH", true).setFont(font).setFontSize(10f));
-            table.addCell(getCell10Center("12 NVB, Q. Gò Vấp, TP HCM", false).setFont(font));
+        Table table = new Table(fullWidth);
+        table.addCell(getCell10Center("NHÀ THUỐC DNGH", true).setFont(font).setFontSize(10f));
+        table.addCell(getCell10Center("12 NVB, Q. Gò Vấp, TP HCM", false).setFont(font));
 //        table.addCell(getCell10Center("----------------------",false).setFont(font));
-            table.addCell(getCell10Center("HÓA ĐƠN BÁN HÀNG", true).setFontSize(8f).setFont(font));
+        table.addCell(getCell10Center("HÓA ĐƠN BÁN HÀNG", true).setFontSize(8f).setFont(font));
 
-            Border gb = new SolidBorder(com.itextpdf.kernel.color.Color.BLACK, 1f / 50);
-            Table divider = new Table(fullWidth);
-            divider.setBorder(gb);
+        Border gb = new SolidBorder(com.itextpdf.kernel.color.Color.BLACK, 1f / 50);
+        Table divider = new Table(fullWidth);
+        divider.setBorder(gb);
 
         ArrayList<Order> list = (ArrayList<Order>) orderService.searchByMultipleCriteria("Order", order.getOrderID());
 
@@ -1331,47 +1342,47 @@ public class TempOrderForm extends TabbedForm {
         ckbPres.setSelected(prescription != null);
     }
 
-        // Variables declaration - do not modify//GEN-BEGIN:variables
-        private Button btnCheckOut;
-        private ButtonGroup btnGroup_PaymentMethod;
-        private JCheckBoxCustom ckbPres;
-        private JCheckBoxCustom ckbTransPoint;
-        private JLabel lbCustName;
-        private JLabel lbCustNeededPay;
-        private JLabel lbCustPay;
-        private JLabel lbCustPhone;
-        private JLabel lbCustPoint;
-        private JLabel lbDiscountAmount;
-        private JLabel lbEmployeeName;
-        private JLabel lbOrderPoint;
-        private JLabel lbTotalDue;
-        private JLabel lbTotalDue_Left;
-        private JLabel lblChange;
-        private JLabel lblPaymentMethod;
-        private PanelRound panelRound2;
-        private PanelRound pnNotes;
-        private PanelRound pnOrderInfor;
-        private PanelRound pnProductOrder;
-        private RadioButtonCustom rbCash;
-        private RadioButtonCustom rbCreditCard;
-        private RadioButtonCustom rbTransfer;
-        private JScrollPane scrollPane;
-        private JTable tableProduct;
-        private TableScrollButton tableScrollButton_Product;
-        private TextField_Behind txtChange;
-        private TextField_Behind txtCustName;
-        private TextField_Behind txtCustPay;
-        private TextField_Behind txtCustPhone;
-        private TextField_Behind txtDiscount;
-        private TextField_Behind txtEmployeeName;
-        private TextField_Behind txtNeededPay;
-        private TextField_Behind txtNote;
-        private TextField_Behind txtPoint;
-        private TextField_Behind txtPointOrder;
-        private TextField_Behind txtTotalDue;
-        private TextField_Behind txtTotalDue_Left;
-        private TextField_Behind txtTotalQuantity;
-        // End of variables declaration//GEN-END:variables
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private Button btnCheckOut;
+    private ButtonGroup btnGroup_PaymentMethod;
+    private JCheckBoxCustom ckbPres;
+    private JCheckBoxCustom ckbTransPoint;
+    private JLabel lbCustName;
+    private JLabel lbCustNeededPay;
+    private JLabel lbCustPay;
+    private JLabel lbCustPhone;
+    private JLabel lbCustPoint;
+    private JLabel lbDiscountAmount;
+    private JLabel lbEmployeeName;
+    private JLabel lbOrderPoint;
+    private JLabel lbTotalDue;
+    private JLabel lbTotalDue_Left;
+    private JLabel lblChange;
+    private JLabel lblPaymentMethod;
+    private PanelRound panelRound2;
+    private PanelRound pnNotes;
+    private PanelRound pnOrderInfor;
+    private PanelRound pnProductOrder;
+    private RadioButtonCustom rbCash;
+    private RadioButtonCustom rbCreditCard;
+    private RadioButtonCustom rbTransfer;
+    private JScrollPane scrollPane;
+    private JTable tableProduct;
+    private TableScrollButton tableScrollButton_Product;
+    private TextField_Behind txtChange;
+    private TextField_Behind txtCustName;
+    private TextField_Behind txtCustPay;
+    private TextField_Behind txtCustPhone;
+    private TextField_Behind txtDiscount;
+    private TextField_Behind txtEmployeeName;
+    private TextField_Behind txtNeededPay;
+    private TextField_Behind txtNote;
+    private TextField_Behind txtPoint;
+    private TextField_Behind txtPointOrder;
+    private TextField_Behind txtTotalDue;
+    private TextField_Behind txtTotalDue_Left;
+    private TextField_Behind txtTotalQuantity;
+    // End of variables declaration//GEN-END:variables
 //    public static void main(String[] args) throws IOException {
 //        ConnectDB.getInstance().connect();
 //        OrderDAO order_dao = new OrderDAO();
