@@ -27,7 +27,7 @@ import java.util.List;
  */
 public class TodayRevenueStatistic extends javax.swing.JPanel {
 
-    private final OrderService orderService = (OrderService) Naming.lookup("rmi://localhost:7281/orderService");
+    private final OrderService orderService = (OrderService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/orderService");
     ;
 
     /**

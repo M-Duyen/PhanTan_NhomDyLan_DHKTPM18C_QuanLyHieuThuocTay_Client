@@ -37,11 +37,11 @@ public class WelcomeMyApp {
 
         }));
 
-        Loading load = new Loading();
         login = new LoginGUI();
         SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() {
+                Loading load = new Loading();
                 Loading.main(load);
                 while (!doneLoading) {
                     try {
