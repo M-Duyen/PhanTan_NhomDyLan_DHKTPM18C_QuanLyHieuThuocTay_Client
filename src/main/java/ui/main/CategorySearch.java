@@ -1,10 +1,12 @@
 package ui.main;
 
 import model.*;
+import org.apache.commons.math3.stat.descriptive.summary.Product;
 import service.AdministrationRouteService;
 import service.CategoryService;
 import service.ProductService;
 import service.VendorService;
+import ui.dialog.Message;
 import ui.table.TableCustom;
 
 import javax.swing.*;
@@ -24,14 +26,14 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CategorySearch extends JPanel {
-    AdministrationRouteService administrationRouteService = (AdministrationRouteService)  Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/administrationRouteService");
-    ProductService productService = (ProductService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/productService");
-    VendorService vendorService = (VendorService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/vendorService");
-    CategoryService categoryService = (CategoryService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/categoryService");
+    AdministrationRouteService administrationRouteService = (AdministrationRouteService) Naming.lookup("rmi://localhost:7281/administrationRouteService");
+    ProductService productService = (ProductService) Naming.lookup("rmi://localhost:7281/productService");
+    VendorService vendorService = (VendorService) Naming.lookup("rmi://localhost:7281/vendorService");
+    CategoryService categoryService = (CategoryService) Naming.lookup("rmi://localhost:7281/categoryService");
 
-    private final ArrayList<Product> proFetchList;
     private HomePage homePage;
     private ArrayList<Product> productsListTemp;
 
@@ -46,7 +48,6 @@ public class CategorySearch extends JPanel {
         showDataComboBoxVendor();
         showDataComboBoxCategory();
         showDataComboBoxAdmintrationRoute();
-        proFetchList = (ArrayList<Product>) productService.fetchProducts();
     }
 
 
@@ -161,14 +162,11 @@ public class CategorySearch extends JPanel {
         cbbCategory.setLabeText("Danh mục");
         cbbCategory.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                if (txtSearch.getText().equals("Nhập tiêu chí tìm kiếm ...")) {
-                    try {
-                        cbbCategoryActionPerformed(evt);
-                    } catch (RemoteException e) {
-                        throw new RuntimeException(e);
-                    }
+                try {
+                    cbbCategoryActionPerformed(evt);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
                 }
-
             }
         });
 
@@ -181,12 +179,10 @@ public class CategorySearch extends JPanel {
         cbbVendor.setLabeText("Nhà cung cấp");
         cbbVendor.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                if (txtSearch.getText().equals("Nhập tiêu chí tìm kiếm ...")) {
-                    try {
-                        cbbVendorActionPerformed(evt);
-                    } catch (RemoteException e) {
-                        throw new RuntimeException(e);
-                    }
+                try {
+                    cbbVendorActionPerformed(evt);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
                 }
             }
         });
@@ -253,14 +249,12 @@ public class CategorySearch extends JPanel {
         cbbAdministration.setLabeText("Đường dùng");
         cbbAdministration.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                if (txtSearch.getText().equals("Nhập tiêu chí tìm kiếm ...")) {
-                    try {
+                                   try {
                         cbbAdministrationActionPerformed(evt);
                     } catch (RemoteException e) {
                         throw new RuntimeException(e);
                     }
-                }
-            }
+                            }
         });
 
         txtSearch.setForeground(new Color(153, 153, 153));
@@ -270,17 +264,33 @@ public class CategorySearch extends JPanel {
         txtSearch.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-//                if (!txtSearch.getText().equals("Nhập tiêu chí tìm kiếm ...")) {
-//                    ArrayList<Product> result = productDAO.searchProductWithCriteria(txtSearch.getText(), cbbCategory, cbbVendor, cbbAdministration);
-//                    if (result.isEmpty()) {
-//                        new Message(homePage, true, "Thông báo", "Hết hàng", "src/main/java/ui/dialog/warning.png").showAlert(); new Message(homePage, true, "Thông báo", "Không tìm thấy", "src/main/java/ui/dialog/warning.png").showAlert();
-//                    } else {
-//                        tableProduct.setVisible(true);
-//                        showTable(result);
-//                    }
-//                }
-//                pCenter.revalidate(); // Cập nhật lại giao diện
-//                pCenter.repaint();
+
+                    List<model.Product> result = null;
+                    try {
+                        result = searchProducts(
+                                cbbCategory.getSelectedItem(),
+                                cbbVendor.getSelectedItem(),
+                                cbbAdministration.getSelectedItem(),
+                                txtSearch.getText()
+                        );
+                    } catch (RemoteException ex) {
+                        throw new RuntimeException(ex);
+                    }
+
+                    showTable(result);
+
+
+                    if (result.isEmpty()) {
+//                            new Message(homePage, true, "Thông báo", "Hết hàng", "src/main/java/ui/dialog/warning.png").showAlert();
+                        new Message(homePage, true, "Thông báo", "Không tìm thấy", "src/main/java/ui/dialog/warning.png").showAlert();
+                    } else {
+                        tableProduct.setVisible(true);
+                        showTable(result);
+
+
+                }
+                pCenter.revalidate(); // Cập nhật lại giao diện
+                pCenter.repaint();
             }
         });
         txtSearch.addFocusListener(new java.awt.event.FocusAdapter() {
@@ -300,22 +310,30 @@ public class CategorySearch extends JPanel {
         btnSearch.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!txtSearch.getText().equals("Nhập tiêu chí tìm kiếm ...")) {
-                    ArrayList<Product> result = null;
-//                    ArrayList<Product> result = productDAO.searchProductWithCriteria(txtSearch.getText(), cbbCategory, cbbVendor, cbbAdministration);
-                    DefaultTableModel model = (DefaultTableModel) tableProduct.getModel();
-                    if (result.isEmpty()) {
-//                        new Message(homePage, true, "Thông báo", "Không tìm thấy", "src/main/java/ui/dialog/warning.png").showAlert();
-                        model.addRow(new Object[]{"...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "..."});
-                    } else {
-                        tableProduct.setVisible(true);
+                try {
+                    if (countSelectedComboBox() >= 1) {
+                        List<model.Product> result = searchProducts(
+                                cbbCategory.getSelectedItem(),
+                                cbbVendor.getSelectedItem(),
+                                cbbAdministration.getSelectedItem(),
+                                txtSearch.getText()
+                        );
                         showTable(result);
+
+                        if (result.isEmpty()) {
+                            new Message(homePage, true, "Thông báo", "Không tìm thấy sản phẩm phù hợp", "src/main/java/ui/dialog/warning.png").showAlert();
+                        }
+                    } else {
+                        new Message(homePage, true, "Thông báo", "Vui lòng chọn tiêu chí tìm kiếm", "src/main/java/ui/dialog/warning.png").showAlert();
                     }
+                    pCenter.revalidate();
+                    pCenter.repaint();
+                } catch (RemoteException ex) {
+                    ex.printStackTrace();
                 }
-                pCenter.revalidate(); // Cập nhật lại giao diện
-                pCenter.repaint();
             }
         });
+
         btnSearch.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -408,14 +426,14 @@ public class CategorySearch extends JPanel {
     }// </editor-fold>
 
     private void txtDateActionPerformed(ActionEvent evt) throws RemoteException {
-        ArrayList<Product> proListByDate = (ArrayList<Product>) productService.searchByMultipleCriteria("Product",convertDateFormat(txtDate.getText()));
+        List<model.Product> proListByDate = (List<model.Product>) productService.searchByMultipleCriteria("product", convertDateFormat(txtDate.getText()));
         showTable(proListByDate);
 
     }
 
     private void btnCalendarActionPerformed(ActionEvent evt) throws RemoteException {
-        date.showPopup();
-        ArrayList<Product> proListByDate = (ArrayList<Product>) productService.searchByMultipleCriteria("Product",convertDateFormat(txtDate.getText()));
+//        date.showPopup();
+        List<model.Product> proListByDate = (List<model.Product>) productService.searchByMultipleCriteria("product", convertDateFormat(txtDate.getText()));
         showTable(proListByDate);
     }
 
@@ -433,23 +451,47 @@ public class CategorySearch extends JPanel {
     }
 
     private void cbbCategoryActionPerformed(ActionEvent evt) throws RemoteException {
-        ArrayList<Product> proListByCategory = (ArrayList<Product>) productService.searchByMultipleCriteria("Product",(String) cbbCategory.getSelectedItem());
-        showTable(proListByCategory);
+        if (countSelectedComboBox() == 1) {
+            List<model.Product> result = searchProducts(
+                    cbbCategory.getSelectedItem(),
+                    null,
+                    null,
+                    ""
+            );
+            showTable(result);
+        }
     }
 
+
     private void cbbVendorActionPerformed(ActionEvent evt) throws RemoteException {
-        ArrayList<Product> proListByVendor = (ArrayList<Product>) productService.searchByMultipleCriteria("Product",(String) cbbVendor.getSelectedItem());
-        showTable(proListByVendor);
+        if (countSelectedComboBox() == 1) {
+            List<model.Product> result = searchProducts(
+                    null,
+                    cbbVendor.getSelectedItem(),
+                    null,
+                    ""
+            );
+            showTable(result);
+        }
     }
+
 
     private void cbbMethodActionPerformed(ActionEvent evt) throws RemoteException {
         searchByOtherCriterious();
     }
 
     private void cbbAdministrationActionPerformed(ActionEvent evt) throws RemoteException {
-        ArrayList<Product> proListByAdmin = (ArrayList<Product>) productService.searchByMultipleCriteria("Product",(String) cbbAdministration.getSelectedItem());
-        showTable(proListByAdmin);
+        if (countSelectedComboBox() == 1) {
+            List<model.Product> result = searchProducts(
+                    null,
+                    null,
+                    cbbAdministration.getSelectedItem(),
+                    ""
+            );
+            showTable(result);
+        }
     }
+
 
     private void txtSearchFocusGained(java.awt.event.FocusEvent evt) {
         if (txtSearch.getText().equals("Nhập tiêu chí tìm kiếm ...")) {
@@ -483,69 +525,60 @@ public class CategorySearch extends JPanel {
     private ui.textfield.TextField txtSearch;
 
 
-    public void showTable(ArrayList<Product> arrayList) {
+    public void showTable(List<model.Product> arrayList) {
         DefaultTableModel model = (DefaultTableModel) tableProduct.getModel();
-        model.setRowCount(0);
+        model.setRowCount(0); // Clear dữ liệu cũ
 
-        ArrayList<Medicine> medicineList = (ArrayList<Medicine>) arrayList.stream().filter(x -> x instanceof Medicine).map(product -> (Medicine) product).collect(Collectors.toList());
-        List<MedicalSupply> suppliesList = arrayList.stream().filter(x -> x instanceof MedicalSupply).map(product -> (MedicalSupply) product).collect(Collectors.toList());
-        List<FunctionalFood> funtionFoodList = arrayList.stream().filter(x -> x instanceof FunctionalFood).map(product -> (FunctionalFood) product).collect(Collectors.toList());
-        for (Medicine medicine : medicineList) {
-//            for (Map.Entry<PackagingUnit, Double> entry : medicine.getUnitPrice().entrySet()) {
-//                model.addRow(new Object[]{
-//                        medicine.getProductID(),
-//                        medicine.getProductName(),
-//                        medicine.getRegistrationNumber(),
-//                        medicine.getEndDate(),
-//                        entry.getKey().name(),
-//                        medicine.getInStockByUnit(entry.getKey()),
-//                        medicine.getSellPrice(entry.getKey()),
-//                        medicine.getActiveIngredient(),
-//                        medicine.getAdministrationRoute().getAdministrationRouteID(),
-//                        medicine.getConversionUnit(),
-//                        "", "",
-//                        medicine.getCategory().getCategoryName(),
-//                        medicine.getVendor().getVendorName()
-//                });
-//            }
-        }
-
-        for (MedicalSupply supplies : suppliesList) {
-//            for (Map.Entry<PackagingUnit, Double> entry : supplies.getUnitPrice().entrySet()) {
-//                model.addRow(new Object[]{
-//                        supplies.getProductID(),
-//                        supplies.getProductName(),
-//                        supplies.getRegistrationNumber(),
-//                        supplies.getEndDate(),
-//                        entry.getKey().name(), //supplies.getQuantityInStock()
-//                        supplies.getInStockByUnit(entry.getKey()),
-//                        supplies.getSellPrice(entry.getKey()),
-//                        "", "", "", "",
-//                        supplies.getMedicalSupplyType(),
-//                        supplies.getCategory().getCategoryName(),
-//                        supplies.getVendor().getVendorName()
-//                });
-//            }
-        }
-        for (FunctionalFood functionalFood : funtionFoodList) {
-//            for (Map.Entry<PackagingUnit, Double> entry : functionalFood.getUnitPrice().entrySet()) {
-//                model.addRow(new Object[]{
-//                        functionalFood.getProductID(),
-//                        functionalFood.getProductName(),
-//                        functionalFood.getRegistrationNumber(),
-//                        functionalFood.getEndDate(),
-//                        entry.getKey().name(), //functionalFood.getQuantityInStock()
-//                        functionalFood.getInStockByUnit(entry.getKey()),
-//                        functionalFood.getSellPrice(entry.getKey()),
-//                        "", "", "",
-//                        functionalFood.getMainNutrients(),
-//                        "",
-//                        functionalFood.getCategory().getCategoryName(),
-//                        functionalFood.getVendor().getVendorName()
-//                });
-//            }
+        for (model.Product product : arrayList) {
+            if (product instanceof Medicine medicine) {
+                medicine.getUnitDetails().forEach((unit, detail) -> model.addRow(new Object[]{
+                        medicine.getProductID(),
+                        medicine.getProductName(),
+                        medicine.getRegistrationNumber(),
+                        medicine.getEndDate(),
+                        unit.name(),
+                        detail.getInStock(),
+                        medicine.getSellPrice(unit),
+                        medicine.getActiveIngredient(),
+                        medicine.getAdministrationRoute().getAdministrationRouteID(),
+                        medicine.getConversionUnit(),
+                        "", "",
+                        medicine.getCategory().getCategoryName(),
+                        medicine.getVendor().getVendorName()
+                }));
+            } else if (product instanceof MedicalSupply supply) {
+                supply.getUnitDetails().forEach((unit, detail) -> model.addRow(new Object[]{
+                        supply.getProductID(),
+                        supply.getProductName(),
+                        supply.getRegistrationNumber(),
+                        supply.getEndDate(),
+                        unit.name(),
+                        detail.getInStock(),
+                        supply.getSellPrice(unit),
+                        "", "", "", "",
+                        supply.getMedicalSupplyType(),
+                        supply.getCategory().getCategoryName(),
+                        supply.getVendor().getVendorName()
+                }));
+            } else if (product instanceof FunctionalFood food) {
+                food.getUnitDetails().forEach((unit, detail) -> model.addRow(new Object[]{
+                        food.getProductID(),
+                        food.getProductName(),
+                        food.getRegistrationNumber(),
+                        food.getEndDate(),
+                        unit.name(),
+                        detail.getInStock(),
+                        food.getSellPrice(unit),
+                        "", "", "",
+                        food.getMainNutrients(),
+                        "",
+                        food.getCategory().getCategoryName(),
+                        food.getVendor().getVendorName()
+                }));
+            }
         }
     }
+
 
     public void showDataComboBoxVendor() throws RemoteException {
 
@@ -600,24 +633,87 @@ public class CategorySearch extends JPanel {
         String searchByOther = (String) cbbMethod.getSelectedItem();
         if (searchByOther != null) {
             if (searchByOther.equals("Sản phẩm sắp hết hạn")) {
-                ArrayList<Product> proNearExpire = (ArrayList<Product>) productService.getProductListNearExpire();
+                List<model.Product> proNearExpire = productService.getProductListNearExpire();
                 showTable(proNearExpire);
 
             } else if (searchByOther.equals("Sản phẩm tồn kho thấp")) {
                 DefaultTableModel model = (DefaultTableModel) tableProduct.getModel();
-                ArrayList<Product> lowStockProductsList = (ArrayList<Product>) productService.getLowStockProducts(25);
+                ArrayList<model.Product> lowStockProductsList = (ArrayList<model.Product>) productService.getLowStockProducts(25);
                 if (lowStockProductsList.isEmpty()) {
                     model.addRow(new Object[]{"...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "..."});
                 } else {
                     showTable(lowStockProductsList);
                 }
             } else if (searchByOther.equals("Tất cả")) {
-                ArrayList<Product> productArrayList = proFetchList;
+                List<model.Product> productArrayList = productService.fetchProducts();
                 showTable(productArrayList);
             }
         } else {
             System.out.println("Bị null");
         }
     }
+
+    public List<model.Product> searchProducts(Object selectedCategory, Object selectedVendor, Object selectedAdmin, String searchText) throws RemoteException {
+        List<model.Product> allProducts = productService.getAll();
+        List<model.Product> filteredProducts = new ArrayList<>();
+
+        boolean hasSearchText = searchText != null && !searchText.trim().isEmpty() && !searchText.equals("Nhập tiêu chí tìm kiếm ...");
+
+        for (model.Product p : allProducts) {
+            boolean match = true;
+
+            if (selectedCategory != null && !selectedCategory.toString().isEmpty()) {
+                if (p.getCategory() == null || !p.getCategory().getCategoryName().equals(selectedCategory.toString())) {
+                    match = false;
+                }
+            }
+
+            if (selectedVendor != null && !selectedVendor.toString().isEmpty()) {
+                if (p.getVendor() == null || !p.getVendor().getVendorName().equals(selectedVendor.toString())) {
+                    match = false;
+                }
+            }
+
+            if (selectedAdmin != null && !selectedAdmin.toString().isEmpty()) {
+                if (p instanceof Medicine) {
+                    Medicine m = (Medicine) p;
+                    if (m.getAdministrationRoute() == null || !m.getAdministrationRoute().getAdministrationRouteID().equals(selectedAdmin.toString())) {
+                        match = false;
+                    }
+                } else {
+                    match = false;
+                }
+            }
+
+            if (hasSearchText) {
+                boolean textMatch = p.getProductID().contains(searchText) ||
+                        p.getProductName().toLowerCase().contains(searchText.toLowerCase()) ||
+                        (p.getRegistrationNumber() != null && p.getRegistrationNumber().contains(searchText));
+                if (!textMatch) {
+                    match = false;
+                }
+            }
+
+            if (match) {
+                filteredProducts.add(p);
+            }
+        }
+
+        return filteredProducts;
+    }
+    private int countSelectedComboBox() {
+        int count = 0;
+        if (cbbCategory.getSelectedItem() != null && !cbbCategory.getSelectedItem().toString().isEmpty())
+            count++;
+        if (cbbVendor.getSelectedItem() != null && !cbbVendor.getSelectedItem().toString().isEmpty())
+            count++;
+        if (cbbAdministration.getSelectedItem() != null && !cbbAdministration.getSelectedItem().toString().isEmpty())
+            count++;
+        if (txtSearch.getText() != null && !txtSearch.getText().trim().isEmpty() && !txtSearch.getText().equals("Nhập tiêu chí tìm kiếm ..."))
+            count++;
+        return count;
+    }
+
+
 }
 

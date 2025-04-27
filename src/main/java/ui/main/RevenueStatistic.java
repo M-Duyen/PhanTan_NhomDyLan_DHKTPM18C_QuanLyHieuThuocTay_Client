@@ -505,10 +505,10 @@ public class RevenueStatistic extends JPanel implements ActionListener {
                         if (cellB1 == null) cellB1 = row1.createCell(1);
                         cellB1.setCellValue("THỐNG KÊ DOANH THU NĂM " + (Integer) panelBarStatistical1.ycNam.getValue());
 
-                        inf = orderDAO.getOverviewStatistical(
-                                LocalDate.of((Integer) (Integer) panelBarStatistical1.ycNam.getValue(), 1, 1).atStartOfDay(),
-                                LocalDate.of((Integer) (Integer) panelBarStatistical1.ycNam.getValue(), 12, 31).atTime(23, 59, 59)
-                        );
+//                        inf = orderDAO.getOverviewStatistical(
+//                                LocalDate.of((Integer) (Integer) panelBarStatistical1.ycNam.getValue(), 1, 1).atStartOfDay(),
+//                                LocalDate.of((Integer) (Integer) panelBarStatistical1.ycNam.getValue(), 12, 31).atTime(23, 59, 59)
+//                        );
                         listMD = orderDAO.getModelDataRSByYear((Integer) (Integer) panelBarStatistical1.ycNam.getValue());
                         break;
                     case "Tháng":
@@ -525,10 +525,10 @@ public class RevenueStatistic extends JPanel implements ActionListener {
                         }
                         cellBa.setCellValue("THỐNG KÊ DOANH THU THÁNG " + month + " NĂM " + (Integer) panelBarStatistical1.ycNam.getValue());
                         LocalDate firstDayOfMonth = LocalDate.of((Integer) (Integer) panelBarStatistical1.ycT.getValue(), month, 1);
-                        inf = orderDAO.getOverviewStatistical(
-                                firstDayOfMonth.atStartOfDay(),
-                                firstDayOfMonth.withDayOfMonth(firstDayOfMonth.lengthOfMonth()).atTime(23, 59, 59)
-                        );
+//                        inf = orderDAO.getOverviewStatistical(
+//                                firstDayOfMonth.atStartOfDay(),
+//                                firstDayOfMonth.withDayOfMonth(firstDayOfMonth.lengthOfMonth()).atTime(23, 59, 59)
+//                        );
                         listMD = orderDAO.getModelDataRSByYearByMonth(month, (Integer) (Integer) panelBarStatistical1.ycT.getValue());
                         break;
                     case "Tùy chỉnh":
@@ -539,10 +539,10 @@ public class RevenueStatistic extends JPanel implements ActionListener {
                         if (cellBtc == null) cellBtc = rowtc.createCell(1);
                         cellBtc.setCellValue("THỐNG KÊ DOANH THU TỪ  " + panelBarStatistical1.txtStart.getText() + " ĐẾN " + panelBarStatistical1.txtStart.getText());
 
-                        inf =orderDAO.getOverviewStatistical(
-                                convertStringToLocalDate(panelBarStatistical1.txtStart.getText()).atStartOfDay(),
-                                convertStringToLocalDate(panelBarStatistical1.txtEnd.getText()).atTime(23, 59, 59)
-                        );
+//                        inf =orderDAO.getOverviewStatistical(
+//                                convertStringToLocalDate(panelBarStatistical1.txtStart.getText()).atStartOfDay(),
+//                                convertStringToLocalDate(panelBarStatistical1.txtEnd.getText()).atTime(23, 59, 59)
+//                        );
 //                            listMD = orderDAO.getModelDataRSByYearByTime(convertDateFormat(panelBarStatistical1.txtStart.getText()), convertDateFormat(panelBarStatistical1.txtEnd.getText()));
                         break;
                 }
@@ -792,10 +792,10 @@ public class RevenueStatistic extends JPanel implements ActionListener {
     }
 
     public void setOverView(LocalDateTime startD, LocalDateTime endD) throws MalformedURLException, NotBoundException, RemoteException {
-        ArrayList<Double> inf = ((OrderService)Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/orderService")).getOverviewStatistical(startD, endD);
-        lbCreatedNumber.setText(inf.get(0).intValue() + "");
-        lbSoldNumber.setText(inf.get(2).intValue() + "");
-        lbNumberRevenue.setText( formatCurrency(inf.get(1)));
+//        ArrayList<Double> inf = ((OrderService)Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/orderService")).getOverviewStatistical(startD, endD);
+//        lbCreatedNumber.setText(inf.get(0).intValue() + "");
+//        lbSoldNumber.setText(inf.get(2).intValue() + "");
+//        lbNumberRevenue.setText( formatCurrency(inf.get(1)));
     }
 
     //Chuyển định dạng tiền

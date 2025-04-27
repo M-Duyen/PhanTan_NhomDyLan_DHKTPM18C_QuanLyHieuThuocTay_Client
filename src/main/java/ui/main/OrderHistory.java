@@ -23,11 +23,15 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 public class OrderHistory extends javax.swing.JPanel {
     EmployeeService employeeService = (EmployeeService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/employeeService");
@@ -129,9 +133,20 @@ public class OrderHistory extends javax.swing.JPanel {
                 } catch (RemoteException e) {
                     throw new RuntimeException(e);
                 }
-                showTable(filterOrder(listT, flag1, flag2, flag3));
+                // Reset filter
+                flag1 = "";
+                flag2 = "";
+                flag3 = "";
+                txtSearch.setText("Nhập tiêu chí ...");
+                cbbSaler.setSelectedIndex(0);
+                cbbTime.setSelectedIndex(0);
+                cbbMethod.setSelectedIndex(0);
+
+                // Load lại toàn bộ không lọc
+                showTable(filterOrder(listT, "", "", "", ""));
             }
         });
+
 
         cbbSaler.setBackground(new Color(242, 249, 255));
         cbbSaler.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
@@ -212,7 +227,7 @@ public class OrderHistory extends javax.swing.JPanel {
                 DefaultTableModel model = (DefaultTableModel) tableOrder.getModel();
                 ArrayList<Order> list = null;
                 try {
-                    list = (ArrayList<Order>) orderService.searchByMultipleCriteria("Order",txtSearch.getText().trim());
+                    list = (ArrayList<Order>) orderService.searchByMultipleCriteria("customer",txtSearch.getText().trim());
                 } catch (RemoteException ex) {
                     throw new RuntimeException(ex);
                 }
@@ -239,6 +254,18 @@ public class OrderHistory extends javax.swing.JPanel {
         btnSearch.setBackground(new Color(102, 204, 255));
         btnSearch.setIcon(new javax.swing.ImageIcon("src/main/java/ui/button/magnifying-glass_32.png")); // NOI18N
         btnSearch.setRound(30);
+        btnSearch.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showTable(filterOrder(listT,
+                        (String) cbbSaler.getSelectedItem(),
+                        (String) cbbTime.getSelectedItem(),
+                        (String) cbbMethod.getSelectedItem(),
+                        txtSearch.getText().trim()
+                ));
+            }
+        });
+
 
         lblFilter.setFont(new Font("Segoe UI", 0, 18)); // NOI18N
         lblFilter.setText("Lọc theo ngày");
@@ -368,20 +395,36 @@ public class OrderHistory extends javax.swing.JPanel {
     }
 
     private void btnCalendarActionPerformed(ActionEvent evt) {
-        date.showPopup();
+//        date.showPopup(); // Hiện popup chọn ngày
 
-        String dateString = txtDate.getText();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        String dateText = txtDate.getText().trim();
+        if (dateText.isEmpty() || dateText.equals("Nhập ngày...")) {
+            // Nếu chưa nhập ngày thì không làm gì
+            return;
+        }
 
         try {
-            LocalDate localDate = LocalDate.parse(dateString, formatter);
-            LocalDateTime startOfDay = localDate.atStartOfDay();
-            ArrayList<Order> orderListByDate_txt = orderService.getOrdersByDateRange(startOfDay, startOfDay.plusDays(1).minusNanos(1));
-            showTable(orderListByDate_txt);
+            // Gửi ngày đã convert sang server để tìm kiếm
+            String formattedDate = convertDateFormat(dateText); // Giả sử bạn có hàm convert đúng định dạng
+            List<Order> orderListByDate = (List<Order>) orderService.searchByMultipleCriteria("order", formattedDate);
+
+            if (orderListByDate != null && !orderListByDate.isEmpty()) {
+                showTable(new ArrayList<>(orderListByDate)); // ép List về ArrayList
+            } else {
+                // Nếu không tìm thấy
+                DefaultTableModel model = (DefaultTableModel) tableOrder.getModel();
+                model.setRowCount(0);
+                model.addRow(new Object[]{"Không tìm thấy hóa đơn", "", "", "", "", "", ""});
+            }
         } catch (Exception e) {
             e.printStackTrace();
+            // Có lỗi thì cũng clear bảng
+            DefaultTableModel model = (DefaultTableModel) tableOrder.getModel();
+            model.setRowCount(0);
+            model.addRow(new Object[]{"Lỗi khi tìm kiếm", "", "", "", "", "", ""});
         }
     }
+
 
     private void btnPrintOutActionPerformed(ActionEvent evt) {
         // TODO add your handling code here:
@@ -406,18 +449,27 @@ public class OrderHistory extends javax.swing.JPanel {
 
     private void cbbSalerActionPerformed(ActionEvent evt) {
         flag1 = (String) cbbSaler.getSelectedItem();
-        showTable(filterOrder(listT, flag1, flag2, flag3));
+        if (countSelectedFilters() == 1) {
+            showTable(filterOrder(listT, flag1, flag2, flag3, txtSearch.getText().trim()));
+        }
     }
+
 
     private void cbbTimeActionPerformed(ActionEvent evt) {
         flag2 = (String) cbbTime.getSelectedItem();
-        showTable(filterOrder(listT, flag1, flag2, flag3));
+        if (countSelectedFilters() == 1) {
+            showTable(filterOrder(listT, flag1, flag2, flag3, txtSearch.getText().trim()));
+        }
     }
+
 
     private void cbbMethodActionPerformed(ActionEvent evt) {
         flag3 = (String) cbbMethod.getSelectedItem();
-        showTable(filterOrder(listT, flag1, flag2, flag3));
+        if (countSelectedFilters() == 1) {
+            showTable(filterOrder(listT, flag1, flag2, flag3, txtSearch.getText().trim()));
+        }
     }
+
 
     private void txtSearchFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtSearchFocusGained
         if (txtSearch.getText().equals("Nhập tiêu chí ...")) {
@@ -439,7 +491,7 @@ public class OrderHistory extends javax.swing.JPanel {
         }
     }
 
-    public void showTable(ArrayList<Order> arrayList) {
+    public void showTable(List<Order> arrayList) {
         DefaultTableModel model = (DefaultTableModel) tableOrder.getModel();
         model.setRowCount(0);
         for (Order o : arrayList) {
@@ -450,13 +502,16 @@ public class OrderHistory extends javax.swing.JPanel {
 
     }
 
-    public ArrayList<Order> filterOrder(ArrayList<Order> listOrder, String t1, String t2, String t3) {
+    public ArrayList<Order> filterOrder(ArrayList<Order> listOrder, String t1, String t2, String t3, String keyword) {
         ArrayList<Order> listTemp = new ArrayList<>();
-        boolean filterByName = !t1.isEmpty();
-        boolean filterByDate = !t2.isEmpty();
-        boolean filterByPrescription = !t3.isEmpty();
+        boolean filterByName = (t1 != null && !t1.isEmpty());
+        boolean filterByDate = (t2 != null && !t2.isEmpty());
+        boolean filterByPrescription = (t3 != null && !t3.isEmpty());
+        boolean filterByKeyword = (keyword != null && !keyword.trim().isEmpty() && !keyword.equals("Nhập tiêu chí ..."));
+
         LocalDateTime startDate = null;
         LocalDateTime endDate = null;
+
         if (filterByDate) {
             switch (t2) {
                 case "Tuần này":
@@ -481,30 +536,66 @@ public class OrderHistory extends javax.swing.JPanel {
         for (Order o : listOrder) {
             boolean match = true;
 
-            // Kiểm tra tên nhân viên
-            if (filterByName && !o.getEmployee().getEmployeeName().equals(t1)) {
+            // Lọc theo tên nhân viên (Saler)
+            if (filterByName && (o.getEmployee() == null || !o.getEmployee().getEmployeeName().equalsIgnoreCase(t1))) {
                 match = false;
             }
-            if (filterByDate && !(o.getOrderDate().isAfter(startDate) && o.getOrderDate().isBefore(endDate))) {
+
+            // Lọc theo thời gian
+            if (filterByDate && (o.getOrderDate() == null || o.getOrderDate().isBefore(startDate) || o.getOrderDate().isAfter(endDate))) {
                 match = false;
             }
+
+            // Lọc theo hình thức (có đơn/không đơn)
             if (filterByPrescription) {
-                if (o.getPrescription() == null) {
-                    if (t3.equals("Theo đơn")) {
-                        match = false;
-                    }
-                } else {
-                    if (t3.equals("Không theo đơn")) {
-                        match = false;
-                    }
+                boolean hasPrescription = o.getPrescription() != null;
+                if (t3.equals("Theo đơn") && !hasPrescription) {
+                    match = false;
+                } else if (t3.equals("Không theo đơn") && hasPrescription) {
+                    match = false;
                 }
             }
+
+            // Lọc theo từ khóa (OrderID hoặc CustomerName chứa keyword)
+            if (filterByKeyword) {
+                String lowerKeyword = keyword.toLowerCase();
+                boolean keywordMatch = (o.getOrderID() != null && o.getOrderID().toLowerCase().contains(lowerKeyword))
+                        || (o.getCustomer() != null && o.getCustomer().getCustomerName() != null && o.getCustomer().getCustomerName().toLowerCase().contains(lowerKeyword));
+                if (!keywordMatch) {
+                    match = false;
+                }
+            }
+
             if (match) {
                 listTemp.add(o);
             }
         }
+
         return listTemp;
     }
+
+    private int countSelectedFilters() {
+        int count = 0;
+        if (cbbSaler.getSelectedIndex() > 0) count++;
+        if (cbbTime.getSelectedIndex() > 0) count++;
+        if (cbbMethod.getSelectedIndex() > 0) count++;
+        if (!txtSearch.getText().trim().isEmpty() && !txtSearch.getText().equals("Nhập tiêu chí ...")) count++;
+        return count;
+    }
+    private static String convertDateFormat(String inputDate) {
+        SimpleDateFormat inputFormat = new SimpleDateFormat("dd-MM-yyyy");
+        SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date date;
+
+        try {
+            date = inputFormat.parse(inputDate);
+            return outputFormat.format(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
