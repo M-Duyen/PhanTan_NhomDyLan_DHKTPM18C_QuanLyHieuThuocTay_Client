@@ -29,6 +29,7 @@ import java.rmi.RemoteException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 
 public class AddPromotion extends JPanel {
 
@@ -348,7 +349,7 @@ public class AddPromotion extends JPanel {
             String endDate = txtNgayKetThuc.getText();
             double per = Double.parseDouble(txtPer.getText());
 
-            ArrayList<PromotionType> promotionTypeList = (ArrayList<PromotionType>) promotionTypeService.searchByMultipleCriteria("PromotionType",cboProType_Left.getSelectedItem().toString());
+            ArrayList<PromotionType> promotionTypeList = (ArrayList<PromotionType>) promotionTypeService.searchByMultipleCriteria("promotionType",cboProType_Left.getSelectedItem().toString());
 
             PromotionType promotionType = promotionTypeList.getFirst();
 
@@ -431,14 +432,14 @@ public class AddPromotion extends JPanel {
 
     private void searchPromotion(Object cri_type, Object crt_sta) throws RemoteException {
 
-        ArrayList<Promotion> promotionList = new ArrayList<>();
+        List<Promotion> promotionList = new ArrayList<>();
 
         if (cri_type == null && crt_sta != null) {
             if (crt_sta.equals("Đang áp dụng")) {
-                promotionList = promotionService.getPromotionListByStatus(true);
+                promotionList = (ArrayList<Promotion>) promotionService.getPromotionListByStatus(true);
 
             } else if (crt_sta.equals("Ngừng áp dụng")) {
-                promotionList = promotionService.getPromotionListByStatus(false);
+                promotionList = (ArrayList<Promotion>) promotionService.getPromotionListByStatus(false);
 
             } else if (crt_sta.equals("")) {
                 promotionList = (ArrayList<Promotion>) promotionService.searchByMultipleCriteria("Promotion","");
@@ -453,12 +454,12 @@ public class AddPromotion extends JPanel {
             ArrayList<Promotion> proList_1 = (ArrayList<Promotion>) promotionService.searchByMultipleCriteria("Promotion",cri_type.toString());
             if (crt_sta.equals("Đang áp dụng")) {
                 //TODO
-//                promotionList = promotionService.getPromotionListByCriterous(true, proList_1);
+                promotionList = promotionService.getPromotionListByCriterous(true, proList_1);
 
 
             } else if (crt_sta.equals("Ngừng áp dụng")) {
                 //TODO
-//                promotionList = promotionService.getPromotionListByCriterous(false, proList_1);
+                promotionList = promotionService.getPromotionListByCriterous(false, proList_1);
 
             } else if (crt_sta.equals("")) {
                 promotionList = (ArrayList<Promotion>) promotionService.searchByMultipleCriteria("Promotion",cri_type.toString());
@@ -472,7 +473,7 @@ public class AddPromotion extends JPanel {
     }
 
 
-    private void loadTable(ArrayList<Promotion> promotionList) {
+    private void loadTable(List<Promotion> promotionList) {
         DefaultTableModel model = (DefaultTableModel) tableKhuyenMai.getModel();
         model.setRowCount(0);
         for (Promotion promotion : promotionList) {

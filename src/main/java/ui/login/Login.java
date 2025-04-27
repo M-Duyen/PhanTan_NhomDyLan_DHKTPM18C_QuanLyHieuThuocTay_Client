@@ -251,21 +251,32 @@ public class Login extends JPanel implements ActionListener, KeyListener {
                             kqCheck = false;
                             JOptionPane.showMessageDialog(this, "Tài khoản không tồn tại");
                         }
-                        if (kqCheck) {
-                            currentAccount = txtUsername.getText().trim();
 
-                            lblErrorUser.setText("");
-                            lblErrorPass.setText("");
-                            StaticProcess.userlogin = txtUsername.getText();
-                            try {
-                                StaticProcess.empLogin = employeeService.findById(txtUsername.getText());
-                            } catch (RemoteException ex) {
-                                throw new RuntimeException(ex);
+                        try {
+                            if(!accountService.isAccountLoggedIn(tenDN)){
+                                if (kqCheck) {
+                                    currentAccount = txtUsername.getText().trim();
+                                    lblErrorUser.setText("");
+                                    lblErrorPass.setText("");
+                                    StaticProcess.userlogin = txtUsername.getText();
+                                    try {
+                                        StaticProcess.empLogin = employeeService.findById(txtUsername.getText());
+                                    } catch (RemoteException ex) {
+                                        throw new RuntimeException(ex);
+                                    }
+                                    accountService.loginCheck(tenDN, password);
+                                    StaticProcess.loginSuccess = true;
+                                    closeLoginWindow();
+
+                                }
+
+                            }else {
+                                JOptionPane.showMessageDialog(this, "Tài khoản đã đăng nhập trên thiết bị khác");
                             }
-                            StaticProcess.loginSuccess = true;
-                            closeLoginWindow();
-
+                        } catch (RemoteException ex) {
+                            throw new RuntimeException(ex);
                         }
+
                     } else {
                         JOptionPane.showMessageDialog(this, "Tài khoản không tồn tại");
                     }
@@ -328,5 +339,12 @@ public class Login extends JPanel implements ActionListener, KeyListener {
             return true;
         }
         return false;
+    }
+
+    public static void main(String[] args) throws MalformedURLException, NotBoundException, RemoteException {
+        AccountService accountService = (AccountService) Naming.lookup("rmi://localhost:7281/accountService");
+        System.out.println(accountService.containUserName("EP0302"));
+        employeeService = (EmployeeService) Naming.lookup("rmi://localhost:7281/employeeService");
+        System.out.println(employeeService.findById("EP0302"));
     }
 }
