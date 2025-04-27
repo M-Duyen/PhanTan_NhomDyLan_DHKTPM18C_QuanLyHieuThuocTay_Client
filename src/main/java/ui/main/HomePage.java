@@ -105,7 +105,6 @@ public class HomePage extends JFrame implements ActionListener{
                     message.lblEmpName_show.setText(emp.getManagerName());
                     message.lblPhoneNumber_show.setText(emp.getPhoneNumber());
                     message.lblDOB_show.setText(emp.getBirthDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-                    //TODO: Trong bảng manager thiếu mấy thông tin này
                     message.lblGender_show.setText((""));
                     message.lblDegree_show.setText("");
                     message.lblEmail_show.setText("");
