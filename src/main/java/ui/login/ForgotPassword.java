@@ -17,7 +17,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
 public class ForgotPassword extends JPanel implements ActionListener, KeyListener {
-    AccountService accountService = (AccountService) Naming.lookup("rmi://localhost:7281/accountService");
+    AccountService accountService = (AccountService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/accountService");
     Font f = new Font("Times New Romam", Font.PLAIN, 20);
     Font f1 = new Font("Times New Romam", Font.ITALIC, 15);
     public JButton btnSendCode;

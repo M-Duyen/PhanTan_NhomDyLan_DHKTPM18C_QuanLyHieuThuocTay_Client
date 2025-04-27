@@ -6,6 +6,7 @@ import service.AdministrationRouteService;
 import service.CategoryService;
 import service.ProductService;
 import service.VendorService;
+import staticProcess.StaticProcess;
 import ui.dialog.Message;
 import ui.table.TableCustom;
 
@@ -29,10 +30,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CategorySearch extends JPanel {
-    AdministrationRouteService administrationRouteService = (AdministrationRouteService) Naming.lookup("rmi://localhost:7281/administrationRouteService");
-    ProductService productService = (ProductService) Naming.lookup("rmi://localhost:7281/productService");
-    VendorService vendorService = (VendorService) Naming.lookup("rmi://localhost:7281/vendorService");
-    CategoryService categoryService = (CategoryService) Naming.lookup("rmi://localhost:7281/categoryService");
+    AdministrationRouteService administrationRouteService = (AdministrationRouteService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/administrationRouteService");
+    ProductService productService = (ProductService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/productService");
+    VendorService vendorService = (VendorService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/vendorService");
+    CategoryService categoryService = (CategoryService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/categoryService");
 
     private HomePage homePage;
     private ArrayList<Product> productsListTemp;
