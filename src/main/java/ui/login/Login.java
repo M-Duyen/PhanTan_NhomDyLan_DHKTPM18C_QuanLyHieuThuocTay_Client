@@ -2,13 +2,15 @@ package ui.login;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.util.UIScale;
+
 import model.Employee;
 import model.Manager;
-import net.miginfocom.swing.MigLayout;
 import service.AccountService;
 import service.EmployeeService;
 import service.ManagerService;
 import staticProcess.StaticProcess;
+import net.miginfocom.swing.MigLayout;
+
 
 import javax.swing.*;
 import java.awt.*;
@@ -27,8 +29,8 @@ public class Login extends JPanel implements ActionListener, KeyListener {
 
     static {
         try {
-            employeeService = (EmployeeService) Naming.lookup("rmi://localhost:7281/employeeService");
-            managerService = (ManagerService) Naming.lookup("rmi://localhost:7281/managerService");
+            employeeService = (EmployeeService) Naming.lookup("rmi://"+ StaticProcess.properties.get("ServerName") +":" + StaticProcess.properties.get("Port") + "/employeeService");
+            managerService = (ManagerService) Naming.lookup("rmi://"+ StaticProcess.properties.get("ServerName") +":" + StaticProcess.properties.get("Port") + "/managerService");
         } catch (NotBoundException e) {
             throw new RuntimeException(e);
         } catch (MalformedURLException e) {
@@ -37,7 +39,7 @@ public class Login extends JPanel implements ActionListener, KeyListener {
             throw new RuntimeException(e);
         }
     }
-    AccountService accountService = (AccountService) Naming.lookup("rmi://localhost:7281/accountService");
+    AccountService accountService = (AccountService) Naming.lookup("rmi://"+ StaticProcess.properties.get("ServerName") +":" + StaticProcess.properties.get("Port") + "/accountService");
     Font f = new Font("Times New Romam", Font.PLAIN, 20);
     Font f1 = new Font("Times New Romam", Font.ITALIC, 15);
     public JButton btnLogin;
@@ -264,6 +266,8 @@ public class Login extends JPanel implements ActionListener, KeyListener {
                             closeLoginWindow();
 
                         }
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Tài khoản không tồn tại");
                     }
                 }
 
@@ -273,11 +277,7 @@ public class Login extends JPanel implements ActionListener, KeyListener {
             if (checkBoxForgotPW.isSelected()) {
                 try {
                     handleForgotPasswordCheckbox();
-                } catch (MalformedURLException ex) {
-                    throw new RuntimeException(ex);
-                } catch (NotBoundException ex) {
-                    throw new RuntimeException(ex);
-                } catch (RemoteException ex) {
+                } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
 
