@@ -69,10 +69,10 @@ import java.util.Locale;
 import java.util.Map;
 
 public class TempOrderForm extends TabbedForm {
-    OrderService orderService  = (OrderService) Naming.lookup("rmi://localhost:7281/orderService");
-    OrderDetailService orderDetailService  = (OrderDetailService) Naming.lookup("rmi://localhost:7281/orderDetailService");
-    ProductService productService  = (ProductService) Naming.lookup("rmi://localhost:7281/productService");
-    CustomerService customerService = (CustomerService) Naming.lookup("rmi://localhost:7281/customerService");
+    OrderService orderService  = (OrderService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/orderService");
+    OrderDetailService orderDetailService  = (OrderDetailService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/orderDetailService");
+    ProductService productService  = (ProductService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/productService");
+    CustomerService customerService = (CustomerService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/customerService");
 
     private HomePage homePage;
     private DefaultTableModel model;
@@ -1130,7 +1130,7 @@ public class TempOrderForm extends TabbedForm {
             float[] footer = {270f, 50f};
 
 
-//        Paragraph onesp = new Paragraph("\n");
+//        Paragraph onesp = new Paragraph("n");
 
             Table table = new Table(fullWidth);
             table.addCell(getCell10Center("NHÀ THUỐC DNGH", true).setFont(font).setFontSize(10f));
