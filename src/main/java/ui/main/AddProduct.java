@@ -133,7 +133,11 @@ public class AddProduct extends JPanel {
         btnSave.setShadowColor(new java.awt.Color(0, 0, 0));
         btnSave.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                btnSaveActionPerformed(evt);
+                try {
+                    btnSaveActionPerformed(evt);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -254,13 +258,13 @@ public class AddProduct extends JPanel {
         }
     }//GEN-LAST:event_btnAddActionPerformed
 
-    private void btnSaveActionPerformed(ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
+    private void btnSaveActionPerformed(ActionEvent evt) throws RemoteException {//GEN-FIRST:event_btnSaveActionPerformed
         // TODO add your handling code here:
         if (flag == false) {
             new Message(StaticProcess.homePage, true, "Thông báo", "Đã lưu, không có gì thay đổi!", "src/main/java/ui/dialog/checked.png").showAlert();
 
         } else {
-//            new ProductDAO(Product.class).addManyProduct(temp);
+           productService.createMultiple(temp);
             temp = new ArrayList<>();
             setDataTable(tableProduct, temp);
             new Message(StaticProcess.homePage, true, "Thông báo", "Danh sách sản phẩm đã được thêm", "src/main/java/ui/dialog/checked.png").showAlert();

@@ -436,10 +436,10 @@ public class AddPromotion extends JPanel {
 
         if (cri_type == null && crt_sta != null) {
             if (crt_sta.equals("Đang áp dụng")) {
-                promotionList = promotionService.getPromotionListByStatus(true);
+                promotionList = (ArrayList<Promotion>) promotionService.getPromotionListByStatus(true);
 
             } else if (crt_sta.equals("Ngừng áp dụng")) {
-                promotionList = promotionService.getPromotionListByStatus(false);
+                promotionList = (ArrayList<Promotion>) promotionService.getPromotionListByStatus(false);
 
             } else if (crt_sta.equals("")) {
                 promotionList = (ArrayList<Promotion>) promotionService.searchByMultipleCriteria("Promotion","");
@@ -454,12 +454,12 @@ public class AddPromotion extends JPanel {
             ArrayList<Promotion> proList_1 = (ArrayList<Promotion>) promotionService.searchByMultipleCriteria("Promotion",cri_type.toString());
             if (crt_sta.equals("Đang áp dụng")) {
                 //TODO
-//                promotionList = promotionService.getPromotionListByCriterous(true, proList_1);
+                promotionList = promotionService.getPromotionListByCriterous(true, proList_1);
 
 
             } else if (crt_sta.equals("Ngừng áp dụng")) {
                 //TODO
-//                promotionList = promotionService.getPromotionListByCriterous(false, proList_1);
+                promotionList = promotionService.getPromotionListByCriterous(false, proList_1);
 
             } else if (crt_sta.equals("")) {
                 promotionList = (ArrayList<Promotion>) promotionService.searchByMultipleCriteria("Promotion",cri_type.toString());
