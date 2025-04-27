@@ -320,17 +320,15 @@ public class AddProduct extends JPanel {
                 String categoryName = row.getCell(12).getStringCellValue();
                 String conversionUnit = row.getCell(14).getStringCellValue();
                 String noteUnit = row.getCell(20).getStringCellValue();
-//                System.out.println("Result: ");
-//                System.out.println("20: " + row.getCell(20).getStringCellValue());
-//                System.out.println("11: " + row.getCell(11).getStringCellValue());
+
+                Vendor vendor = vendorService.findById(vendorID);
+                Category category = categoryService.findById(categoryID);
                 switch (row.getCell(11).getStringCellValue()) {
                     case "M": {
                         String activeIngredient = row.getCell(13).getStringCellValue();
                         String administrationID = row.getCell(15).getStringCellValue();
                         String administrationName = row.getCell(16).getStringCellValue();
-
-                        Map<PackagingUnit, ProductUnit> unitMap = new HashMap<>();
-                        Medicine medicine = new Medicine(productService.getIDProduct("PM", xM), productName, registrationNumber, purchasePrice, taxPercentage, new Vendor(vendorID, vendorName, vendorCountry), new Category(categoryID, categoryName, null), endDate, activeIngredient, conversionUnit, new AdministrationRoute(administrationID, administrationName), noteUnit);
+                        Medicine medicine = new Medicine(productService.getIDProduct("PM", xM), productName, registrationNumber, purchasePrice, taxPercentage, vendor == null ? new Vendor(vendorID, vendorName, null) : vendor, category == null ? new Category(categoryID, categoryName, null) : category, endDate, activeIngredient, conversionUnit, new AdministrationRoute(administrationID, administrationName), noteUnit);
                         medicine.addUnit(PackagingUnit.fromString(conversionUnit), new ProductUnit(calSellPrice(purchasePrice , medicine), quantityInStock));
                         //Các đơn vị còn lại
                         addUnitByString(row.getCell(20).getStringCellValue(), purchasePrice, medicine);
@@ -341,7 +339,7 @@ public class AddProduct extends JPanel {
                     case "FF": {
                         String mainNutrients = row.getCell(17).getStringCellValue();
                         String supplementaryIngredients = row.getCell(18).getStringCellValue();
-                        FunctionalFood ff = new FunctionalFood(productService.getIDProduct("PF", xFF), productName, registrationNumber, purchasePrice, taxPercentage, new Vendor(vendorID, vendorName, vendorCountry), new Category(categoryID, categoryName, null), endDate, mainNutrients, supplementaryIngredients, noteUnit);
+                        FunctionalFood ff = new FunctionalFood(productService.getIDProduct("PF", xFF), productName, registrationNumber, purchasePrice, taxPercentage, vendor == null ? new Vendor(vendorID, vendorName, null) : vendor, category == null ? new Category(categoryID, categoryName, null) : category, endDate, mainNutrients, supplementaryIngredients, noteUnit);
                         xFF++;
 
                         ff.addUnit(PackagingUnit.fromString(conversionUnit), new ProductUnit(calSellPrice(purchasePrice , ff), quantityInStock));
@@ -352,7 +350,7 @@ public class AddProduct extends JPanel {
                     }
                     case "MS": {
                         String medicalSupplyType = row.getCell(19).getStringCellValue();
-                        MedicalSupply ms = new MedicalSupply(productService.getIDProduct("PS", xMS), productName, registrationNumber, purchasePrice, taxPercentage, new Vendor(vendorID, vendorName, vendorCountry), new Category(categoryID, categoryName, null), endDate, medicalSupplyType, noteUnit);
+                        MedicalSupply ms = new MedicalSupply(productService.getIDProduct("PS", xMS), productName, registrationNumber, purchasePrice, taxPercentage, vendor == null ? new Vendor(vendorID, vendorName, null) : vendor, category == null ? new Category(categoryID, categoryName, null) : category, endDate, medicalSupplyType, noteUnit);
                         xMS++;
                         ms.addUnit(PackagingUnit.fromString(conversionUnit), new ProductUnit(calSellPrice(purchasePrice , ms), quantityInStock));
                         //Các đơn vị còn lại
@@ -368,20 +366,7 @@ public class AddProduct extends JPanel {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return listProduct;
-    }
-
-    String datePart = new SimpleDateFormat("ddMMyy").format(new Date());
-    private String generateProductID(String prefix , int current) {
-        if (prefix.equals("PM")) {
-            return "PM" + datePart + String.format("%05d", current++);
-        } else if (prefix.equals("PF")) {
-            return "PF" + datePart + String.format("%05d", current++);
-        } else if (prefix.equals("PS")) {
-            return "PS" + datePart + String.format("%05d", current++);
-        }
-        return "";
     }
 
     //Đẩy data lên table
