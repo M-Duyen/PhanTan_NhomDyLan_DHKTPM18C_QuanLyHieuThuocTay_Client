@@ -101,7 +101,7 @@ public class PromotionSearch extends JPanel{
                     promotion.getStartDate(),
                     promotion.getEndDate(),
                     promotion.getDiscount(),
-                    promotion.isStats()?"Đang áp dụng":"Ngừng áp dụng",
+                    promotion.isStatus()?"Đang áp dụng":"Ngừng áp dụng",
                     promotion.getPromotionType().getPromotionTypeName()
             });
         }
@@ -135,7 +135,7 @@ public class PromotionSearch extends JPanel{
             boolean status = stt.equals("Đang áp dụng");
             ArrayList<Promotion> temp = new ArrayList<>();
             for (Promotion promotion : filteredPromotions) {
-                if (promotion.isStats() == status) {
+                if (promotion.isStatus() == status) {
                     temp.add(promotion);
                 }
             }
