@@ -236,6 +236,12 @@ public class AddProduct extends JPanel {
 
     private void btnAddActionPerformed(ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         if (evt.getSource() == btnAdd) {
+            if(UtilStatics.getAwaiKey() == false) {
+                UtilStatics.setAwaiKey();
+            } else {
+                new Message(StaticProcess.homePage, true, "Thông báo", "Có tài khoản khác đang thực hiện thao tác này. Vui lòng thử lại sau!", "src/main/java/ui/dialog/warning.png").showAlert();
+                return;
+            }
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Chọn file sản phẩm");
 
@@ -246,19 +252,6 @@ public class AddProduct extends JPanel {
             if (result == JFileChooser.APPROVE_OPTION) {
                 String selectedFile = fileChooser.getSelectedFile().getAbsolutePath();
                 if (selectedFile.toLowerCase().endsWith(".xlsx")) {
-                    Message mess = new Message(StaticProcess.homePage, true, "Thông báo", "Có tài khoản khác đang thực hiện thao tác này. Vui lòng chờ!", "src/main/java/ui/dialog/warning.png");
-                    if(UtilStatics.getAwaiKey() == true){
-                       mess.showAlert();
-                    }
-                    while (UtilStatics.getAwaiKey() == true){
-                        try {
-                            Thread.sleep(100);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    mess.dispose();
-                    UtilStatics.setAwaiKey();
                     temp = loadDataProduct(selectedFile);
                     if (!temp.isEmpty()) {
                         setDataTable(tableProduct, temp);
