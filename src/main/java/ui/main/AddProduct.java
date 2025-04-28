@@ -34,9 +34,10 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import static staticProcess.StaticProcess.userlogin;
 @SuppressWarnings("all")
 
-import static staticProcess.StaticProcess.userlogin;
+
 
 public class AddProduct extends JPanel {
     ProductService productService = (ProductService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/productService");
@@ -49,6 +50,8 @@ public class AddProduct extends JPanel {
     public boolean isFlag() {
         return flag;
     }
+
+
 
     public AddProduct() throws MalformedURLException, NotBoundException, RemoteException {
 //        listPd = new Product_DAO().getProductList();
@@ -160,6 +163,7 @@ public class AddProduct extends JPanel {
         cbbCategory.setSelectedIndex(-1);
         cbbCategory.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         cbbCategory.setLabeText("Danh mục");
+        cbbVendor.setPreferredSize(new java.awt.Dimension(500, 30));
         cbbCategory.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -172,6 +176,7 @@ public class AddProduct extends JPanel {
         cbbVendor.setSelectedIndex(-1);
         cbbVendor.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         cbbVendor.setLabeText("Nhà cung cấp");
+        cbbVendor.setPreferredSize(new java.awt.Dimension(350, 30));
         cbbVendor.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
