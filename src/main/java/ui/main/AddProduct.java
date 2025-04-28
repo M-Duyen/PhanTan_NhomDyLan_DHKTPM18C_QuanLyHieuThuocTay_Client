@@ -366,7 +366,6 @@ public class AddProduct extends JPanel {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return listProduct;
     }
 
