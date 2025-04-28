@@ -45,7 +45,7 @@ public class RevenueStatistic extends JPanel implements ActionListener {
         dcEnd.setTextRefernce(panelBarStatistical1.txtEnd);
 
         cboThongKeTheo.setSelectedIndex(0);
-        btnLamMoi.doClick();
+//        btnLamMoi.doClick();
         pgsLoiNhuan.start();
         pgsThuNhapBan.start();
         pgsSanPhamBan.start();

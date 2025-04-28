@@ -40,7 +40,7 @@ public class HomePage extends JFrame implements ActionListener{
     EmployeeService employeeService = (EmployeeService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/employeeService");
     ManagerService managerService = (ManagerService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/managerService");
     AccountService accountService = (AccountService) Naming.lookup("rmi://"+ StaticProcess.properties.get("ServerName") +":" + StaticProcess.properties.get("Port") + "/accountService");
-
+    ServerService serverService = (ServerService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/serverService");
     private JPanel currentPanel;
 
     private final HomeSlide homeSlide = new HomeSlide();
@@ -475,6 +475,11 @@ public class HomePage extends JFrame implements ActionListener{
 
                     int response = dialog.getResponse();
                     if(response == 1) {
+                        try {
+                            serverService.setAwaiKey(false);
+                        } catch (RemoteException ex) {
+                            throw new RuntimeException(ex);
+                        }
                         StaticProcess.loginSuccess = false;
                         try {
                             serverService.setAwaiKey(false);

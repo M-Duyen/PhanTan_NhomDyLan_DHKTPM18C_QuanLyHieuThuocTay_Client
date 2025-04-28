@@ -12,7 +12,6 @@ import service.VendorService;
 import ui.dialog.Message;
 import ui.table.TableCustom;
 import staticProcess.StaticProcess;
-import utils.UtilStatics;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -242,7 +241,7 @@ public class AddProduct extends JPanel {
 
     private void btnAddActionPerformed(ActionEvent evt) throws RemoteException {//GEN-FIRST:event_btnAddActionPerformed
         if (evt.getSource() == btnAdd) {
-            if(UtilStatics.getAwaiKey() == false) {
+            if(serverService.getAwaiKey() == false) {
                 serverService.setAwaiKey(true);
             } else {
                 new Message(StaticProcess.homePage, true, "Thông báo", "Có tài khoản khác đang thực hiện thao tác này. Vui lòng thử lại sau!", "src/main/java/ui/dialog/warning.png").showAlert();
@@ -268,6 +267,8 @@ public class AddProduct extends JPanel {
                     new Message(StaticProcess.homePage, true, "Thông báo", "Chỉ hỗ trợ file định dạng xlxs", "src/main/java/ui/dialog/warning.png").showAlert();
 
                 }
+            } else {
+                serverService.setAwaiKey(false);
             }
         }
     }//GEN-LAST:event_btnAddActionPerformed
@@ -307,6 +308,7 @@ public class AddProduct extends JPanel {
      */
     public ArrayList<Product> loadDataProduct(String path) throws RemoteException {
         ArrayList<Product> listProduct = new ArrayList();
+
         int xM = 0, xFF = 0, xMS = 0;
         try (FileInputStream fis = new FileInputStream(new File(path));
              Workbook workbook = new XSSFWorkbook(fis)) {

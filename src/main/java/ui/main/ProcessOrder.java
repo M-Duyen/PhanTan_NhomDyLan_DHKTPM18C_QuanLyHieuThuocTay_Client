@@ -1,10 +1,7 @@
 package ui.main;
 
-import model.BarcodeGenerator;
-import model.Order;
+import model.*;
 
-import model.OrderDetail;
-import model.Product;
 import service.OrderDetailService;
 import service.OrderService;
 import service.ProductService;
@@ -36,6 +33,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 @SuppressWarnings("all")
 
@@ -45,9 +43,9 @@ public class ProcessOrder extends JFrame implements ActionListener {
     OrderDetailService orderDetailService = (OrderDetailService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/orderDetailService");
     ProductService productService = (ProductService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/productService");
     private Order orderTemp = new Order();
-    private ArrayList<OrderDetail> orderDetailsTemp = new ArrayList<>();
-    private ArrayList<OrderDetail> listOrderConfirm = new ArrayList<>();
-    private ArrayList<OrderDetail> listOrderDetailConver = new ArrayList<>();
+    private List<OrderDetail> listOrderConfirm = new ArrayList<>();
+    private List<OrderDetail>  listOrderDetailConver = new ArrayList<>();
+    private List<OrderDetail>  orderDetailsTemp = new ArrayList<>();
     public boolean isUpdating = false;
     NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
     /**
@@ -733,7 +731,7 @@ public class ProcessOrder extends JFrame implements ActionListener {
                 } catch (RemoteException ex) {
                     throw new RuntimeException(ex);
                 }
-                if(orderTemp.getCustomer().getCustomerID() == null){
+                if(orderTemp.getCustomer() == null){
                     new Message(StaticProcess.homePage, true, "Thông báo", "Hóa đơn khách vãng lai, không được đổi trả theo quy định!", "src/main/java/ui/dialog/warning.png").showAlert();
                 }
                 if(orderTemp == null){
@@ -749,9 +747,9 @@ public class ProcessOrder extends JFrame implements ActionListener {
                         if(orderService.orderIsExists(convertOrderID(orderTemp.getOrderID()))){
                             new Message(StaticProcess.homePage, true, "Thông báo", "Hóa đơn này đã được đổi trả, vui lòng kiểm tra lại", "src/main/java/ui/dialog/warning.png").showAlert();
                         }else{
-    //                        orderDetailsTemp =orderDetailDAO.getOrderDetailList(orderTemp.getOrderID());
-    //                        fillInfo(orderTemp);
-    //                        loadTableCTHD(tblCTHD, orderDetailsTemp);
+                            orderDetailsTemp = orderTemp.getListOrderDetail();
+                            fillInfo(orderTemp);
+                            loadTableCTHD(tblCTHD, orderDetailsTemp);
                         }
                     } catch (RemoteException ex) {
                         throw new RuntimeException(ex);
@@ -763,22 +761,32 @@ public class ProcessOrder extends JFrame implements ActionListener {
         if(o.equals(panelProcess1.btnT) && checkOrder()){
             if(listOrderConfirm.size() != 0){
                 if(panelProcess1.chkTXacNhan.isSelected()){
-//                    Order orderN = new Order(convertOrderID(orderTemp.getOrderID()), LocalDateTime.now(), orderTemp.getShipToAddress(), orderTemp.getPaymentMethod(), orderTemp.getDiscount(), StaticProcess.empLogin, orderTemp.getCustomer(), orderTemp.getPrescription());
-//                    orderDAO.create(orderN);
                     double tienHoanT = 0.0;
                     for(OrderDetail odt : listOrderConfirm){
                         tienHoanT += odt.getLineTotal();
                     }
+                    Order orderN = new Order(convertOrderID(orderTemp.getOrderID()), LocalDateTime.now(), orderTemp.getShipToAddress(), orderTemp.getPaymentMethod(), orderTemp.getDiscount() + 0.01, StaticProcess.empLogin, orderTemp.getCustomer(), orderTemp.getPrescription());
+                    List<OrderDetail> listOrderDetail = new ArrayList<>();
                     for (OrderDetail ord: listOrderConfirm){
-//                        orderDetailDAO.addOrderReturnDetails(orderN.getOrderID(),ord.getProduct().getProductID(), ord.getOrderQuantity(),ord.getProduct().getSellPrice(ord.getUnit()) * (-1) * ord.getOrderQuantity(), Unit_DAO.getInstance().getUnitByName(ord.getUnit().name()).getFirst().getUnitID(), ConnectDB.getConnectDB_H());
+                            listOrderDetail.add(new OrderDetail(orderN, ord.getProduct(), ord.getUnit(), -ord.getOrderQuantity()));
+                        try {
+                            productService.update(productService.getProductAfterUpdateUnits(ord.getProduct(), ord.getUnit(), true, ord.getOrderQuantity()));
+                        } catch (RemoteException ex) {
+                            throw new RuntimeException(ex);
+                        }
                     }
-                    //số lượng tồn kho sản phẩm trả tăng lên
-                    //Sản phẩm trả tăng
-                    for(OrderDetail ot: listOrderConfirm){
-//                        productDAO.updateProductInStock_WithTransaction(ot.getProduct().getProductID(), ot.getOrderQuantity(), ot.getUnit(), true, ConnectDB.getConnectDB_H());
+                    try {
+                        orderService.create(orderN);
+                    } catch (RemoteException ex) {
+                        throw new RuntimeException(ex);
                     }
                     new Message(StaticProcess.homePage, true, "Thông báo", "Hóa đơn đã được xử lý thành công!", "src/main/java/ui/dialog/done.png").showAlert();
                     reset();
+                    try {
+                        TempOrderForm.invoiceOrder(orderN);
+                    } catch (IOException | NotBoundException ex) {
+                        throw new RuntimeException(ex);
+                    }
                 }else {
                     new Message(StaticProcess.homePage, true, "Chú ý", "Trường hợp hoàn tiền, vui lòng xác nhận đây là hóa đơn với lý do giao nhầm sản phẩm", "src/main/java/ui/dialog/warning.png").showAlert();
                 }
@@ -807,16 +815,21 @@ public class ProcessOrder extends JFrame implements ActionListener {
                         throw new RuntimeException(ex);
                     }
                     pCf.showAlert();
-                    //OrderDetail pSelect = pCf.getOrderDetails(orderTemp, convertOrderID(orderTemp.getOrderID()));
-//                    if(checkProductList(prod.getProductID(), listOrderDetailConver)){
-//                        listOrderDetailConver.add(pSelect);
-//                    }else{
-//                        for(OrderDetail ot: listOrderDetailConver){
-//                            if(ot.getProduct().getProductID().equals(prod.getProductID())){
-//                                ot.setOrderQuantity((ot.getOrderQuantity() + 1));
-//                            }
-//                        }
-//                    }
+                    OrderDetail pSelect = null;
+                    try {
+                        pSelect = pCf.getOrderDetails(orderTemp, convertOrderID(orderTemp.getOrderID()));
+                    } catch (RemoteException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    if(checkProductLíst(prod.getProductID(), listOrderDetailConver)){
+                        listOrderDetailConver.add(pSelect);
+                    }else{
+                        for(OrderDetail ot: listOrderDetailConver){
+                            if(ot.getProduct().getProductID().equals(prod.getProductID())){
+                                ot.setOrderQuantity((ot.getOrderQuantity() + 1));
+                            }
+                        }
+                    }
                     panelProcess1.txtDThem.setText("");
                     fillInfoPC();
                 }else{
@@ -832,33 +845,45 @@ public class ProcessOrder extends JFrame implements ActionListener {
                     new Message(StaticProcess.homePage, true, "Chú ý", "Vui lòng thêm sản phẩm muốn quy đổi", "src/main/java/ui/dialog/warning.png").showAlert();
                     panelProcess1.txtDThem.requestFocus();
                 }else{
-//                    Order orderD = new Order(convertOrderID(orderTemp.getOrderID()), LocalDateTime.now(), orderTemp.getShipToAddress(), orderTemp.getPaymentMethod(), orderTemp.getDiscount(), StaticProcess.empLogin, orderTemp.getCustomer(), orderTemp.getPrescription());
-//                    orderDAO.create(orderD);
+                    Order orderD = new Order(convertOrderID(orderTemp.getOrderID()), LocalDateTime.now(), orderTemp.getShipToAddress(), orderTemp.getPaymentMethod(), orderTemp.getDiscount() + 0.01, StaticProcess.empLogin, orderTemp.getCustomer(), orderTemp.getPrescription());
                     //Thêm chi tiết hóa đơn
                     double tienBanDau = getProductListPrice(listOrderConfirm);
                     double tongDoi = getProductListPrice(listOrderDetailConver);
                     double tienThuThem =  tienBanDau - (tienBanDau * 0.01) - tongDoi;
+                    List<OrderDetail> listOrderDetails = new ArrayList<>();
                     for (int i = 0; i < listOrderConfirm.size(); i++){
                         OrderDetail ord = listOrderConfirm.get(i);
                         double additionalAmount = (i == listOrderConfirm.size() - 1) ? tienThuThem * (-1) : 0.0;
-//                        orderDetailDAO.addOrderReturnDetails(orderD.getOrderID(), ord.getProduct().getProductID(), ord.getOrderQuantity(), additionalAmount, Unit_DAO.getInstance().getUnitByName(ord.getUnit().name()).getFirst().getUnitID(),conn);
+                        listOrderDetails.add(new OrderDetail(orderD, ord.getProduct(), ord.getUnit(), -ord.getOrderQuantity()));
+                        //Sản phẩm trả tăng
+                        try {
+                            productService.update(productService.getProductAfterUpdateUnits(ord.getProduct(), ord.getUnit(), true, ord.getOrderQuantity()));
+                        } catch (RemoteException ex) {
+                            throw new RuntimeException(ex);
+                        }
                     }
                     //Cập nhật tình trạng tồn kho
                     //Sản phẩm đổi giảm
                     for(OrderDetail ot: listOrderDetailConver){
-//                        productDAO.updateProductInStock_WithTransaction(ot.getProduct().getProductID(), ot.getOrderQuantity(), ot.getUnit(), false, ConnectDB.getConnectDB_H());
+                        try {
+                            productService.update(productService.getProductAfterUpdateUnits(ot.getProduct(), ot.getUnit(), false, ot.getOrderQuantity()));
+                        } catch (RemoteException ex) {
+                            throw new RuntimeException(ex);
+                        }
                     }
-                    //Sản phẩm trả tăng
-                    for(OrderDetail ot: listOrderConfirm){
-//                        productDAO.updateProductInStock_WithTransaction(ot.getProduct().getProductID(), ot.getOrderQuantity(), ot.getUnit(), false, ConnectDB.getConnectDB_H());
+                    //Thêm hóa đơn
+                    try {
+                        orderService.create(orderD);
+                    } catch (RemoteException ex) {
+                        throw new RuntimeException(ex);
                     }
                     reset();
                     new Message(StaticProcess.homePage, true, "Thông báo", "Hóa đơn đã được xử lý thành công!", "src/main/java/ui/dialog/done.png").showAlert();
-//                    try {
-//                        TempOrderForm.invoiceOrder(orderD);
-//                    } catch (IOException ex) {
-//                        throw new RuntimeException(ex);
-//                    }
+                    try {
+                        TempOrderForm.invoiceOrder(orderD);
+                    } catch (IOException | NotBoundException ex) {
+                        throw new RuntimeException(ex);
+                    }
                 }
             }else {
                 new Message(StaticProcess.homePage, true, "Chú ý", "Vui lòng thêm sản phẩm đổi trả", "src/main/java/ui/dialog/warning.png").showAlert();
@@ -902,7 +927,7 @@ public class ProcessOrder extends JFrame implements ActionListener {
            lbltxtTongTienTT.setText(currencyFormatter.format(o.getTotalDue()));
     }
 
-    public void loadTableCTHD(JTable table, ArrayList<OrderDetail> listCTHD){
+    public void loadTableCTHD(JTable table, List<OrderDetail> listCTHD){
         isUpdating = true;
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         model.setRowCount(0);
@@ -914,7 +939,7 @@ public class ProcessOrder extends JFrame implements ActionListener {
         isUpdating = false;
     }
 
-    public void loadTableSPTra(JTable table, ArrayList<OrderDetail> listCTHD){
+    public void loadTableSPTra(JTable table, List<OrderDetail> listCTHD){
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         model.setRowCount(0);
         int count = 1; //"STT", "Mã sản phẩm", "Tên sản phẩm", "Số lượng", "Giá bán", "Thành tiền"
@@ -1064,7 +1089,7 @@ public class ProcessOrder extends JFrame implements ActionListener {
         }
         return false;
     }
-    public boolean checkProductLíst(String productID, ArrayList<OrderDetail> listOdt){
+    public boolean checkProductLíst(String productID, List<OrderDetail> listOdt){
         for(OrderDetail odt : listOdt){
             if(odt.getProduct().getProductID().equals(productID))
                 return false;
@@ -1073,7 +1098,7 @@ public class ProcessOrder extends JFrame implements ActionListener {
     }
 
     //Get tổng tiền đổi trả sản phẩm
-    public double getProductListPrice(ArrayList<OrderDetail> list){
+    public double getProductListPrice(List<OrderDetail> list){
         double t = 0;
         for(OrderDetail o : list){
             t += o.getLineTotal();
