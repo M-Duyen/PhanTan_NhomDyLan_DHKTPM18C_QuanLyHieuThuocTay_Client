@@ -7,11 +7,11 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import service.CategoryService;
 import service.ProductService;
+import service.ServerService;
 import service.VendorService;
 import ui.dialog.Message;
 import ui.table.TableCustom;
 import staticProcess.StaticProcess;
-import utils.UtilStatics;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -37,7 +37,7 @@ public class AddProduct extends JPanel {
     ProductService productService = (ProductService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/productService");
     VendorService vendorService = (VendorService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/vendorService");
     CategoryService categoryService = (CategoryService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/categoryService");
-    //    private final ArrayList<Product> listPd;
+    ServerService serverService = (ServerService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/serverService");
     private boolean flag = false;
     ArrayList<Product> temp = new ArrayList<>();
 
@@ -122,7 +122,11 @@ public class AddProduct extends JPanel {
         btnAdd.setShadowColor(new java.awt.Color(0, 0, 0));
         btnAdd.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                btnAddActionPerformed(evt);
+                try {
+                    btnAddActionPerformed(evt);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -234,10 +238,10 @@ public class AddProduct extends JPanel {
         searchProduct();
     }//GEN-LAST:event_txtSearchActionPerformed
 
-    private void btnAddActionPerformed(ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
+    private void btnAddActionPerformed(ActionEvent evt) throws RemoteException {//GEN-FIRST:event_btnAddActionPerformed
         if (evt.getSource() == btnAdd) {
-            if(UtilStatics.getAwaiKey() == false) {
-                UtilStatics.setAwaiKey();
+            if(serverService.getAwaiKey() == false) {
+                serverService.setAwaiKey();
             } else {
                 new Message(StaticProcess.homePage, true, "Thông báo", "Có tài khoản khác đang thực hiện thao tác này. Vui lòng thử lại sau!", "src/main/java/ui/dialog/warning.png").showAlert();
                 return;
@@ -299,7 +303,7 @@ public class AddProduct extends JPanel {
      * @param path
      * @return
      */
-    public ArrayList<Product> loadDataProduct(String path) {
+    public ArrayList<Product> loadDataProduct(String path) throws RemoteException {
         ArrayList<Product> listProduct = new ArrayList();
         int xM = 0, xFF = 0, xMS = 0;
         try (FileInputStream fis = new FileInputStream(new File(path));
@@ -373,7 +377,7 @@ public class AddProduct extends JPanel {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        UtilStatics.setAwaiKey();
+        serverService.setAwaiKey();
         return listProduct;
     }
 
