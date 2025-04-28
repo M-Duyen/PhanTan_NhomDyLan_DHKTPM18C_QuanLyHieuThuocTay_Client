@@ -28,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Date;
+@SuppressWarnings("all")
 
 public class RevenueStatistic extends JPanel implements ActionListener {
 
@@ -744,7 +745,11 @@ public class RevenueStatistic extends JPanel implements ActionListener {
                         }
                         curveLineChart1.clear();
                         setNameLineChart("BIỂU ĐỒ ĐƯỜNG THỂ HIỆN DOANH THU TỪ " + convertDateFormat(start) + " ĐẾN " + convertDateFormat(end));
-//                        setDataLineChart(orderDAO.getModelDataRSByYearByTime(convertDateFormat(start), convertDateFormat(end)));
+                        try {
+                            setDataLineChart(orderDAO.getModelDataRSByYearByTime(convertStringToLocalDate(start).atStartOfDay(), convertStringToLocalDate(end).atTime(23, 59, 59)));
+                        } catch (RemoteException ex) {
+                            throw new RuntimeException(ex);
+                        }
                     } else{
                         curveLineChart1.clear();
                     }
@@ -792,10 +797,10 @@ public class RevenueStatistic extends JPanel implements ActionListener {
     }
 
     public void setOverView(LocalDateTime startD, LocalDateTime endD) throws MalformedURLException, NotBoundException, RemoteException {
-//        ArrayList<Double> inf = ((OrderService)Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/orderService")).getOverviewStatistical(startD, endD);
-//        lbCreatedNumber.setText(inf.get(0).intValue() + "");
-//        lbSoldNumber.setText(inf.get(2).intValue() + "");
-//        lbNumberRevenue.setText( formatCurrency(inf.get(1)));
+        ArrayList<Double> inf = ((OrderService)Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/orderService")).getOverviewStatistical(startD, endD);
+        lbCreatedNumber.setText(inf.get(0).intValue() + "");
+        lbSoldNumber.setText(inf.get(2).intValue() + "");
+        lbNumberRevenue.setText( formatCurrency(inf.get(1)));
     }
 
     //Chuyển định dạng tiền
