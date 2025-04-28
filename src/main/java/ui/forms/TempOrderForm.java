@@ -826,6 +826,9 @@ public class TempOrderForm extends TabbedForm {
                 if (customer != null) {
                     txtCustName.setText(customer.getCustomerName());
                     txtPoint.setText(String.valueOf(df_point.format(customer.getPoint())));
+                } else{
+                    new Message(homePage, true, "Thông báo", "Không tìm thấy khách hàng", "src/main/java/ui/dialog/warning.png").showAlert();
+                    txtCustPhone.requestFocus();
                 }
             } catch (Exception e) {
                 new Message(homePage, true, "Thông báo", "Không tìm thấy khách hàng", "src/main/java/ui/dialog/warning.png").showAlert();
