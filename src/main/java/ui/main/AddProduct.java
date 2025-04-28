@@ -253,7 +253,7 @@ public class AddProduct extends JPanel {
     private void btnAddActionPerformed(ActionEvent evt) throws RemoteException {//GEN-FIRST:event_btnAddActionPerformed
         if (evt.getSource() == btnAdd) {
             if(serverService.getAwaiKey() == false) {
-                serverService.setAwaiKey();
+                serverService.setAwaiKey(true);
             } else {
                 new Message(StaticProcess.homePage, true, "Thông báo", "Có tài khoản khác đang thực hiện thao tác này. Vui lòng thử lại sau!", "src/main/java/ui/dialog/warning.png").showAlert();
                 return;
@@ -319,6 +319,7 @@ public class AddProduct extends JPanel {
      */
     public ArrayList<Product> loadDataProduct(String path) throws RemoteException {
         ArrayList<Product> listProduct = new ArrayList();
+
         int xM = 0, xFF = 0, xMS = 0;
         try (FileInputStream fis = new FileInputStream(new File(path));
              Workbook workbook = new XSSFWorkbook(fis)) {
@@ -391,7 +392,7 @@ public class AddProduct extends JPanel {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        serverService.setAwaiKey();
+        serverService.setAwaiKey(false);
         return listProduct;
     }
 
