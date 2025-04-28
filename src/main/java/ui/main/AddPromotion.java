@@ -360,7 +360,7 @@ public class AddPromotion extends JPanel {
             promotion.setStartDate(convertDateFormat(startDate));
             promotion.setEndDate(convertDateFormat(endDate));
             promotion.setDiscount(per);
-            promotion.setStats(true);
+            promotion.setStatus(true);
             promotion.setPromotionType(promotionType);
 
             if (promotionService.create(promotion)) {
