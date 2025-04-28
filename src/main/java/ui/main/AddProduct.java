@@ -266,6 +266,8 @@ public class AddProduct extends JPanel {
                     new Message(StaticProcess.homePage, true, "Thông báo", "Chỉ hỗ trợ file định dạng xlxs", "src/main/java/ui/dialog/warning.png").showAlert();
 
                 }
+            } else {
+                serverService.setAwaiKey(false);
             }
         }
     }//GEN-LAST:event_btnAddActionPerformed
@@ -305,7 +307,7 @@ public class AddProduct extends JPanel {
      */
     public ArrayList<Product> loadDataProduct(String path) throws RemoteException {
         ArrayList<Product> listProduct = new ArrayList();
-
+        
         int xM = 0, xFF = 0, xMS = 0;
         try (FileInputStream fis = new FileInputStream(new File(path));
              Workbook workbook = new XSSFWorkbook(fis)) {
