@@ -214,7 +214,14 @@ public class Login extends JPanel implements ActionListener, KeyListener {
 
             } else {
                 try {
-                    tenDN = accountService.containUserName(username);
+                    if(accountService.containUserName(username) == null){
+                        JOptionPane.showMessageDialog(this, "Tài khoản không tồn tại");
+
+                    }else{
+                        tenDN = accountService.containUserName(username);
+
+                    }
+
                 } catch (RemoteException ex) {
                     throw new RuntimeException(ex);
                 }
@@ -230,9 +237,10 @@ public class Login extends JPanel implements ActionListener, KeyListener {
                             txtPassword.requestFocus();
                             lblErrorPass.setText("Mật khẩu không đúng");
                         }
-                    } else {
-                        JOptionPane.showMessageDialog(this, "Tài khoản không tồn tại");
                     }
+//                    else {
+//                        JOptionPane.showMessageDialog(this, "Tài khoản không tồn tại");
+//                    }
                 }
                 else {
                     if (!(duLieu.get(0) == null)) {
@@ -281,6 +289,7 @@ public class Login extends JPanel implements ActionListener, KeyListener {
                         JOptionPane.showMessageDialog(this, "Tài khoản không tồn tại");
                     }
                 }
+
 
 
             }

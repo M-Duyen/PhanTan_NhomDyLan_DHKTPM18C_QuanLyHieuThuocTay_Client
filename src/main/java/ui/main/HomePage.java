@@ -2,10 +2,7 @@ package ui.main;
 
 import model.Employee;
 import model.Manager;
-import service.AccountService;
-import service.EmployeeService;
-import service.ManagerService;
-import service.ServerService;
+import service.*;
 import staticProcess.StaticProcess;
 import ui.dialog.Confirm;
 import ui.forms.TempOrderForm;
@@ -40,6 +37,7 @@ public class HomePage extends JFrame implements ActionListener{
     EmployeeService employeeService = (EmployeeService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/employeeService");
     ManagerService managerService = (ManagerService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/managerService");
     AccountService accountService = (AccountService) Naming.lookup("rmi://"+ StaticProcess.properties.get("ServerName") +":" + StaticProcess.properties.get("Port") + "/accountService");
+    ProductService productService = (ProductService) Naming.lookup("rmi://"+ StaticProcess.properties.get("ServerName") +":" + StaticProcess.properties.get("Port") + "/productService");
     private JPanel currentPanel;
 
     private final HomeSlide homeSlide = new HomeSlide();
@@ -133,6 +131,16 @@ public class HomePage extends JFrame implements ActionListener{
                 Notification notification = new Notification();
                 GlassPanePopup.showPopup(notification);
                 notification.myList1.addItem("Đăng nhập thành công tài khoản " + userlogin);
+                try {
+                    if(!productService.getLowStockProducts(25).isEmpty()){
+                        notification.myList1.addItem("Có sản phẩm tồn kho dưới 25%!");
+                    }
+                    if (!productService.getProductListNearExpire().isEmpty()){
+                        notification.myList1.addItem("Có sản phẩm gần hết hạn sử dụng!");
+                    }
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         });
     }
