@@ -87,7 +87,7 @@ public class TempOrderForm extends TabbedForm {
         initComponents();
         TableActionEvent event = new TableActionEvent() {
             @Override
-            public void onEdit(int row) throws RemoteException {
+            public void onEdit(int row) throws RemoteException, MalformedURLException, NotBoundException {
                 String productID = model.getValueAt(row, 0).toString();
                 Product product = productService.findById(productID);
 
