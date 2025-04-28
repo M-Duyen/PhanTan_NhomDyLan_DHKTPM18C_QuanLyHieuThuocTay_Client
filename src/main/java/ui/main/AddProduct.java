@@ -277,7 +277,12 @@ public class AddProduct extends JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnLoadActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
+        temp = new ArrayList<>();
+        setDataTable(tableProduct, temp);
+        cbbCategory.setSelectedIndex(-1);
+        cbbVendor.setSelectedIndex(-1);
+        txtSearch.setText("");
+        flag = false;
     }
     private void txtSearchActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtSearchActionPerformed
         searchProduct();
@@ -327,10 +332,7 @@ public class AddProduct extends JPanel {
             temp = new ArrayList<>();
             setDataTable(tableProduct, temp);
             new Message(StaticProcess.homePage, true, "Thông báo", "Danh sách sản phẩm đã được thêm", "src/main/java/ui/dialog/checked.png").showAlert();
-
             flag = false;
-
-
         }
     }//GEN-LAST:event_btnSaveActionPerformed
 

@@ -765,7 +765,7 @@ public class ProcessOrder extends JFrame implements ActionListener {
                     for(OrderDetail odt : listOrderConfirm){
                         tienHoanT += odt.getLineTotal();
                     }
-                    Order orderN = new Order(convertOrderID(orderTemp.getOrderID()), LocalDateTime.now(), orderTemp.getShipToAddress(), orderTemp.getPaymentMethod(), orderTemp.getDiscount() + 0.01, StaticProcess.empLogin, orderTemp.getCustomer(), orderTemp.getPrescription());
+                    Order orderN = new Order(convertOrderID(orderTemp.getOrderID()), LocalDateTime.now(), orderTemp.getShipToAddress(), orderTemp.getPaymentMethod(), orderTemp.getDiscount(), StaticProcess.empLogin, orderTemp.getCustomer(), orderTemp.getPrescription());
                     List<OrderDetail> listOrderDetail = new ArrayList<>();
                     for (OrderDetail ord: listOrderConfirm){
                             listOrderDetail.add(new OrderDetail(orderN, ord.getProduct(), ord.getUnit(), -ord.getOrderQuantity()));
@@ -775,6 +775,7 @@ public class ProcessOrder extends JFrame implements ActionListener {
                             throw new RuntimeException(ex);
                         }
                     }
+                    orderN.setListOrderDetail(listOrderDetail);
                     try {
                         orderService.create(orderN);
                     } catch (RemoteException ex) {
@@ -845,7 +846,7 @@ public class ProcessOrder extends JFrame implements ActionListener {
                     new Message(StaticProcess.homePage, true, "Chú ý", "Vui lòng thêm sản phẩm muốn quy đổi", "src/main/java/ui/dialog/warning.png").showAlert();
                     panelProcess1.txtDThem.requestFocus();
                 }else{
-                    Order orderD = new Order(convertOrderID(orderTemp.getOrderID()), LocalDateTime.now(), orderTemp.getShipToAddress(), orderTemp.getPaymentMethod(), orderTemp.getDiscount() + 0.01, StaticProcess.empLogin, orderTemp.getCustomer(), orderTemp.getPrescription());
+                    Order orderD = new Order(convertOrderID(orderTemp.getOrderID()), LocalDateTime.now(), orderTemp.getShipToAddress(), orderTemp.getPaymentMethod(), orderTemp.getDiscount(), StaticProcess.empLogin, orderTemp.getCustomer(), orderTemp.getPrescription());
                     //Thêm chi tiết hóa đơn
                     double tienBanDau = getProductListPrice(listOrderConfirm);
                     double tongDoi = getProductListPrice(listOrderDetailConver);
@@ -871,6 +872,7 @@ public class ProcessOrder extends JFrame implements ActionListener {
                             throw new RuntimeException(ex);
                         }
                     }
+                    orderD.setListOrderDetail(listOrderDetails);
                     //Thêm hóa đơn
                     try {
                         orderService.create(orderD);
