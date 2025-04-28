@@ -924,6 +924,7 @@ public class TempOrderForm extends TabbedForm {
                     throw new RuntimeException(e);
                 }
 
+                System.out.println(customer.getPoint() + ": " + point);
                 if (customer != null) {
                     if (!customerService.updateCustPoint_Decrease(customer.getPhoneNumber(), point)) {
                         new Message(homePage, true, "Thông báo", "Cập nhật giảm điểm tích lũy của khách hàng thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
