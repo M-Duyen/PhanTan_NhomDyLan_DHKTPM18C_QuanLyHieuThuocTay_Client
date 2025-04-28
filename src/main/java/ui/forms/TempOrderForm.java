@@ -902,21 +902,10 @@ public class TempOrderForm extends TabbedForm {
         if (!txtCustPhone.getText().trim().isEmpty()) {
             customer = customerService.getCustomerByPhone(txtCustPhone.getText().trim());
         }
-
         Employee employee = Login.getEmployeeLogin();
-
         Prescription prescription = this.prescription;
 
-        Order order = new Order();
-        order.setOrderID(orderID);
-        order.setOrderDate(orderDate);
-        order.setShipToAddress(shipToAddress);
-        order.setPaymentMethod(pm);
-        order.setDiscount(discount);
-        order.setEmployee(employee);
-        order.setCustomer(customer);
-        order.setPrescription(prescription);
-
+        Order order = new Order(orderID, orderDate, shipToAddress, pm, discount, employee, customer, prescription);
         try {
             double point = 0;
             //Update Customer Point nếu có check ckbTransPoint
@@ -964,6 +953,7 @@ public class TempOrderForm extends TabbedForm {
                     new Message(homePage, true, "Thông báo", "Cập nhật số lượng tồn kho thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
                     return;
                 }
+                System.out.println(new OrderDetail(order, afterProduct, unit, quantity).getLineTotal());
             }
 
             //Add Orders
@@ -972,6 +962,7 @@ public class TempOrderForm extends TabbedForm {
                 new Message(homePage, true, "Thông báo", "Thêm đơn hàng thất bại!", "src/main/java/ui/dialog/warning.png").showAlert();
                 return;
             }
+            System.out.println(order.getTotalDue());
 
             //Add OrderDetails
             for (OrderDetail orderDetail : orderDetails) {
