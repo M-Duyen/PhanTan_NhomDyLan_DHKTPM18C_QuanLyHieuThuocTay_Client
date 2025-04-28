@@ -276,10 +276,12 @@ public class ProductConfirm extends SweetAlert {
 
     private void btnConfirmActionPerformed(ActionEvent evt) {//GEN-FIRST:event_btnConfirmActionPerformed
         if(cbbUnit.getSelectedItem() != null){
-            if(!txtQuantity.getText().isEmpty() && (Integer.parseInt(txtQuantity.getText().trim()) > 0)) {
+            if(!txtQuantity.getText().isEmpty() && (Integer.parseInt(txtQuantity.getText().trim()) > 0) && (Integer.parseInt(txtInStock.getText().trim())) > 0) {
                 flag = true;
                 closeAlert();
-            } else {
+            } else if(!((Integer.parseInt(txtInStock.getText().trim())) > 0)) {
+                new Message(StaticProcess.homePage, true, "Thông báo", "Số lượng tồn kho không đủ!", "src/main/java/ui/dialog/warning.png").showAlert();
+            } else if(!(Integer.parseInt(txtQuantity.getText().trim()) > 0)) {
                 new Message(StaticProcess.homePage, true, "Thông báo", "Số lượng bán phải lớn hơn 0!", "src/main/java/ui/dialog/warning.png").showAlert();
             }
         } else {

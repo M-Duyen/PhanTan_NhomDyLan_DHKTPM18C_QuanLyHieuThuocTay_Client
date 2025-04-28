@@ -36,6 +36,7 @@ import static staticProcess.StaticProcess.userlogin;
 @SuppressWarnings("all")
 
 public class HomePage extends JFrame implements ActionListener{
+    ServerService serverService = (ServerService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/serverService");
     EmployeeService employeeService = (EmployeeService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/employeeService");
     ManagerService managerService = (ManagerService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/managerService");
     AccountService accountService = (AccountService) Naming.lookup("rmi://"+ StaticProcess.properties.get("ServerName") +":" + StaticProcess.properties.get("Port") + "/accountService");
@@ -481,6 +482,7 @@ public class HomePage extends JFrame implements ActionListener{
                         }
                         StaticProcess.loginSuccess = false;
                         try {
+                            serverService.setAwaiKey(false);
                             accountService.logout(userlogin);
                         } catch (RemoteException ex) {
                             throw new RuntimeException(ex);

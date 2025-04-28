@@ -15,25 +15,16 @@ import service.OrderService;
 import staticProcess.StaticProcess;
 import ui.table.TableCustom;
 
-import java.net.MalformedURLException;
 import java.rmi.Naming;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.time.LocalDate;
 import java.util.List;
 @SuppressWarnings("all")
 
-/**
- * @author nguye
- */
 public class TodayRevenueStatistic extends javax.swing.JPanel {
 
     private final OrderService orderService = (OrderService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/orderService");
-    ;
 
-    /**
-     * Creates new form TodayRevenueStatistic
-     */
     public TodayRevenueStatistic() throws Exception {
         initComponents();
         setupTable();
