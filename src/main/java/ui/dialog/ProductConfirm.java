@@ -3,6 +3,7 @@ package ui.dialog;
 
 import model.*;
 import service.ProductService;
+import service.ServerService;
 import staticProcess.StaticProcess;
 
 import javax.swing.*;
@@ -26,6 +27,7 @@ public class ProductConfirm extends SweetAlert {
     public static DecimalFormat df = new DecimalFormat("#,##0.00 VND");
     public static NumberFormat nf = NumberFormat.getInstance(Locale.getDefault());
     public boolean flag = false;
+    ServerService serverService = (ServerService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/serverService");
     ProductService productService = (ProductService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/productService");
 
     public ProductConfirm(java.awt.Frame parent, Product product, boolean modal) throws MalformedURLException, NotBoundException, RemoteException {
