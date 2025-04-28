@@ -21,6 +21,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.time.LocalDate;
 import java.util.List;
+@SuppressWarnings("all")
 
 /**
  * @author nguye
@@ -287,7 +288,7 @@ public class TodayRevenueStatistic extends javax.swing.JPanel {
         for (Order order : list) {
             model.addRow(new Object[]{
                     order.getOrderID(),
-                    order.getCustomer().getCustomerName(),
+                    order.getCustomer() == null ? "Khách vãng lai" : order.getCustomer().getCustomerName(),
                     order.getOrderDate(),
                     order.getPaymentMethod(),
                     order.getDiscount(),

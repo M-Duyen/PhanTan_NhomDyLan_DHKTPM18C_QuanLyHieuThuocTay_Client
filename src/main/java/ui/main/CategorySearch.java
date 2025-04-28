@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+@SuppressWarnings("all")
 
 public class CategorySearch extends JPanel {
     AdministrationRouteService administrationRouteService = (AdministrationRouteService) Naming.lookup("rmi://" + StaticProcess.properties.get("ServerName") + ":" + StaticProcess.properties.get("Port") + "/administrationRouteService");

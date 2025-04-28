@@ -6,6 +6,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JTable;
 import javax.swing.table.JTableHeader;
 import ui.table.TableCustom;
+@SuppressWarnings("all")
 
 public class UpdateProduct extends javax.swing.JPanel {
 

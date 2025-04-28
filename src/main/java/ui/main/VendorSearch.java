@@ -18,6 +18,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
+@SuppressWarnings("all")
 
 public class VendorSearch extends javax.swing.JPanel {
 
@@ -258,7 +259,7 @@ public class VendorSearch extends javax.swing.JPanel {
                 }
             }
         }else{
-            ArrayList<Vendor> searchResults = (ArrayList<Vendor>) vendorDAO.searchByMultipleCriteria("Vendor","nameCriteria_txt");
+            ArrayList<Vendor> searchResults = (ArrayList<Vendor>) vendorDAO.searchByMultipleCriteria("Vendor",nameCriteria_txt);
             if (searchResults.isEmpty()) {
                 model.addRow(new Object[]{"K...","...","..."});
                 // Tùy chọn: Căn chỉnh cột đầu tiên cho thông báo

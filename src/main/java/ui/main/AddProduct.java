@@ -7,6 +7,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import service.CategoryService;
 import service.ProductService;
+import service.ServerService;
 import service.VendorService;
 import ui.dialog.Message;
 import ui.glasspanepupup.GlassPanePopup;
@@ -33,6 +34,7 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+@SuppressWarnings("all")
 
 import static staticProcess.StaticProcess.userlogin;
 
@@ -40,7 +42,7 @@ public class AddProduct extends JPanel {
     ProductService productService = (ProductService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/productService");
     VendorService vendorService = (VendorService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/vendorService");
     CategoryService categoryService = (CategoryService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/categoryService");
-    //    private final ArrayList<Product> listPd;
+    ServerService serverService = (ServerService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/serverService");
     private boolean flag = false;
     ArrayList<Product> temp = new ArrayList<>();
 
@@ -127,7 +129,11 @@ public class AddProduct extends JPanel {
         btnAdd.setShadowColor(new java.awt.Color(0, 0, 0));
         btnAdd.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                btnAddActionPerformed(evt);
+                try {
+                    btnAddActionPerformed(evt);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -239,8 +245,14 @@ public class AddProduct extends JPanel {
         searchProduct();
     }//GEN-LAST:event_txtSearchActionPerformed
 
-    private void btnAddActionPerformed(ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
+    private void btnAddActionPerformed(ActionEvent evt) throws RemoteException {//GEN-FIRST:event_btnAddActionPerformed
         if (evt.getSource() == btnAdd) {
+            if(serverService.getAwaiKey() == false) {
+                serverService.setAwaiKey();
+            } else {
+                new Message(StaticProcess.homePage, true, "Thông báo", "Có tài khoản khác đang thực hiện thao tác này. Vui lòng thử lại sau!", "src/main/java/ui/dialog/warning.png").showAlert();
+                return;
+            }
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Chọn file sản phẩm");
 
@@ -250,12 +262,11 @@ public class AddProduct extends JPanel {
 
             if (result == JFileChooser.APPROVE_OPTION) {
                 String selectedFile = fileChooser.getSelectedFile().getAbsolutePath();
-                if (selectedFile.toLowerCase().endsWith(".xlsx")) { //Từ từ bổ sung đuôi sau xls,...
+                if (selectedFile.toLowerCase().endsWith(".xlsx")) {
                     temp = loadDataProduct(selectedFile);
                     if (!temp.isEmpty()) {
                         setDataTable(tableProduct, temp);
                         new Message(StaticProcess.homePage, true, "Thông báo", "Đã tải sản phẩm, vui lòng bấm lưu để lưu sản phẩm!", "src/main/java/ui/dialog/checked.png").showAlert();
-
                         flag = true;
                     }
                 } else {
@@ -301,7 +312,7 @@ public class AddProduct extends JPanel {
      * @param path
      * @return
      */
-    public ArrayList<Product> loadDataProduct(String path) {
+    public ArrayList<Product> loadDataProduct(String path) throws RemoteException {
         ArrayList<Product> listProduct = new ArrayList();
         int xM = 0, xFF = 0, xMS = 0;
         try (FileInputStream fis = new FileInputStream(new File(path));
@@ -375,6 +386,7 @@ public class AddProduct extends JPanel {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        serverService.setAwaiKey();
         return listProduct;
     }
 

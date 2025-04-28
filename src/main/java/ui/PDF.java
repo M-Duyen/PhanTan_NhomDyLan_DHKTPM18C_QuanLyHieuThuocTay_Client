@@ -33,6 +33,7 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+@SuppressWarnings("all")
 
 
 public class PDF {
