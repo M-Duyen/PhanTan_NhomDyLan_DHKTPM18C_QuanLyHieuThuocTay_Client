@@ -761,10 +761,6 @@ public class ProcessOrder extends JFrame implements ActionListener {
         if(o.equals(panelProcess1.btnT) && checkOrder()){
             if(listOrderConfirm.size() != 0){
                 if(panelProcess1.chkTXacNhan.isSelected()){
-                    double tienHoanT = 0.0;
-                    for(OrderDetail odt : listOrderConfirm){
-                        tienHoanT += odt.getLineTotal();
-                    }
                     Order orderN = new Order(convertOrderID(orderTemp.getOrderID()), LocalDateTime.now(), orderTemp.getShipToAddress(), orderTemp.getPaymentMethod(), orderTemp.getDiscount(), StaticProcess.empLogin, orderTemp.getCustomer(), orderTemp.getPrescription());
                     List<OrderDetail> listOrderDetail = new ArrayList<>();
                     for (OrderDetail ord: listOrderConfirm){
@@ -776,6 +772,7 @@ public class ProcessOrder extends JFrame implements ActionListener {
                         }
                     }
                     orderN.setListOrderDetail(listOrderDetail);
+                    orderN.setDiscount(orderTemp.getDiscount() - orderN.getTotalDue() * 0.01);
                     try {
                         orderService.create(orderN);
                     } catch (RemoteException ex) {
@@ -852,11 +849,13 @@ public class ProcessOrder extends JFrame implements ActionListener {
                     double tongDoi = getProductListPrice(listOrderDetailConver);
                     double tienThuThem =  tienBanDau - (tienBanDau * 0.01) - tongDoi;
                     List<OrderDetail> listOrderDetails = new ArrayList<>();
+                    double additionalAmount = 0;
+                    double addBefore = 0;
+                    //Đã xác nhận đổi trả
                     for (int i = 0; i < listOrderConfirm.size(); i++){
                         OrderDetail ord = listOrderConfirm.get(i);
-                        double additionalAmount = (i == listOrderConfirm.size() - 1) ? tienThuThem * (-1) : 0.0;
-                        listOrderDetails.add(new OrderDetail(orderD, ord.getProduct(), ord.getUnit(), -ord.getOrderQuantity()));
-                        //Sản phẩm trả tăng
+                        addBefore += ord.getLineTotal();
+                        //Sản phẩm trả tăng số lượng tồn kho
                         try {
                             productService.update(productService.getProductAfterUpdateUnits(ord.getProduct(), ord.getUnit(), true, ord.getOrderQuantity()));
                         } catch (RemoteException ex) {
@@ -864,15 +863,18 @@ public class ProcessOrder extends JFrame implements ActionListener {
                         }
                     }
                     //Cập nhật tình trạng tồn kho
-                    //Sản phẩm đổi giảm
+                    //Sản phẩm muốn đổi
                     for(OrderDetail ot: listOrderDetailConver){
                         try {
+                            additionalAmount += ot.getLineTotal();
+                            listOrderDetails.add(new OrderDetail(orderD, ot.getProduct(), ot.getUnit(), ot.getOrderQuantity()));
                             productService.update(productService.getProductAfterUpdateUnits(ot.getProduct(), ot.getUnit(), false, ot.getOrderQuantity()));
                         } catch (RemoteException ex) {
                             throw new RuntimeException(ex);
                         }
                     }
-                    orderD.setListOrderDetail(listOrderDetails);
+                    orderD.setListOrderDetail(listOrderDetailConver);
+                    orderD.setDiscount(addBefore + (addBefore * 0.01));
                     //Thêm hóa đơn
                     try {
                         orderService.create(orderD);
