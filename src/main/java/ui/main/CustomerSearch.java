@@ -18,6 +18,7 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+@SuppressWarnings("all")
 
 public class CustomerSearch extends javax.swing.JPanel {
     CustomerService customerService = (CustomerService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/customerService");
@@ -208,7 +209,7 @@ public class CustomerSearch extends javax.swing.JPanel {
         model.setRowCount(0); // Xóa các dòng hiện tại
         String criteria = txtearch.getText().trim();
 
-        ArrayList<Customer> searchResults = (ArrayList<Customer>) customerService.searchByMultipleCriteria("Customer", "criteria");
+        ArrayList<Customer> searchResults = (ArrayList<Customer>) customerService.searchByMultipleCriteria("Customer", criteria);
         if(searchResults.isEmpty()){
             model.addRow(new Object[] {"...","...","...","...","...","...","...","..."});
             // Tùy chọn: Căn chỉnh cột đầu tiên cho thông báo
@@ -221,7 +222,7 @@ public class CustomerSearch extends javax.swing.JPanel {
                     customer.isGender() ? "Nam" : "Nữ",
                     customer.getBrithDate(),
                     customer.getEmail(),
-                    "",  // Điền ĐTL nếu cần
+                    customer.getPoint(),
                     customer.getAddr()
             });
         }

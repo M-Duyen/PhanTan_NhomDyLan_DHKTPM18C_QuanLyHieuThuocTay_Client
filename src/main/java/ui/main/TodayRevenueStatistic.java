@@ -21,6 +21,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.time.LocalDate;
 import java.util.List;
+@SuppressWarnings("all")
 
 /**
  * @author nguye

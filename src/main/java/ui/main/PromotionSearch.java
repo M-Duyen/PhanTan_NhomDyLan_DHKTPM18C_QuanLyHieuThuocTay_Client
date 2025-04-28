@@ -25,11 +25,12 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+@SuppressWarnings("all")
 
 public class PromotionSearch extends JPanel{
     PromotionService promotionService = (PromotionService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/promotionService");
     PromotionTypeService promotionTypeService = (PromotionTypeService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/promotionTypeService");
-    
+
     public PromotionSearch() throws MalformedURLException, NotBoundException, RemoteException {
         initComponents();
         setupTable();
@@ -156,8 +157,6 @@ public class PromotionSearch extends JPanel{
         // Hiển thị kết quả
         if (filteredPromotions.isEmpty()) {
             model.addRow(new Object[]{"...", "...", "...", "...", "...", "...", "..."});
-        } else {
-            loadTable(filteredPromotions);
         }
     }
 
@@ -178,7 +177,8 @@ public class PromotionSearch extends JPanel{
         tableKhuyenMai = new JTable();
         lblTitle = new JLabel();
         txtSearch = new TextField();
-        btnSearch = new Button();
+        // Variables declaration - do not modify//GEN-BEGIN:variables
+        Button btnSearch = new Button();
         lblTitleList = new JLabel();
 
         setBackground(new Color(242, 249, 255));
@@ -303,8 +303,6 @@ public class PromotionSearch extends JPanel{
     }//GEN-LAST:event_cbbPromoTypeActionPerformed
 
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private Button btnSearch;
     private Combobox cbbPromoType;
     private Combobox cbbStatus;
     private JLabel lblTitle;

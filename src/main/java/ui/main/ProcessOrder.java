@@ -37,6 +37,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Locale;
+@SuppressWarnings("all")
 
 public class ProcessOrder extends JFrame implements ActionListener {
 

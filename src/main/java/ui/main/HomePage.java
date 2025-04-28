@@ -32,7 +32,7 @@ import java.util.Date;
 import static staticProcess.StaticProcess.homePage;
 import static staticProcess.StaticProcess.userlogin;
 import static staticProcess.StaticProcess.userlogin;
-
+@SuppressWarnings("all")
 
 public class HomePage extends JFrame implements ActionListener{
     EmployeeService employeeService = (EmployeeService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/employeeService");
