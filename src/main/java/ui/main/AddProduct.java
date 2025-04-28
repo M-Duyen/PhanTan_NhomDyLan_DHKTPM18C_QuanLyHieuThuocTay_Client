@@ -99,6 +99,7 @@ public class AddProduct extends JPanel {
         txtSearch = new ui.textfield.TextField();
         btnAdd = new ui.button.Button();
         btnSave = new ui.button.Button();
+        btnLoad = new ui.button.Button();
         cbbCategory = new ui.combobox.Combobox();
         cbbVendor = new ui.combobox.Combobox();
         jScrollPane_tableProduct = new ui.scroll.win11.ScrollPaneWin11();
@@ -119,6 +120,20 @@ public class AddProduct extends JPanel {
         txtSearch.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 txtSearchActionPerformed(evt);
+            }
+        });
+
+        btnLoad.setBackground(new java.awt.Color(102, 204, 255));
+        btnLoad.setForeground(new java.awt.Color(255, 255, 255));
+        btnLoad.setText("Làm mới");
+        btnLoad.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        btnLoad.setIconTextGap(2);
+        btnLoad.setPreferredSize(new java.awt.Dimension(64, 64));
+        btnLoad.setRound(30);
+        btnLoad.setShadowColor(new java.awt.Color(0, 0, 0));
+        btnLoad.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLoadActionPerformed(evt);
             }
         });
 
@@ -200,52 +215,70 @@ public class AddProduct extends JPanel {
         tableProduct.setGridColor(new java.awt.Color(218, 247, 249));
         jScrollPane_tableProduct.setViewportView(tableProduct);
 
-        GroupLayout pCenterLayout = new GroupLayout(pCenter);
+        javax.swing.GroupLayout pCenterLayout = new javax.swing.GroupLayout(pCenter);
         pCenter.setLayout(pCenterLayout);
         pCenterLayout.setHorizontalGroup(
-                pCenterLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                pCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(pCenterLayout.createSequentialGroup()
                                 .addGap(37, 37, 37)
-                                .addGroup(pCenterLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                .addGroup(pCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                         .addGroup(pCenterLayout.createSequentialGroup()
-                                                .addComponent(txtSearch, GroupLayout.PREFERRED_SIZE, 806, GroupLayout.PREFERRED_SIZE)
-                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addComponent(btnAdd, GroupLayout.PREFERRED_SIZE, 108, GroupLayout.PREFERRED_SIZE)
-                                                .addGap(39, 39, 39)
-                                                .addComponent(btnSave, GroupLayout.PREFERRED_SIZE, 87, GroupLayout.PREFERRED_SIZE)
-                                                .addGap(40, 40, 40))
+                                                .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 806, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(40, 777, Short.MAX_VALUE))
                                         .addGroup(pCenterLayout.createSequentialGroup()
                                                 .addGap(6, 6, 6)
-                                                .addGroup(pCenterLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                                        .addComponent(jScrollPane_tableProduct, GroupLayout.PREFERRED_SIZE, 1549, GroupLayout.PREFERRED_SIZE)
+                                                .addGroup(pCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                                         .addGroup(pCenterLayout.createSequentialGroup()
-                                                                .addComponent(cbbCategory, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                                .addComponent(jScrollPane_tableProduct, javax.swing.GroupLayout.PREFERRED_SIZE, 1549, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addContainerGap(28, Short.MAX_VALUE))
+                                                        .addGroup(pCenterLayout.createSequentialGroup()
+                                                                .addComponent(cbbCategory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                                                 .addGap(107, 107, 107)
-                                                                .addComponent(cbbVendor, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
-                                                .addContainerGap(28, Short.MAX_VALUE))))
+                                                                .addComponent(cbbVendor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                                .addComponent(btnLoad, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addGap(155, 155, 155)
+                                                                .addComponent(btnSave, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addGap(39, 39, 39))))))
+                        .addGroup(pCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pCenterLayout.createSequentialGroup()
+                                        .addContainerGap(1356, Short.MAX_VALUE)
+                                        .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(156, 156, 156)))
         );
         pCenterLayout.setVerticalGroup(
-                pCenterLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                pCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(pCenterLayout.createSequentialGroup()
-                                .addGroup(pCenterLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                .addGroup(pCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                         .addGroup(pCenterLayout.createSequentialGroup()
                                                 .addGap(77, 77, 77)
-                                                .addComponent(txtSearch, GroupLayout.PREFERRED_SIZE, 52, GroupLayout.PREFERRED_SIZE))
-                                        .addGroup(GroupLayout.Alignment.TRAILING, pCenterLayout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
-                                                .addComponent(btnAdd, GroupLayout.DEFAULT_SIZE, 60, Short.MAX_VALUE)
-                                                .addComponent(btnSave, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(pCenterLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(cbbCategory, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(cbbVendor, GroupLayout.PREFERRED_SIZE, 52, Short.MAX_VALUE))
-                                .addGap(52, 52, 52)
-                                .addComponent(jScrollPane_tableProduct, GroupLayout.PREFERRED_SIZE, 690, GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGroup(pCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(cbbCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(cbbVendor, javax.swing.GroupLayout.PREFERRED_SIZE, 52, Short.MAX_VALUE))
+                                                .addGap(52, 52, 52))
+                                        .addGroup(pCenterLayout.createSequentialGroup()
+                                                .addGap(77, 77, 77)
+                                                .addGroup(pCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(btnLoad, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(btnSave, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                                .addComponent(jScrollPane_tableProduct, javax.swing.GroupLayout.PREFERRED_SIZE, 690, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addContainerGap(72, Short.MAX_VALUE))
+                        .addGroup(pCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(pCenterLayout.createSequentialGroup()
+                                        .addGap(79, 79, 79)
+                                        .addComponent(btnAdd, javax.swing.GroupLayout.DEFAULT_SIZE, 60, Short.MAX_VALUE)
+                                        .addGap(862, 862, 862)))
         );
 
         add(pCenter, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
+    private void btnLoadActionPerformed(java.awt.event.ActionEvent evt) {
+        // TODO add your handling code here:
+    }
     private void txtSearchActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtSearchActionPerformed
         searchProduct();
     }//GEN-LAST:event_txtSearchActionPerformed
@@ -308,6 +341,7 @@ public class AddProduct extends JPanel {
     private JFileChooser jFileChooser1;
     private JScrollPane jScrollPane_tableProduct;
     private JPanel pCenter;
+    private ui.button.Button btnLoad;
     private JTable tableProduct;
     private ui.textfield.TextField txtSearch;
     // End of variables declaration//GEN-END:variables
