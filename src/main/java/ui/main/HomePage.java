@@ -5,6 +5,7 @@ import model.Manager;
 import service.AccountService;
 import service.EmployeeService;
 import service.ManagerService;
+import service.ProductService;
 import staticProcess.StaticProcess;
 import ui.dialog.Confirm;
 import ui.forms.TempOrderForm;
@@ -26,6 +27,7 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
@@ -38,6 +40,7 @@ public class HomePage extends JFrame implements ActionListener{
     EmployeeService employeeService = (EmployeeService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/employeeService");
     ManagerService managerService = (ManagerService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/managerService");
     AccountService accountService = (AccountService) Naming.lookup("rmi://"+ StaticProcess.properties.get("ServerName") +":" + StaticProcess.properties.get("Port") + "/accountService");
+    ProductService productService = (ProductService) Naming.lookup("rmi://"+ StaticProcess.properties.get("ServerName") +":" + StaticProcess.properties.get("Port") + "/productService");
 
     private JPanel currentPanel;
 
@@ -45,7 +48,7 @@ public class HomePage extends JFrame implements ActionListener{
     private final CreateOrder createOrder = new CreateOrder(this);
     private final OrderHistory orderHistory = new OrderHistory(this);
     private final RevenueStatistic revenueStatistic = new RevenueStatistic();
-    private CategorySearch category = new CategorySearch(this);
+    private final CategorySearch category = new CategorySearch(this);
     private final AddProduct addProduct = new AddProduct();
     private final UpdateProduct updateProduct = new UpdateProduct();
     private final ProductStatistics productStatistics = new ProductStatistics(this);
@@ -131,9 +134,25 @@ public class HomePage extends JFrame implements ActionListener{
             public void actionPerformed(ActionEvent e) {
                 Notification notification = new Notification();
                 GlassPanePopup.showPopup(notification);
-                notification.myList1.addItem("Đăng nhập thành công tài khoản " + userlogin);
+                notification.addNotification("Đăng nhập thành công tài khoản " + userlogin);
+                if (addProduct.isFlag()) {
+                    notification.addNotification("Thêm sản phẩm thành công " + LocalDateTime.now());
+                }
+                try {
+                    if (!productService.getProductListNearExpire().isEmpty()){
+                        notification.addNotification("Có sản phẩm gần hết hạn sử dụng");
+                    }if (!productService.getLowStockProducts(25).isEmpty()){
+                        notification.addNotification("Có sản phẩm sắp hết hàng");
+                    }
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
+
+
             }
         });
+
+
     }
 
     public static void setRole(String s){

@@ -458,7 +458,6 @@ public class ProductStatistics extends javax.swing.JPanel implements ActionListe
             } catch (RemoteException ex) {
                 throw new RuntimeException(ex);
             }
-            modelDataPSList.forEach(x -> System.out.println(x));
             if(!modelDataPSList.isEmpty()){
                 dashboardForm1.barChart1.setDataset(dashboardForm1.createData(modelDataPSList, 0));
                 dashboardForm1.setFormattedDataset(dashboardForm1.createData(modelDataPSList, 0), dashboardForm1.barChart1);

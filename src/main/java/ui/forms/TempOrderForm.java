@@ -1092,8 +1092,8 @@ public class TempOrderForm extends TabbedForm {
         }
 
         public static void invoiceOrder (Order order) throws IOException, NotBoundException {
-            OrderService orderService = (OrderService) Naming.lookup("rmi://localhost:7281/orderService");
-            OrderDetailService orderDetailService = (OrderDetailService) Naming.lookup("rmi://localhost:7281/orderDetailService");
+            OrderService orderService = (OrderService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/orderService");
+            OrderDetailService orderDetailService = (OrderDetailService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/orderDetailService");
 
             String path = "invoice.pdf";
             PdfWriter pdfWriter = new PdfWriter(path);

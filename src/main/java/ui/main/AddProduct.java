@@ -9,6 +9,8 @@ import service.CategoryService;
 import service.ProductService;
 import service.VendorService;
 import ui.dialog.Message;
+import ui.glasspanepupup.GlassPanePopup;
+import ui.glasspanepupup.Notification;
 import ui.table.TableCustom;
 import staticProcess.StaticProcess;
 
@@ -26,10 +28,13 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static staticProcess.StaticProcess.userlogin;
 
 public class AddProduct extends JPanel {
     ProductService productService = (ProductService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/productService");
@@ -39,7 +44,9 @@ public class AddProduct extends JPanel {
     private boolean flag = false;
     ArrayList<Product> temp = new ArrayList<>();
 
-
+    public boolean isFlag() {
+        return flag;
+    }
 
     public AddProduct() throws MalformedURLException, NotBoundException, RemoteException {
 //        listPd = new Product_DAO().getProductList();
@@ -271,6 +278,8 @@ public class AddProduct extends JPanel {
             new Message(StaticProcess.homePage, true, "Thông báo", "Danh sách sản phẩm đã được thêm", "src/main/java/ui/dialog/checked.png").showAlert();
 
             flag = false;
+
+
         }
     }//GEN-LAST:event_btnSaveActionPerformed
 

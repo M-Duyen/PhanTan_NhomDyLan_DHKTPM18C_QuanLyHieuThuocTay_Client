@@ -18,14 +18,6 @@ import javax.swing.ListModel;
 
 public class MyList<E extends Object> extends JList<E> {
 
-    public Color getSelectedColor() {
-        return selectedColor;
-    }
-
-    public void setSelectedColor(Color selectedColor) {
-        this.selectedColor = selectedColor;
-    }
-
     private final DefaultListModel model;
     private Color selectedColor;
     private int movingIndex = -1;
@@ -34,10 +26,14 @@ public class MyList<E extends Object> extends JList<E> {
     private int x;
     private int mx;
 
+    private final Image image = new ImageIcon("src/main/java/ui/jlist/page.png").getImage();
+
     public MyList() {
         model = new DefaultListModel();
         super.setModel(model);
         selectedColor = new Color(237, 237, 237);
+
+        // Lắng nghe các sự kiện chuột
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent me) {
@@ -57,11 +53,11 @@ public class MyList<E extends Object> extends JList<E> {
             @Override
             public void mouseReleased(MouseEvent me) {
                 if (mx <= deleteAble) {
-                    //  remove item
+                    // Nếu kéo qua khu vực xóa thì xóa mục
                     model.removeElementAt(movingIndex);
                 }
                 if (mx >= optionAble) {
-
+                    // Xử lý tùy chọn khác nếu cần
                 } else {
                     movingIndex = -1;
                     mx = 0;
@@ -71,6 +67,8 @@ public class MyList<E extends Object> extends JList<E> {
             }
 
         });
+
+        // Lắng nghe sự kiện chuột di chuyển
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseDragged(MouseEvent me) {
@@ -115,14 +113,11 @@ public class MyList<E extends Object> extends JList<E> {
         model.addElement(obj);
     }
 
-    private final Image image = new ImageIcon("src/main/java/ui/jlist/page.png").getImage();
-
     @Override
     public void paint(Graphics grphcs) {
         super.paint(grphcs);
         if (model.isEmpty()) {
             Graphics2D g2 = (Graphics2D) grphcs;
-            //  for draw image smooth
             g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
             g2.drawImage(image, getWidth() / 2 - 35, getHeight() / 2 - 35, 70, 70, null);
             g2.setColor(Color.GRAY);
@@ -131,3 +126,4 @@ public class MyList<E extends Object> extends JList<E> {
     }
 
 }
+

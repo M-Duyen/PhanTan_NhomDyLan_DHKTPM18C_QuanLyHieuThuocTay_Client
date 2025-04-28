@@ -648,7 +648,7 @@ public class CategorySearch extends JPanel {
 
             } else if (searchByOther.equals("Sản phẩm tồn kho thấp")) {
                 // Lấy danh sách sản phẩm tồn kho thấp
-                List<model.Product> lowStockProductsList = productService.getLowStockProducts(300);
+                List<model.Product> lowStockProductsList = productService.getLowStockProducts(25);
                 if (lowStockProductsList.isEmpty()) {
                     model.setRowCount(0);  // Clear existing rows
                     model.addRow(new Object[]{"...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "...", "..."});

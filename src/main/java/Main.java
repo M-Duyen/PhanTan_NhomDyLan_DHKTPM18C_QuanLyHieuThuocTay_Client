@@ -1,18 +1,11 @@
-import service.CategoryService;
-import service.OrderService;
+import ui.glasspanepupup.Notification;
 
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
+import javax.swing.*;
+import java.awt.*;
 
-public class Main {
-    public static void main(String[] args) throws MalformedURLException, NotBoundException, RemoteException {
-        CategoryService categoryService = (CategoryService) Naming.lookup("rmi://localhost:7281/categoryService");
-//        categoryService.getAll().forEach(System.out::println);
-        OrderService orderService = (OrderService) Naming.lookup("rmi://localhost:7281/orderService");
-        orderService.filterOrderByEmpID("EP1501", "2025-04-25").forEach(System.out::println);
+public class Main extends JFrame {
 
+    public static void main(String[] args) {
 
     }
 }
