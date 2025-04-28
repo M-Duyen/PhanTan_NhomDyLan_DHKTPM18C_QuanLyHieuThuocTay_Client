@@ -19,6 +19,7 @@ import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.time.LocalDate;
 import java.util.List;
+
 @SuppressWarnings("all")
 
 public class TodayRevenueStatistic extends javax.swing.JPanel {
@@ -282,8 +283,8 @@ public class TodayRevenueStatistic extends javax.swing.JPanel {
                     order.getCustomer() == null ? "Khách vãng lai" : order.getCustomer().getCustomerName(),
                     order.getOrderDate(),
                     order.getPaymentMethod(),
-                    order.getDiscount(),
-                    order.getTotalDue()
+                    StaticProcess.df.format(order.getDiscount()),
+                    StaticProcess.df.format(order.getTotalDue())
             });
         }
 
