@@ -5,7 +5,6 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
 
-
 import model.Employee;
 import model.Order;
 import service.EmployeeService;
@@ -32,6 +31,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 @SuppressWarnings("all")
 
 public class OrderHistory extends javax.swing.JPanel {
@@ -228,7 +228,7 @@ public class OrderHistory extends javax.swing.JPanel {
                 DefaultTableModel model = (DefaultTableModel) tableOrder.getModel();
                 ArrayList<Order> list = null;
                 try {
-                    list = (ArrayList<Order>) orderService.searchByMultipleCriteria("customer",txtSearch.getText().trim());
+                    list = (ArrayList<Order>) orderService.searchByMultipleCriteria("customer", txtSearch.getText().trim());
                 } catch (RemoteException ex) {
                     throw new RuntimeException(ex);
                 }
@@ -496,7 +496,7 @@ public class OrderHistory extends javax.swing.JPanel {
         model.setRowCount(0);
         for (Order o : arrayList) {
             model.addRow(new Object[]{
-                    o.getOrderID(), o.getCustomer() == null ? "Khách vãng lai" : o.getCustomer().getCustomerName(), o.getEmployee().getEmployeeName(), o.getOrderDate(), o.getPrescription() == null ? "Không kê đơn" : o.getPrescription().getPrescriptionID(), o.getDiscount(), o.getTotalDue()
+                    o.getOrderID(), o.getCustomer() == null ? "Khách vãng lai" : o.getCustomer().getCustomerName(), o.getEmployee().getEmployeeName(), o.getOrderDate(), o.getPrescription() == null ? "Không kê đơn" : o.getPrescription().getPrescriptionID(), StaticProcess.df.format(o.getDiscount()), StaticProcess.df.format(o.getTotalDue())
             });
         }
 
@@ -582,6 +582,7 @@ public class OrderHistory extends javax.swing.JPanel {
         if (!txtSearch.getText().trim().isEmpty() && !txtSearch.getText().equals("Nhập tiêu chí ...")) count++;
         return count;
     }
+
     private static String convertDateFormat(String inputDate) {
         SimpleDateFormat inputFormat = new SimpleDateFormat("dd-MM-yyyy");
         SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -595,7 +596,6 @@ public class OrderHistory extends javax.swing.JPanel {
             return null;
         }
     }
-
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
