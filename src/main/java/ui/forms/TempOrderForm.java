@@ -1176,11 +1176,8 @@ public class TempOrderForm extends TabbedForm {
 
         int stt = 1;
         for (OrderDetail detail : listOD) {
-            tableHeader.addCell(getCell10Center(String.valueOf(stt), false).setFont(font)); // In ra số thứ tự, bắt đầu từ 1
+            tableHeader.addCell(getCell10Center(String.valueOf(stt), false).setFont(font));
             tableHeader.addCell(getCell10Left(detail.getProduct().getProductName(), false).setFont(font));
-            // Lấy phần tử đầu tiên trong Map
-//            String unit = productPrices.keySet().iterator().next();
-//            Double unitPrice = productPrices.get(unit);
             String unit = detail.getUnit().convertUnit(detail.getUnit());
             Double unitPrice = detail.getProduct().getSellPrice(detail.getUnit());
             tableHeader.addCell(getCell10Center(unit, false).setFont(font));
@@ -1193,19 +1190,25 @@ public class TempOrderForm extends TabbedForm {
 
         Table tableFooter = new Table(footer);
         tableFooter.addCell(getCell10Left("Tổng tiền (Đã bao gồm thuế)", false).setFont(font).setBorderTop(new SolidBorder(0)));
-        tableFooter.addCell(getCell10Right(StaticProcess.df.format(order.getTotalDue()), false).setFont(font).setBorderTop(new SolidBorder(0)));
+        tableFooter.addCell(getCell10Right(StaticProcess.df.format(Math.abs(order.getTotalDue())), false).setFont(font).setBorderTop(new SolidBorder(0)));
 
-        tableFooter.addCell(getCell10Left("Giảm giá", false).setFont(font));
-        tableFooter.addCell(getCell10Right(StaticProcess.df.format(order.getDiscount()), false).setFont(font));
+        if (!order.getOrderID().startsWith("OC")) {
+            tableFooter.addCell(getCell10Left("Giảm giá", false).setFont(font));
+            tableFooter.addCell(getCell10Right(StaticProcess.df.format(order.getDiscount()), false).setFont(font));
+        }
 
         tableFooter.addCell(getCell10Left("Tổng thanh toán", true).setFont(font).setBorderTop(new SolidBorder(0)));
-        tableFooter.addCell(getCell10Right(StaticProcess.df.format(order.getTotalDue() - order.getDiscount()), false).setFont(font).setBorderTop(new SolidBorder(0)));
+        tableFooter.addCell(getCell10Right(StaticProcess.df.format(order.getTotalDue()), false).setFont(font).setBorderTop(new SolidBorder(0)));
 
         tableFooter.addCell(getCell10Left("Phương thức thanh toán ", false).setFont(font));
         tableFooter.addCell(getCell10Right(String.valueOf(order.getPaymentMethod()), false));
 
         Table tableEnd = new Table(fullWidth);
-        tableEnd.addCell(getCell10Center("*Lưu ý: Sản phẩm có thể đổi trả trong 30 ngày !!!", true).setFont(font));
+        if (!order.getOrderID().startsWith("OC")) {
+            tableEnd.addCell(getCell10Center("*Lưu ý: Sản phẩm có thể đổi trả trong 30 ngày !!!", true).setFont(font));
+        } else {
+            tableEnd.addCell(getCell10Center("*Lưu ý: Đây là hóa đơn đổi trả, số tiền có thể là âm!!!", true).setFont(font));
+        }
         tableEnd.addCell(getCell10Center("Cảm ơn quý khách", true).setFont(font));
 
         document.add(table);

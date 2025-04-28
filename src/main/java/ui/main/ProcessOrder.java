@@ -592,7 +592,6 @@ public class ProcessOrder extends JFrame implements ActionListener {
                         listOrderConfirm.add(odt);
                         continue;
                     }
-                    System.out.println("Có chạy!");
                     if (checked != null && checked) {
                         if (!((Boolean) tblCTHD.getModel().getValueAt(i, 7))) {
                             Confirm dialog = new Confirm(StaticProcess.homePage, true, "Chú ý", "Lưu ý đây là những sản phẩm không cho đổi trả trừ trường hợp giao nhầm. Bạn vẫn muốn tiếp tục?", "src/main/java/ui/dialog/warning.png", "Tiếp tục", "Hủy bỏ");
@@ -874,7 +873,7 @@ public class ProcessOrder extends JFrame implements ActionListener {
                         }
                     }
                     orderD.setListOrderDetail(listOrderDetailConver);
-                    orderD.setDiscount(addBefore + (addBefore * 0.01));
+                    orderD.setDiscount(addBefore - (addBefore * 0.01));
                     //Thêm hóa đơn
                     try {
                         orderService.create(orderD);
