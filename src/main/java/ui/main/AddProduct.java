@@ -11,6 +11,7 @@ import service.VendorService;
 import ui.dialog.Message;
 import ui.table.TableCustom;
 import staticProcess.StaticProcess;
+import utils.UtilStatics;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -244,13 +245,17 @@ public class AddProduct extends JPanel {
 
             if (result == JFileChooser.APPROVE_OPTION) {
                 String selectedFile = fileChooser.getSelectedFile().getAbsolutePath();
-                if (selectedFile.toLowerCase().endsWith(".xlsx")) { //Từ từ bổ sung đuôi sau xls,...
-                    temp = loadDataProduct(selectedFile);
-                    if (!temp.isEmpty()) {
-                        setDataTable(tableProduct, temp);
-                        new Message(StaticProcess.homePage, true, "Thông báo", "Đã tải sản phẩm, vui lòng bấm lưu để lưu sản phẩm!", "src/main/java/ui/dialog/checked.png").showAlert();
+                if (selectedFile.toLowerCase().endsWith(".xlsx")) {
+                    if(UtilStatics.getAwaiKey() == false) {
+                        temp = loadDataProduct(selectedFile);
+                        if (!temp.isEmpty()) {
+                            setDataTable(tableProduct, temp);
+                            new Message(StaticProcess.homePage, true, "Thông báo", "Đã tải sản phẩm, vui lòng bấm lưu để lưu sản phẩm!", "src/main/java/ui/dialog/checked.png").showAlert();
 
-                        flag = true;
+                            flag = true;
+                        }
+                    } else {
+                        new Message(StaticProcess.homePage, true, "Thông báo", "Chức năng này đang được thực hiện trên tài khoản khác, Vui lòng thử lại sau!", "src/main/java/ui/dialog/warning.png").showAlert();
                     }
                 } else {
                     new Message(StaticProcess.homePage, true, "Thông báo", "Chỉ hỗ trợ file định dạng xlxs", "src/main/java/ui/dialog/warning.png").showAlert();
@@ -294,6 +299,7 @@ public class AddProduct extends JPanel {
      * @return
      */
     public ArrayList<Product> loadDataProduct(String path) {
+        UtilStatics.setAwaiKey();
         ArrayList<Product> listProduct = new ArrayList();
         int xM = 0, xFF = 0, xMS = 0;
         try (FileInputStream fis = new FileInputStream(new File(path));
@@ -367,6 +373,7 @@ public class AddProduct extends JPanel {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        UtilStatics.setAwaiKey();
         return listProduct;
     }
 
