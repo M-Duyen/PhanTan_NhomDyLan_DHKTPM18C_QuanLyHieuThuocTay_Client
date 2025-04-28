@@ -335,7 +335,7 @@ public class ProductStatistics extends javax.swing.JPanel implements ActionListe
             cellE.setCellValue(model.getSold());
 
             Cell cellG = row.getCell(5);
-            if(cellG == null) cellG = row.createCell(6);
+            if(cellG == null) cellG = row.createCell(5);
             cellG.setCellValue(model.getTotalPriceSold());
         }
     }
@@ -350,8 +350,8 @@ public class ProductStatistics extends javax.swing.JPanel implements ActionListe
             if(cellB == null) cellB = row.createCell(1);
             cellB.setCellValue(model.getName());
 
-            Cell cellE = row.getCell(4);
-            if(cellE == null) cellE = row.createCell(4);
+            Cell cellE = row.getCell(2);
+            if(cellE == null) cellE = row.createCell(2);
             cellE.setCellValue(model.getCount());
         }
     }
@@ -366,8 +366,8 @@ public class ProductStatistics extends javax.swing.JPanel implements ActionListe
             if(cellB == null) cellB = row.createCell(1);
             cellB.setCellValue(model.getName());
 
-            Cell cellE = row.getCell(4);
-            if(cellE == null) cellE = row.createCell(4);
+            Cell cellE = row.getCell(2);
+            if(cellE == null) cellE = row.createCell(2);
             cellE.setCellValue(model.getCount());
         }
     }
