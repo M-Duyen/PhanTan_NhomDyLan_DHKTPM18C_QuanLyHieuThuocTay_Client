@@ -40,10 +40,11 @@ import static staticProcess.StaticProcess.userlogin;
 
 
 public class AddProduct extends JPanel {
+    ServerService serverService = (ServerService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/serverService");
     ProductService productService = (ProductService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/productService");
     VendorService vendorService = (VendorService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/vendorService");
     CategoryService categoryService = (CategoryService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/categoryService");
-    ServerService serverService = (ServerService) Naming.lookup("rmi://" + staticProcess.StaticProcess.properties.get("ServerName") + ":" + staticProcess.StaticProcess.properties.get("Port") + "/serverService");
+    //    private final ArrayList<Product> listPd;
     private boolean flag = false;
     ArrayList<Product> temp = new ArrayList<>();
 
@@ -355,7 +356,7 @@ public class AddProduct extends JPanel {
      */
     public ArrayList<Product> loadDataProduct(String path) throws RemoteException {
         ArrayList<Product> listProduct = new ArrayList();
-        
+
         int xM = 0, xFF = 0, xMS = 0;
         try (FileInputStream fis = new FileInputStream(new File(path));
              Workbook workbook = new XSSFWorkbook(fis)) {
