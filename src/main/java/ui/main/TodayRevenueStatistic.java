@@ -217,7 +217,7 @@ public class TodayRevenueStatistic extends javax.swing.JPanel {
         String choice = cbbDate.getSelectedItem().toString();
         List<Order> list = orderService.filterOrderByEmpID(StaticProcess.userlogin, choice);
         showDataTable(list);
-        edtSum.setText(String.valueOf(orderService.calculateTotalAllOrder(StaticProcess.userlogin, choice)));
+        edtSum.setText(String.valueOf(StaticProcess.df.format(orderService.calculateTotalAllOrder(StaticProcess.userlogin, choice))));
 
 
     }
